@@ -6,7 +6,7 @@
 
 ## 功能介绍
 
-对 RecyclerView 的 Adapter 进行了封装。
+对 RecyclerView 的 Adapter 进行了封装。具体功能请查看相关模块。
 
 ## 使用方法：
 
