@@ -1,0 +1,25 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+                name="header2"
+                type="com.like.recyclerview.sample.model.Header2"/>
+    </data>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#800f01"
+            android:orientation="horizontal">
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:gravity="center"
+                android:text="@{header2.name}"/>
+
+    </LinearLayout>
+
+</layout>
