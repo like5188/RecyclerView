@@ -24,7 +24,7 @@
 在Module的gradle中加入：
 ```groovy
     dependencies {
-        // 核心代码
+        // 核心代码（必须）
         implementation 'com.github.like5188.RecyclerView:core:版本号'
         // 扩展库
         implementation 'com.github.like5188.RecyclerView:ext:版本号'
