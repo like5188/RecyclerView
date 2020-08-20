@@ -13,7 +13,7 @@ import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.ext.model.IPinnedItem
 
 /**
- * 支持[IPinnedItem]实现类的固定悬浮。并靠它来推动。对固定悬浮标签的操作和正常视图一样（包括动画、各种事件等等）
+ * 配合[IPinnedItem]类型的数据来实现固定悬浮功能。对固定悬浮标签的操作和正常视图一样（包括动画、各种事件等等）
  * 注意：1、使用粘性分组标签时，RecyclerView不能设置padding、margin等，否则会影响显示效果。
  *      2、必须在RecyclerView外面添加一层FrameLayout或者RelativeLayout。例如：
 <FrameLayout>
