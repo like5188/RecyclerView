@@ -1,10 +1,10 @@
 package com.like.recyclerview.ext.utils
 
 import android.animation.Animator
-import androidx.core.view.ViewCompat
 import android.view.View
 import android.view.animation.Interpolator
 import android.view.animation.LinearInterpolator
+import androidx.core.view.ViewCompat
 import com.like.recyclerview.viewholder.CommonViewHolder
 
 /**
@@ -22,7 +22,7 @@ import com.like.recyclerview.viewholder.CommonViewHolder
  * arrayOf(ObjectAnimator.ofFloat(view, "alpha", mFrom, 1f))
  */
 internal class AdapterAnimationManager(private val animators: (view: View) -> Array<Animator>) {
-    private var mDuration = 300
+    private var mDuration = 300L
     private var mInterpolator: Interpolator = LinearInterpolator()
     private var mLastPosition = -1
 
@@ -36,8 +36,8 @@ internal class AdapterAnimationManager(private val animators: (view: View) -> Ar
         if (!isFirstOnly || adapterPosition > mLastPosition) {
             val animators = animators(holder.itemView)
             animators.forEach {
-                it.setDuration(mDuration.toLong()).start()
                 it.interpolator = mInterpolator
+                it.setDuration(mDuration).start()
             }
             mLastPosition = adapterPosition
         } else {
@@ -45,7 +45,7 @@ internal class AdapterAnimationManager(private val animators: (view: View) -> Ar
         }
     }
 
-    fun setDuration(duration: Int) {
+    fun setDuration(duration: Long) {
         mDuration = duration
     }
 
