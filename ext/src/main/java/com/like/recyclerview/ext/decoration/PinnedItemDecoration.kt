@@ -10,13 +10,14 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.adapter.BaseAdapter
+import com.like.recyclerview.ext.model.IPinnedItem
 
 /**
- * 支持IPinnedItem固定悬浮。并靠它来推动。对固定悬浮标签的操作和正常视图一样（包括动画、各种事件等等）
+ * 配合[IPinnedItem]类型的数据来实现固定悬浮功能。对固定悬浮标签的操作和正常视图一样（包括动画、各种事件等等）
  * 注意：1、使用粘性分组标签时，RecyclerView不能设置padding、margin等，否则会影响显示效果。
  *      2、必须在RecyclerView外面添加一层FrameLayout或者RelativeLayout。例如：
 <FrameLayout>
-    <androidx.recyclerview.widget.RecyclerView />
+<androidx.recyclerview.widget.RecyclerView />
 </FrameLayout>
  */
 class PinnedItemDecoration : RecyclerView.ItemDecoration() {
@@ -31,7 +32,7 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
 
     private fun init(recyclerView: RecyclerView) {
         if (recyclerView.adapter !is BaseAdapter) {
-            throw Throwable("RecyclerView的Adapter只能是com.like.livedatarecyclerview.adapter.BaseAdapter")
+            throw Throwable("RecyclerView的Adapter只能是 com.like.recyclerview.adapter.BaseAdapter")
         }
         if (recyclerView.parent !is FrameLayout && recyclerView.parent !is RelativeLayout) {
             throw Throwable("RecyclerView的parent只能是FrameLayout或者RelativeLayout")
@@ -106,7 +107,8 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
 //        Log.d(TAG, "mCurPinnedItem=$mCurPinnedItem")
 //        Log.v(TAG, "nextPinnedItem=$nextPinnedItem")
         if (nextPinnedItem != null) {
-            val nextPinnedView = recyclerView.layoutManager?.findViewByPosition(nextPinnedItem.position)
+            val nextPinnedView =
+                recyclerView.layoutManager?.findViewByPosition(nextPinnedItem.position)
 //            Log.e(TAG, "nextPinnedView=$nextPinnedView")
             if (nextPinnedView != null && nextPinnedView.top in top..bottom) {
                 top = nextPinnedView.top - curPinnedView.height
@@ -150,7 +152,7 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
         if (firstVisiblePosition < mAdapter.itemCount && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition downTo 0) {
                 val item = mAdapter.mAdapterDataManager.get(position)
-                if (item is com.like.recyclerview.ext.model.IPinnedItem) {
+                if (item is IPinnedItem) {
                     return PinnedItem(
                         item.layoutId,
                         position,
@@ -170,7 +172,7 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
         if (firstVisiblePosition < mAdapter.itemCount - 1 && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition + 1 until mAdapter.itemCount) {
                 val item = mAdapter.mAdapterDataManager.get(position)
-                if (item is com.like.recyclerview.ext.model.IPinnedItem) {
+                if (item is IPinnedItem) {
                     return PinnedItem(
                         item.layoutId,
                         position,
@@ -185,14 +187,15 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
     private fun findFirstVisiblePosition(recyclerView: RecyclerView): Int {
         //获取第一个可见item的position
         val firstVisibleItem = recyclerView.layoutManager?.getChildAt(0)
-        val firstVisibleItemLayoutParams = firstVisibleItem?.layoutParams as? RecyclerView.LayoutParams
+        val firstVisibleItemLayoutParams =
+            firstVisibleItem?.layoutParams as? RecyclerView.LayoutParams
         return firstVisibleItemLayoutParams?.viewAdapterPosition ?: -1
     }
 
     data class PinnedItem(
         val layoutId: Int,
         var position: Int,
-        var data: com.like.recyclerview.ext.model.IPinnedItem,
+        var data: IPinnedItem,
         var binding: ViewDataBinding? = null
     ) {
         fun copy() =
@@ -213,6 +216,11 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
          * @param item
          * @param itemPosition pinnedView对应数据在RecyclerView中的位置
          */
-        fun onRender(viewDataBinding: ViewDataBinding, layoutId: Int, item: com.like.recyclerview.ext.model.IPinnedItem, itemPosition: Int)
+        fun onRender(
+            viewDataBinding: ViewDataBinding,
+            layoutId: Int,
+            item: IPinnedItem,
+            itemPosition: Int
+        )
     }
 }
