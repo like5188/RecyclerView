@@ -74,7 +74,7 @@ dependencies {
 
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-19'
 
-    implementation 'com.github.like5188:Common:5.7.7'
+    implementation 'com.github.like5188:Common:5.7.8'
     implementation 'com.github.like5188:Repository:3.0.4'
 
     implementation project(':core')
