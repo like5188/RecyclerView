@@ -30,5 +30,6 @@
         implementation 'com.github.like5188.RecyclerView:ext:版本号'
         // 默认实现的 UI 视图，及 UI 相关的帮助类
         implementation 'com.github.like5188.RecyclerView:ui:版本号'
+        implementation 'com.github.like5188:Repository:版本号'
     }
 ```
