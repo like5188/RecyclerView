@@ -1,23 +1,19 @@
 package com.like.recyclerview.sample.paging
 
+import com.like.datasource.paging.byPageNo.PageNoKeyedPagingDataSource
+import com.like.datasource.util.LoadType
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.model.*
-import com.like.repository.paging.byPageNo.PageNoKeyedPagingDataSource
-import com.like.repository.requestHelper.Initial
-import com.like.repository.requestHelper.Refresh
-import com.like.repository.requestHelper.RequestType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 
-class LoadBeforePagingDataSource(coroutineScope: CoroutineScope, pageSize: Int) :
-    PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(coroutineScope, pageSize, false) {
+class LoadBeforePagingDataSource : PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(20, false) {
     private var i = 0
     private var j = 0
 
-    override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<IRecyclerViewItem>? {
+    override suspend fun load(loadType: LoadType, pageNo: Int, pageSize: Int): List<IRecyclerViewItem>? {
         delay(1000)
-        return when (requestType) {
-            is Initial, is Refresh -> {
+        return when (loadType) {
+            LoadType.INITIAL, LoadType.REFRESH -> {
                 when (++j) {
                     1 -> throw RuntimeException("hahaha")
                     2 -> emptyList()

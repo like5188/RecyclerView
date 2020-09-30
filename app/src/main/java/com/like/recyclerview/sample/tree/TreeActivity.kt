@@ -5,22 +5,30 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter
 import com.like.recyclerview.ext.decoration.PinnedItemDecoration
-import com.like.recyclerview.ui.bindRecyclerViewForNotPaging
-import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.ext.model.IPinnedItem
+import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
+import com.like.recyclerview.ui.bindRecyclerViewForNotPaging
+import kotlinx.coroutines.launch
 
 class TreeActivity : AppCompatActivity() {
     private val mBinding by lazy {
         DataBindingUtil.setContentView<ActivityTreeBinding>(this, R.layout.activity_tree)
     }
     private val mViewModel by lazy {
-        ViewModelProvider(this).get(TreeViewModel::class.java)
+        ViewModelProvider(
+            this, TreeViewModel.Factory(
+                TreeRepository(
+                    TreeNotPagingDataSource()
+                )
+            )
+        ).get(TreeViewModel::class.java)
     }
     private val mAdapter: BaseAdapter by lazy { TreeRecyclerViewAdapter() }
 
@@ -30,25 +38,25 @@ class TreeActivity : AppCompatActivity() {
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.adapter = mAdapter
         mBinding.rv.itemAnimator = null
-        mBinding.rv.addItemDecoration(com.like.recyclerview.ext.decoration.PinnedItemDecoration().apply {
+        mBinding.rv.addItemDecoration(PinnedItemDecoration().apply {
             setOnPinnedHeaderRenderListener(object :
-                com.like.recyclerview.ext.decoration.PinnedItemDecoration.OnPinnedHeaderRenderListener {
+                PinnedItemDecoration.OnPinnedHeaderRenderListener {
                 override fun onRender(
                     viewDataBinding: ViewDataBinding,
                     layoutId: Int,
-                    item: com.like.recyclerview.ext.model.IPinnedItem,
+                    item: IPinnedItem,
                     itemPosition: Int
                 ) {
-                    if (item is TreeNode0 && viewDataBinding is TreeItem0Binding && mAdapter is com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter) {
+                    if (item is TreeNode0 && viewDataBinding is TreeItem0Binding && mAdapter is BaseTreeRecyclerViewAdapter) {
                         viewDataBinding.root.setOnClickListener {
-                            (mAdapter as com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter).clickItem(
+                            (mAdapter as BaseTreeRecyclerViewAdapter).clickItem(
                                 viewDataBinding,
                                 itemPosition,
                                 item
                             )
                         }
                         viewDataBinding.cb.setOnClickListener {
-                            (mAdapter as com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter).clickCheckBox(
+                            (mAdapter as BaseTreeRecyclerViewAdapter).clickCheckBox(
                                 viewDataBinding.cb,
                                 item
                             )
@@ -58,8 +66,9 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        mViewModel.treeNotPagingResult.bindRecyclerViewForNotPaging(this, mAdapter)
-
-        mViewModel.treeNotPagingResult.loadInitial.invoke()
+        lifecycleScope.launch {
+            mViewModel.getResult().bindRecyclerViewForNotPaging(mAdapter)
+            mViewModel.getResult().initial()
+        }
     }
 }
