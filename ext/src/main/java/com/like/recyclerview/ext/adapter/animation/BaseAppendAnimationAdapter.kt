@@ -2,18 +2,17 @@ package com.like.recyclerview.ext.adapter.animation
 
 import android.animation.Animator
 import android.view.View
-import com.like.recyclerview.adapter.BaseLoadBeforeAdapter
+import com.like.recyclerview.adapter.BaseAppendAdapter
 import com.like.recyclerview.ext.utils.AdapterAnimationManager
 import com.like.recyclerview.viewholder.CommonViewHolder
 
 /**
- * 带动画效果的Adapter基类，当需要往前加载更多时使用
+ * 带动画效果的Adapter基类，当需要往后加载更多时使用
  */
-open class BaseLoadBeforeAnimationAdapter(
+open class BaseAppendAnimationAdapter(
     animators: (view: View) -> Array<Animator>,
-    pageSize: Int,
-    onLoadBefore: () -> Unit
-) : BaseLoadBeforeAdapter(pageSize, onLoadBefore) {
+    onLoadAfter: () -> Unit
+) : BaseAppendAdapter(onLoadAfter) {
 
     private val adapterAnimationManager: AdapterAnimationManager by lazy {
         AdapterAnimationManager(animators)

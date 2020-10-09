@@ -16,9 +16,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 1、初始化或者刷新时，RecyclerView自动滚动到最底部。
  * 2、往前加载更多时，做类似于聊天界面的处理。
  */
-open class BaseLoadBeforeAdapter(
+open class BasePrependAdapter(
     private val pageSize: Int,
-    private val onLoadBefore: () -> Unit
+    private val prepend: () -> Unit
 ) : BaseAdapter() {
     companion object {
         private const val TAG = "BaseLoadBeforeAdapter"
@@ -60,7 +60,7 @@ open class BaseLoadBeforeAdapter(
             if (position == 0) {
                 if (mLoadBeforeRunning.compareAndSet(false, true)) {
                     Log.v(TAG, "触发往前加载更多")
-                    onLoadBefore()
+                    prepend()
                 }
             }
         }

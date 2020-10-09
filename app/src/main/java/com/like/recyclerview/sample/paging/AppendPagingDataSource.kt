@@ -1,12 +1,12 @@
 package com.like.recyclerview.sample.paging
 
 import com.like.datasource.paging.byPageNo.PageNoKeyedPagingDataSource
-import com.like.datasource.util.LoadType
+import com.like.datasource.LoadType
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.model.*
 import kotlinx.coroutines.delay
 
-class LoadBeforePagingDataSource : PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(20, false) {
+class AppendPagingDataSource : PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(20) {
     private var i = 0
     private var j = 0
 
@@ -25,21 +25,22 @@ class LoadBeforePagingDataSource : PageNoKeyedPagingDataSource<List<IRecyclerVie
                     i = 2
                     throw RuntimeException("哈哈哈出错啦！！")
                 } else {
-                    getBefore(pageNo, pageSize)
+                    getAfter(pageNo, pageSize)
                 }
             }
         }
+
     }
 
     override fun getInitialPage(): Int {
-        return 10
+        return 0
     }
 
     private fun getInitialData(pageNo: Int, pageSize: Int): List<IRecyclerViewItem> {
-        val start = pageNo * pageSize - 1
-        val end = start - pageSize + 1
+        val start = pageNo * pageSize + 1
+        val end = start + pageSize
         val result = mutableListOf<IRecyclerViewItem>()
-        val items = (end..start).map {
+        val items = (start until end).map {
             Item(
                 id = it,
                 name = "name $it",
@@ -55,13 +56,13 @@ class LoadBeforePagingDataSource : PageNoKeyedPagingDataSource<List<IRecyclerVie
         return result
     }
 
-    private fun getBefore(pageNo: Int, pageSize: Int): List<IRecyclerViewItem> {
-        val start = pageNo * pageSize - 1
-        val end = start - pageSize + 1
+    private fun getAfter(pageNo: Int, pageSize: Int): List<IRecyclerViewItem> {
+        val start = pageNo * pageSize + 1
+        val end = start + pageSize
         val result = if (i == 3) {
             emptyList()
         } else {
-            (end..start).map {
+            (start until end).map {
                 Item(
                     id = it,
                     name = "name $it",

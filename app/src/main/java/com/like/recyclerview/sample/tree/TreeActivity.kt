@@ -14,7 +14,7 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
-import com.like.recyclerview.ui.bindRecyclerViewForNotPaging
+import com.like.recyclerview.ui.bindRecyclerView
 import kotlinx.coroutines.launch
 
 class TreeActivity : AppCompatActivity() {
@@ -67,8 +67,8 @@ class TreeActivity : AppCompatActivity() {
         })
 
         lifecycleScope.launch {
-            mViewModel.getResult().bindRecyclerViewForNotPaging(mAdapter)
-            mViewModel.getResult().initial()
+            mViewModel.getResult().bindRecyclerView(mAdapter)
         }
+        mViewModel.getResult().initial()
     }
 }

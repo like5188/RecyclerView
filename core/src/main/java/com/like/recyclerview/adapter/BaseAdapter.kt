@@ -228,12 +228,12 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
     }
 
     /**
-     * item插入成功时回调。用于[BaseLoadAfterAdapter]、[BaseLoadBeforeAdapter]处理加载更多逻辑
+     * item插入成功时回调。用于[BaseAppendAdapter]、[BasePrependAdapter]处理加载更多逻辑
      */
     protected open fun onItemRangeInserted(positionStart: Int, itemCount: Int) {}
 
     /**
-     * 获取到了item时回调。用于[BaseLoadAfterAdapter]、[BaseLoadBeforeAdapter]处理加载更多逻辑
+     * 获取到了item时回调。用于[BaseAppendAdapter]、[BasePrependAdapter]处理加载更多逻辑
      */
     protected open fun onGetItem(position: Int, item: IRecyclerViewItem?) {}
 

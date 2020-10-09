@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * 做了加载更多的触发条件处理。即最后一个item出现的时候。
  */
-open class BaseLoadAfterAdapter(private val onLoadAfter: () -> Unit) : BaseAdapter() {
+open class BaseAppendAdapter(private val append: () -> Unit) : BaseAdapter() {
     companion object {
         private const val TAG = "BaseLoadAfterAdapter"
     }
@@ -27,7 +27,7 @@ open class BaseLoadAfterAdapter(private val onLoadAfter: () -> Unit) : BaseAdapt
             if (position == itemCount - 1) {
                 if (mLoadAfterRunning.compareAndSet(false, true)) {
                     Log.v(TAG, "触发往后加载更多")
-                    onLoadAfter()
+                    append()
                 }
             }
         }

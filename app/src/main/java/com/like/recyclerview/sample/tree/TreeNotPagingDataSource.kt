@@ -1,7 +1,7 @@
 package com.like.recyclerview.sample.tree
 
+import com.like.datasource.LoadType
 import com.like.datasource.notPaging.NotPagingDataSource
-import com.like.datasource.util.LoadType
 import com.like.recyclerview.sample.R
 
 class TreeNotPagingDataSource : NotPagingDataSource<List<TreeNode0>?>() {

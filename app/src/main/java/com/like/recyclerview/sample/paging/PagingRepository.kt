@@ -1,8 +1,8 @@
 package com.like.recyclerview.sample.paging
 
 class PagingRepository(
-    private val loadAfterPagingDataSource: LoadAfterPagingDataSource,
-    private val loadBeforePagingDataSource: LoadBeforePagingDataSource
+    private val appendPagingDataSource: AppendPagingDataSource,
+    private val prependPagingDataSource: PrependPagingDataSource
 ) {
-    fun getResult() = loadAfterPagingDataSource.result()
+    fun getResult() = appendPagingDataSource.result()
 }

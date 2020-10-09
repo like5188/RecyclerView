@@ -1,9 +1,8 @@
 package com.like.recyclerview.ext.adapter
 
-import androidx.databinding.ViewDataBinding
 import android.widget.CheckBox
+import androidx.databinding.ViewDataBinding
 import com.like.recyclerview.adapter.BaseAdapter
-import com.like.recyclerview.listener.OnItemClickListener
 import com.like.recyclerview.ext.model.BaseTreeNode
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.viewholder.CommonViewHolder
@@ -13,11 +12,7 @@ import com.like.recyclerview.viewholder.CommonViewHolder
  */
 abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
     init {
-        addOnItemClickListener(object : OnItemClickListener {
-            override fun onItemClick(holder: CommonViewHolder, position: Int, data: IRecyclerViewItem?) {
-                clickItem(holder.binding, position, data)
-            }
-        })
+        addOnItemClickListener { holder, position, data -> clickItem(holder.binding, position, data) }
     }
 
     /**
