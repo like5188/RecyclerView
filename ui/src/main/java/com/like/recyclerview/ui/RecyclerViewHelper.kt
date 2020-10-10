@@ -11,7 +11,7 @@ import com.like.repository.Result
 import com.like.repository.StateReport
 
 /**
- * 初始化不分页的 RecyclerView。
+ * 把 [Result] 与 [androidx.recyclerview.widget.RecyclerView] 进行绑定，不分页
  * 包括空视图、错误视图、点击监听及Item数据的自动添加
  *
  * @param errorItem         失败时显示的视图。默认为：[DefaultErrorItem]
@@ -39,12 +39,12 @@ fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForNotPaging(
 }
 
 /**
- * 初始化往后加载更多分页的 RecyclerView。
- * 包括空视图、错误视图、加载更多视图、点击监听及Item数据的自动添加
+ * 把 [Result] 与 [androidx.recyclerview.widget.RecyclerView] 进行绑定，往后加载更多分页
+ * 包括空视图、错误视图、往后加载更多视图、点击监听及Item数据的自动添加
  *
  * @param errorItem         失败时显示的视图。默认为：[DefaultErrorItem]
  * @param emptyItem         数据为空时显示的视图。默认为：[DefaultEmptyItem]
- * @param loadMoreFooter    加载更多的视图。默认为：[DefaultLoadMoreFooter]
+ * @param loadMoreFooter    往后加载更多的视图。默认为：[DefaultLoadMoreFooter]
  * @param listener          item点击监听
  */
 fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForLoadAfterPaging(
@@ -69,12 +69,12 @@ fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForLoadAfterPaging(
 }
 
 /**
- * 初始化往前加载更多分页的 RecyclerView。
- * 包括空视图、错误视图、加载更多视图、点击监听及Item数据的自动添加
+ * 把 [Result] 与 [androidx.recyclerview.widget.RecyclerView] 进行绑定，往前加载更多分页
+ * 包括空视图、错误视图、往前加载更多视图、点击监听及Item数据的自动添加
  *
  * @param errorItem         失败时显示的视图。默认为：[DefaultErrorItem]
  * @param emptyItem         数据为空时显示的视图。默认为：[DefaultEmptyItem]
- * @param loadMoreHeader    加载更多的视图。默认为：[DefaultLoadMoreHeader]
+ * @param loadMoreHeader    往前加载更多的视图。默认为：[DefaultLoadMoreHeader]
  * @param listener          item点击监听
  */
 fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForLoadBeforePaging(
@@ -104,12 +104,13 @@ fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForLoadBeforePaging
 object RecyclerViewHelper {
 
     /**
-     * 初始化 RecyclerView
+     * 把 [Result] 与 [androidx.recyclerview.widget.RecyclerView] 进行绑定
      * 包括空视图、错误视图、加载更多视图、点击监听及Item数据的自动添加
      *
      * @param errorItem         失败时显示的视图。库中默认实现了[DefaultErrorItem]
      * @param emptyItem         数据为空时显示的视图。库中默认实现了[DefaultEmptyItem]
-     * @param loadMoreFooter    加载更多的视图。库中默认实现了[DefaultLoadMoreFooter]
+     * @param loadMoreFooter    往后加载更多的视图。库中默认实现了[DefaultLoadMoreFooter]
+     * @param loadMoreHeader    往前加载更多的视图。库中默认实现了[DefaultLoadMoreHeader]
      * @param listener          item点击监听
      */
     fun <T : IRecyclerViewItem> initRecyclerView(
