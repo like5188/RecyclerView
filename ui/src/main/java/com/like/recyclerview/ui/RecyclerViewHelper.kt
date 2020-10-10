@@ -2,16 +2,17 @@ package com.like.recyclerview.ui
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.listener.OnItemClickListener
 import com.like.recyclerview.model.*
+import com.like.repository.RequestState
+import com.like.repository.RequestType
 import com.like.repository.Result
-import com.like.repository.requestHelper.*
+import com.like.repository.StateReport
 
 /**
  * 初始化不分页的 RecyclerView。
- * 包括空视图、错误视图、加载更多视图、Item的添加及点击监听
+ * 包括空视图、错误视图、点击监听及Item数据的自动添加
  *
  * @param errorItem         失败时显示的视图。默认为：[DefaultErrorItem]
  * @param emptyItem         数据为空时显示的视图。默认为：[DefaultEmptyItem]
@@ -27,7 +28,7 @@ fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForNotPaging(
     RecyclerViewHelper.initRecyclerView(
         lifecycleOwner,
         adapter,
-        this.liveStatus,
+        this.liveState,
         this.liveValue,
         emptyItem,
         errorItem,
@@ -39,7 +40,7 @@ fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForNotPaging(
 
 /**
  * 初始化往后加载更多分页的 RecyclerView。
- * 包括空视图、错误视图、加载更多视图、Item的添加及点击监听
+ * 包括空视图、错误视图、加载更多视图、点击监听及Item数据的自动添加
  *
  * @param errorItem         失败时显示的视图。默认为：[DefaultErrorItem]
  * @param emptyItem         数据为空时显示的视图。默认为：[DefaultEmptyItem]
@@ -57,7 +58,7 @@ fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForLoadAfterPaging(
     RecyclerViewHelper.initRecyclerView(
         lifecycleOwner,
         adapter,
-        this.liveStatus,
+        this.liveState,
         this.liveValue,
         emptyItem,
         errorItem,
@@ -69,7 +70,7 @@ fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForLoadAfterPaging(
 
 /**
  * 初始化往前加载更多分页的 RecyclerView。
- * 包括空视图、错误视图、加载更多视图、Item的添加及点击监听
+ * 包括空视图、错误视图、加载更多视图、点击监听及Item数据的自动添加
  *
  * @param errorItem         失败时显示的视图。默认为：[DefaultErrorItem]
  * @param emptyItem         数据为空时显示的视图。默认为：[DefaultEmptyItem]
@@ -87,7 +88,7 @@ fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerViewForLoadBeforePaging
     RecyclerViewHelper.initRecyclerView(
         lifecycleOwner,
         adapter,
-        this.liveStatus,
+        this.liveState,
         this.liveValue,
         emptyItem,
         errorItem,
@@ -104,7 +105,7 @@ object RecyclerViewHelper {
 
     /**
      * 初始化 RecyclerView
-     * 包括空视图、错误视图、加载更多视图、Item的添加及点击监听
+     * 包括空视图、错误视图、加载更多视图、点击监听及Item数据的自动添加
      *
      * @param errorItem         失败时显示的视图。库中默认实现了[DefaultErrorItem]
      * @param emptyItem         数据为空时显示的视图。库中默认实现了[DefaultEmptyItem]
@@ -114,7 +115,7 @@ object RecyclerViewHelper {
     fun <T : IRecyclerViewItem> initRecyclerView(
         lifecycleOwner: LifecycleOwner,
         adapter: BaseAdapter,
-        liveStatus: LiveData<StatusReport>,
+        liveState: LiveData<StateReport>,
         liveValue: LiveData<List<T>?>,
         emptyItem: IEmptyItem? = null,
         errorItem: IErrorItem? = null,
@@ -126,7 +127,7 @@ object RecyclerViewHelper {
             addEmptyItemToRecyclerView(
                 lifecycleOwner,
                 adapter,
-                liveStatus,
+                liveState,
                 liveValue,
                 it
             )
@@ -135,21 +136,21 @@ object RecyclerViewHelper {
             addErrorItemToRecyclerView(
                 lifecycleOwner,
                 adapter,
-                liveStatus,
+                liveState,
                 it
             )
         }
         addItemToRecyclerView(
             lifecycleOwner,
             adapter,
-            liveStatus,
+            liveState,
             liveValue
         )
         loadMoreFooter?.let {
             addLoadMoreFooterToRecyclerView(
                 lifecycleOwner,
                 adapter,
-                liveStatus,
+                liveState,
                 liveValue,
                 loadMoreFooter
             )
@@ -158,7 +159,7 @@ object RecyclerViewHelper {
             addLoadMoreHeaderToRecyclerView(
                 lifecycleOwner,
                 adapter,
-                liveStatus,
+                liveState,
                 liveValue,
                 loadMoreHeader
             )
@@ -167,7 +168,7 @@ object RecyclerViewHelper {
             addOnItemClickListenerToRecyclerView(
                 lifecycleOwner,
                 adapter,
-                liveStatus,
+                liveState,
                 liveValue,
                 it
             )
@@ -177,85 +178,85 @@ object RecyclerViewHelper {
     private fun <T : IRecyclerViewItem> addEmptyItemToRecyclerView(
         lifecycleOwner: LifecycleOwner,
         adapter: BaseAdapter,
-        liveStatus: LiveData<StatusReport>,
+        liveState: LiveData<StateReport>,
         liveValue: LiveData<List<T>?>,
         emptyItem: IEmptyItem
     ) {
-        liveValue.observe(lifecycleOwner, Observer {
-            val statusReport = liveStatus.value
+        liveValue.observe(lifecycleOwner) {
+            val stateReport = liveState.value
             when {
-                (statusReport?.type is Initial || statusReport?.type is Refresh) && statusReport.status is Success -> {
+                (stateReport?.type is RequestType.Initial || stateReport?.type is RequestType.Refresh) && stateReport.state is RequestState.Success -> {
                     if (it.isNullOrEmpty()) {
                         adapter.mAdapterDataManager.setEmptyItem(emptyItem)
                     }
                 }
             }
-        })
+        }
     }
 
     private fun addErrorItemToRecyclerView(
         lifecycleOwner: LifecycleOwner,
         adapter: BaseAdapter,
-        liveStatus: LiveData<StatusReport>,
+        liveState: LiveData<StateReport>,
         errorItem: IErrorItem
     ) {
-        liveStatus.observe(lifecycleOwner, Observer {
+        liveState.observe(lifecycleOwner) {
             when {
-                it.type is Initial && it.status is Failed -> {
+                it.type is RequestType.Initial && it.state is RequestState.Failed -> {
                     if (errorItem.errorMessage.isEmpty()) {
                         errorItem.errorMessage =
-                            (it.status as Failed).throwable?.message ?: "unknown error"
+                            (it.state as RequestState.Failed).throwable.message ?: "unknown error"
                     }
                     adapter.mAdapterDataManager.setErrorItem(errorItem)
                 }
             }
-        })
+        }
     }
 
     private fun <T : IRecyclerViewItem> addItemToRecyclerView(
         lifecycleOwner: LifecycleOwner,
         adapter: BaseAdapter,
-        liveStatus: LiveData<StatusReport>,
+        liveState: LiveData<StateReport>,
         liveValue: LiveData<List<T>?>
     ) {
-        liveValue.observe(lifecycleOwner, Observer {
-            val statusReport = liveStatus.value
+        liveValue.observe(lifecycleOwner) {
+            val stateReport = liveState.value
             when {
-                (statusReport?.type is Initial || statusReport?.type is Refresh) && statusReport.status is Success -> {
+                (stateReport?.type is RequestType.Initial || stateReport?.type is RequestType.Refresh) && stateReport.state is RequestState.Success -> {
                     if (!it.isNullOrEmpty()) {
                         adapter.mAdapterDataManager.clearAndAddAll(it.map())
                     }
                 }
             }
-        })
+        }
     }
 
     private fun <T : IRecyclerViewItem> addLoadMoreFooterToRecyclerView(
         lifecycleOwner: LifecycleOwner,
         adapter: BaseAdapter,
-        liveStatus: LiveData<StatusReport>,
+        liveState: LiveData<StateReport>,
         liveValue: LiveData<List<T>?>,
         loadMoreFooter: ILoadMoreFooter
     ) {
-        liveStatus.observe(lifecycleOwner, Observer {
+        liveState.observe(lifecycleOwner) {
             when {
-                it.type is After && it.status is Failed -> {
+                it.type is RequestType.After && it.state is RequestState.Failed -> {
                     adapter.mAdapterDataManager.getFooters().forEach { iFooter ->
                         if (iFooter is ILoadMoreFooter)
                             iFooter.onError()
                     }
                 }
             }
-        })
-        liveValue.observe(lifecycleOwner, Observer {
-            val statusReport = liveStatus.value
+        }
+        liveValue.observe(lifecycleOwner) {
+            val stateReport = liveState.value
             when {
-                (statusReport?.type is Initial || statusReport?.type is Refresh) && statusReport.status is Success -> {
+                (stateReport?.type is RequestType.Initial || stateReport?.type is RequestType.Refresh) && stateReport.state is RequestState.Success -> {
                     if (!it.isNullOrEmpty()) {
                         adapter.mAdapterDataManager.addFooterToEnd(loadMoreFooter)
                     }
                 }
-                statusReport?.type is After && statusReport.status is Success -> {
+                stateReport?.type is RequestType.After && stateReport.state is RequestState.Success -> {
                     // 因为 footer 的状态和数据有关，所以放到 liveValue 的监听里面来。
                     if (it.isNullOrEmpty()) {
                         // 到底了
@@ -273,35 +274,35 @@ object RecyclerViewHelper {
                     }
                 }
             }
-        })
+        }
     }
 
     private fun <T : IRecyclerViewItem> addLoadMoreHeaderToRecyclerView(
         lifecycleOwner: LifecycleOwner,
         adapter: BaseAdapter,
-        liveStatus: LiveData<StatusReport>,
+        liveState: LiveData<StateReport>,
         liveValue: LiveData<List<T>?>,
         loadMoreHeader: ILoadMoreHeader
     ) {
-        liveStatus.observe(lifecycleOwner, Observer {
+        liveState.observe(lifecycleOwner) {
             when {
-                it.type is Before && it.status is Failed -> {
+                it.type is RequestType.Before && it.state is RequestState.Failed -> {
                     adapter.mAdapterDataManager.getHeaders().forEach { iHeader ->
                         if (iHeader is ILoadMoreHeader)
                             iHeader.onError()
                     }
                 }
             }
-        })
-        liveValue.observe(lifecycleOwner, Observer {
-            val statusReport = liveStatus.value
+        }
+        liveValue.observe(lifecycleOwner) {
+            val stateReport = liveState.value
             when {
-                (statusReport?.type is Initial || statusReport?.type is Refresh) && statusReport.status is Success -> {
+                (stateReport?.type is RequestType.Initial || stateReport?.type is RequestType.Refresh) && stateReport.state is RequestState.Success -> {
                     if (!it.isNullOrEmpty()) {
                         adapter.mAdapterDataManager.addHeaderToStart(loadMoreHeader)
                     }
                 }
-                statusReport?.type is Before && statusReport.status is Success -> {
+                stateReport?.type is RequestType.Before && stateReport.state is RequestState.Success -> {
                     // 因为 header 的状态和数据有关，所以放到 liveValue 的监听里面来。
                     if (it.isNullOrEmpty()) {
                         // 到顶了
@@ -319,27 +320,27 @@ object RecyclerViewHelper {
                     }
                 }
             }
-        })
+        }
     }
 
     private fun <T : IRecyclerViewItem> addOnItemClickListenerToRecyclerView(
         lifecycleOwner: LifecycleOwner,
         adapter: BaseAdapter,
-        liveStatus: LiveData<StatusReport>,
+        liveState: LiveData<StateReport>,
         liveValue: LiveData<List<T>?>,
         listener: OnItemClickListener
     ) {
-        liveStatus.observe(lifecycleOwner, Observer {
+        liveState.observe(lifecycleOwner) {
             when {
-                it.type is Initial && it.status is Failed -> {
+                it.type is RequestType.Initial && it.state is RequestState.Failed -> {
                     adapter.removeOnItemClickListener(listener)
                 }
             }
-        })
-        liveValue.observe(lifecycleOwner, Observer {
-            val statusReport = liveStatus.value
+        }
+        liveValue.observe(lifecycleOwner) {
+            val stateReport = liveState.value
             when {
-                (statusReport?.type is Initial || statusReport?.type is Refresh) && statusReport.status is Success -> {
+                (stateReport?.type is RequestType.Initial || stateReport?.type is RequestType.Refresh) && stateReport.state is RequestState.Success -> {
                     if (it.isNullOrEmpty()) {
                         adapter.removeOnItemClickListener(listener)
                     } else {
@@ -347,7 +348,7 @@ object RecyclerViewHelper {
                     }
                 }
             }
-        })
+        }
     }
 
     private inline fun <T, reified V> List<T>?.map(): List<V> {

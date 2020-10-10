@@ -8,12 +8,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter
 import com.like.recyclerview.ext.decoration.PinnedItemDecoration
-import com.like.recyclerview.ui.bindRecyclerViewForNotPaging
-import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.ext.model.IPinnedItem
+import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
+import com.like.recyclerview.ui.bindRecyclerViewForNotPaging
 
 class TreeActivity : AppCompatActivity() {
     private val mBinding by lazy {
@@ -30,25 +30,25 @@ class TreeActivity : AppCompatActivity() {
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.adapter = mAdapter
         mBinding.rv.itemAnimator = null
-        mBinding.rv.addItemDecoration(com.like.recyclerview.ext.decoration.PinnedItemDecoration().apply {
+        mBinding.rv.addItemDecoration(PinnedItemDecoration().apply {
             setOnPinnedHeaderRenderListener(object :
-                com.like.recyclerview.ext.decoration.PinnedItemDecoration.OnPinnedHeaderRenderListener {
+                PinnedItemDecoration.OnPinnedHeaderRenderListener {
                 override fun onRender(
                     viewDataBinding: ViewDataBinding,
                     layoutId: Int,
-                    item: com.like.recyclerview.ext.model.IPinnedItem,
+                    item: IPinnedItem,
                     itemPosition: Int
                 ) {
-                    if (item is TreeNode0 && viewDataBinding is TreeItem0Binding && mAdapter is com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter) {
+                    if (item is TreeNode0 && viewDataBinding is TreeItem0Binding && mAdapter is BaseTreeRecyclerViewAdapter) {
                         viewDataBinding.root.setOnClickListener {
-                            (mAdapter as com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter).clickItem(
+                            (mAdapter as BaseTreeRecyclerViewAdapter).clickItem(
                                 viewDataBinding,
                                 itemPosition,
                                 item
                             )
                         }
                         viewDataBinding.cb.setOnClickListener {
-                            (mAdapter as com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter).clickCheckBox(
+                            (mAdapter as BaseTreeRecyclerViewAdapter).clickCheckBox(
                                 viewDataBinding.cb,
                                 item
                             )
@@ -60,6 +60,6 @@ class TreeActivity : AppCompatActivity() {
 
         mViewModel.treeNotPagingResult.bindRecyclerViewForNotPaging(this, mAdapter)
 
-        mViewModel.treeNotPagingResult.loadInitial.invoke()
+        mViewModel.treeNotPagingResult.initial.invoke()
     }
 }

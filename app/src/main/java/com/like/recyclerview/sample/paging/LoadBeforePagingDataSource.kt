@@ -2,10 +2,10 @@ package com.like.recyclerview.sample.paging
 
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.model.*
+import com.like.repository.RequestType
+import com.like.repository.RequestType.Initial
+import com.like.repository.RequestType.Refresh
 import com.like.repository.paging.byPageNo.PageNoKeyedPagingDataSource
-import com.like.repository.requestHelper.Initial
-import com.like.repository.requestHelper.Refresh
-import com.like.repository.requestHelper.RequestType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 

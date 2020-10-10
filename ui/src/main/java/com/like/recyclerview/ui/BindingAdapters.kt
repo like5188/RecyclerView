@@ -38,7 +38,10 @@ object BindingAdapters {
 
     @BindingAdapter("setContentLoadingProgressBarBgColor")
     @JvmStatic
-    fun setContentLoadingProgressBarBgColor(progressBar: ContentLoadingProgressBar, @ColorRes resId: Int) {
+    fun setContentLoadingProgressBarBgColor(
+        progressBar: ContentLoadingProgressBar,
+        @ColorRes resId: Int
+    ) {
         val color = ContextCompat.getColor(progressBar.context, resId)
         progressBar.indeterminateDrawable.setColorFilter(color, PorterDuff.Mode.MULTIPLY)
     }

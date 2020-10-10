@@ -1,8 +1,8 @@
 package com.like.recyclerview.sample.tree
 
 import com.like.recyclerview.sample.R
+import com.like.repository.RequestType
 import com.like.repository.notPaging.NotPagingDataSource
-import com.like.repository.requestHelper.RequestType
 import kotlinx.coroutines.CoroutineScope
 
 class TreeNotPagingDataSource(coroutineScope: CoroutineScope) : NotPagingDataSource<List<TreeNode0>?>(coroutineScope) {

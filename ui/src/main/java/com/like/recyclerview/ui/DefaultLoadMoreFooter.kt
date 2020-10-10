@@ -3,8 +3,6 @@ package com.like.recyclerview.ui
 import android.view.View
 import androidx.annotation.ColorRes
 import androidx.databinding.ObservableInt
-import com.like.recyclerview.ui.BR
-import com.like.recyclerview.ui.R
 import com.like.recyclerview.model.ILoadMoreFooter
 
 /**

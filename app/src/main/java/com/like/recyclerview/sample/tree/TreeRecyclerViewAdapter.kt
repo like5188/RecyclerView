@@ -2,7 +2,6 @@ package com.like.recyclerview.sample.tree
 
 import android.widget.CheckBox
 import androidx.databinding.ViewDataBinding
-import com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter
 import com.like.recyclerview.ext.model.BaseTreeNode
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
@@ -11,8 +10,8 @@ import com.like.recyclerview.sample.databinding.TreeItem2Binding
 import com.like.recyclerview.sample.databinding.TreeItem3Binding
 
 class TreeRecyclerViewAdapter : com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter() {
-    override fun onExpand(parent: com.like.recyclerview.ext.model.BaseTreeNode, position: Int, binding: ViewDataBinding): List<com.like.recyclerview.ext.model.BaseTreeNode> {
-        val result = mutableListOf<com.like.recyclerview.ext.model.BaseTreeNode>()
+    override fun onExpand(parent: BaseTreeNode, position: Int, binding: ViewDataBinding): List<BaseTreeNode> {
+        val result = mutableListOf<BaseTreeNode>()
         when (parent) {
             is TreeNode0 -> {
                 (1..parent.count).forEach {

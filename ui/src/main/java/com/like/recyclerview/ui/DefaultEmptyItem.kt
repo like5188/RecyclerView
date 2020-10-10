@@ -2,8 +2,6 @@ package com.like.recyclerview.ui
 
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.like.recyclerview.ui.BR
-import com.like.recyclerview.ui.R
 import com.like.recyclerview.model.IEmptyItem
 
 /**
