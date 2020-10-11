@@ -4,15 +4,15 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import com.like.common.util.repository.bindProgress
-import com.like.common.util.repository.bindRecyclerViewForLoadAfterPaging
-import com.like.common.util.repository.bindRecyclerViewForLoadBeforePaging
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseLoadAfterAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IItem
 import com.like.recyclerview.sample.R
+import com.like.recyclerview.sample.bindProgress
+import com.like.recyclerview.sample.bindRecyclerViewForLoadAfterPaging
+import com.like.recyclerview.sample.bindRecyclerViewForLoadBeforePaging
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 
 class PagingActivity : AppCompatActivity() {

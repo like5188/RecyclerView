@@ -5,13 +5,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
-import com.like.common.util.repository.bindRecyclerViewForNotPaging
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter
 import com.like.recyclerview.ext.decoration.PinnedItemDecoration
 import com.like.recyclerview.ext.model.IPinnedItem
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
+import com.like.recyclerview.sample.bindRecyclerViewForNotPaging
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
 
