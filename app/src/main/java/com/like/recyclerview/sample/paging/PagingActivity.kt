@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.like.common.util.repository.bindProgress
+import com.like.common.util.repository.bindRecyclerViewForLoadAfterPaging
+import com.like.common.util.repository.bindRecyclerViewForLoadBeforePaging
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseLoadAfterAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
@@ -11,9 +14,6 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IItem
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
-import com.like.recyclerview.sample.util.bindProgress
-import com.like.recyclerview.ui.bindRecyclerViewForLoadAfterPaging
-import com.like.recyclerview.ui.bindRecyclerViewForLoadBeforePaging
 
 class PagingActivity : AppCompatActivity() {
     private val mBinding by lazy {
@@ -34,23 +34,17 @@ class PagingActivity : AppCompatActivity() {
         mBinding.rv.adapter = mAdapter
 
         mViewModel.getResult().bindProgress(this, mBinding.swipeRefreshLayout)
-        mViewModel.getResult().bindRecyclerViewForLoadAfterPaging(
-            this, mAdapter,
-            listener = { holder, position, data ->
-                if (data is IItem) {
-                    mAdapter.mAdapterDataManager.remove(position)
-                }
+        mViewModel.getResult().bindRecyclerViewForLoadAfterPaging(this, mAdapter) { holder, position, data ->
+            if (data is IItem) {
+                mAdapter.mAdapterDataManager.remove(position)
             }
-        )
-//        mViewModel.getResult().bindRecyclerViewForLoadBeforePaging(
-//            this, mAdapter,
-//            listener = { holder, position, data ->
-//                if (data is IItem) {
-//                    mAdapter.mAdapterDataManager.remove(position)
-//                }
+        }
+//        mViewModel.getResult().bindRecyclerViewForLoadBeforePaging(this, mAdapter) { holder, position, data ->
+//            if (data is IItem) {
+//                mAdapter.mAdapterDataManager.remove(position)
 //            }
-//        )
+//        }
 
-        mViewModel.getResult().initial.invoke()
+        mViewModel.getResult().initial()
     }
 }

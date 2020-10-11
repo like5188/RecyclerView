@@ -60,6 +60,11 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+
+    //More than one file was found with OS independent path 'META-INF/core_release.kotlin_module'
+    packagingOptions {
+        exclude 'META-INF/*.kotlin_module'
+    }
 }
 
 dependencies {
@@ -74,8 +79,7 @@ dependencies {
 
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-19'
 
-    implementation 'com.github.like5188:Common:5.8.4'
-    implementation 'com.github.like5188:Repository:3.1.6'
+    implementation 'com.github.like5188:Common:5.8.6'
 
     implementation project(':core')
     implementation project(':ui')
