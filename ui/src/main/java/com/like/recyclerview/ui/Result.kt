@@ -108,7 +108,7 @@ private fun <T : IRecyclerViewItem> Result<List<T>?>.bindRecyclerView(
     listener: OnItemClickListener? = null
 ) {
     val clearAndAddAll: (List<T>?) -> Unit = {
-        adapter.mAdapterDataManager.clearAndAddAll(it.map())
+        adapter.mAdapterDataManager.clearAndAddAll(it)
     }
     val setEmptyItem: (() -> Unit)? = if (emptyItem != null) {
         { adapter.mAdapterDataManager.setEmptyItem(emptyItem) }
