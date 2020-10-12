@@ -4,15 +4,14 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.like.common.util.repository.RecyclerViewLoadType
+import com.like.common.util.repository.bindListResultToRecyclerViewWithProgress
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseLoadAfterAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IItem
 import com.like.recyclerview.sample.R
-import com.like.recyclerview.sample.bindProgress
-import com.like.recyclerview.sample.bindRecyclerViewForLoadAfterPaging
-import com.like.recyclerview.sample.bindRecyclerViewForLoadBeforePaging
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 
 class PagingActivity : AppCompatActivity() {
@@ -33,17 +32,18 @@ class PagingActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(10))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-        mViewModel.getResult().bindProgress(this, mBinding.swipeRefreshLayout)
-        mViewModel.getResult().bindRecyclerViewForLoadAfterPaging(this, mAdapter) { holder, position, data ->
+        mViewModel.getResult().bindListResultToRecyclerViewWithProgress(
+            this, mAdapter,
+            RecyclerViewLoadType.LoadAfter,
+            mBinding.swipeRefreshLayout,
+            {
+                it
+            }
+        ) { holder, position, data ->
             if (data is IItem) {
                 mAdapter.mAdapterDataManager.remove(position)
             }
         }
-//        mViewModel.getResult().bindRecyclerViewForLoadBeforePaging(this, mAdapter) { holder, position, data ->
-//            if (data is IItem) {
-//                mAdapter.mAdapterDataManager.remove(position)
-//            }
-//        }
 
         mViewModel.getResult().initial()
     }
