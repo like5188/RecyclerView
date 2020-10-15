@@ -6,7 +6,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
 import com.like.common.util.repository.RecyclerViewLoadType
-import com.like.common.util.repository.bindListResultToRecyclerView
+import com.like.common.util.repository.bindResultToRecyclerView
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter
 import com.like.recyclerview.ext.decoration.PinnedItemDecoration
@@ -59,7 +59,7 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        mViewModel.treeNotPagingResult.bindListResultToRecyclerView(
+        mViewModel.treeNotPagingResult.bindResultToRecyclerView(
             this, mAdapter,
             RecyclerViewLoadType.NotPaging,
             {

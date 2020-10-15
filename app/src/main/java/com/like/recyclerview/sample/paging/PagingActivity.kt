@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.like.common.util.repository.RecyclerViewLoadType
-import com.like.common.util.repository.bindListResultToRecyclerViewWithProgress
+import com.like.common.util.repository.bindResultToRecyclerViewWithProgress
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseLoadAfterAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
@@ -32,7 +32,7 @@ class PagingActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(10))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-        mViewModel.getResult().bindListResultToRecyclerViewWithProgress(
+        mViewModel.getResult().bindResultToRecyclerViewWithProgress(
             this, mAdapter,
             RecyclerViewLoadType.LoadAfter,
             mBinding.swipeRefreshLayout,
