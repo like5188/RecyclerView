@@ -1,16 +1,14 @@
 package com.like.recyclerview.sample.paging
 
+import com.like.datasource.RequestType
+import com.like.datasource.RequestType.Initial
+import com.like.datasource.RequestType.Refresh
+import com.like.datasource.paging.byPageNo.PageNoKeyedPagingDataSource
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.model.*
-import com.like.repository.RequestType
-import com.like.repository.RequestType.Initial
-import com.like.repository.RequestType.Refresh
-import com.like.repository.paging.byPageNo.PageNoKeyedPagingDataSource
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 
-class LoadBeforePagingDataSource(coroutineScope: CoroutineScope, pageSize: Int) :
-    PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(coroutineScope, pageSize, false) {
+class LoadBeforePagingDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(pageSize, false) {
     private var i = 0
     private var j = 0
 

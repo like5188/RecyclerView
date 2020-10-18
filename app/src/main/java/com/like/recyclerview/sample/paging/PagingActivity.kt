@@ -4,8 +4,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import com.like.common.util.repository.RecyclerViewLoadType
-import com.like.common.util.repository.bindResultToRecyclerViewWithProgress
+import androidx.lifecycle.lifecycleScope
+import com.like.common.util.datasource.RecyclerViewLoadType
+import com.like.common.util.datasource.collectWithProgressForRecyclerView
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseLoadAfterAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
@@ -13,6 +14,7 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IItem
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
+import kotlinx.coroutines.launch
 
 class PagingActivity : AppCompatActivity() {
     private val mBinding by lazy {
@@ -32,19 +34,20 @@ class PagingActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(10))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-        mViewModel.getResult().bindResultToRecyclerViewWithProgress(
-            this, mAdapter,
-            RecyclerViewLoadType.LoadAfter,
-            mBinding.swipeRefreshLayout,
-            {
-                it
-            }
-        ) { holder, position, data ->
-            if (data is IItem) {
-                mAdapter.mAdapterDataManager.remove(position)
+        lifecycleScope.launch {
+            mViewModel.getResult().collectWithProgressForRecyclerView(
+                mAdapter,
+                RecyclerViewLoadType.LoadAfter,
+                mBinding.swipeRefreshLayout,
+                {
+                    it
+                }
+            ) { holder, position, data ->
+                if (data is IItem) {
+                    mAdapter.mAdapterDataManager.remove(position)
+                }
             }
         }
-
         mViewModel.getResult().initial()
     }
 }

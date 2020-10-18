@@ -1,11 +1,10 @@
 package com.like.recyclerview.sample.tree
 
+import com.like.datasource.RequestType
+import com.like.datasource.notPaging.NotPagingDataSource
 import com.like.recyclerview.sample.R
-import com.like.repository.RequestType
-import com.like.repository.notPaging.NotPagingDataSource
-import kotlinx.coroutines.CoroutineScope
 
-class TreeNotPagingDataSource(coroutineScope: CoroutineScope) : NotPagingDataSource<List<TreeNode0>?>(coroutineScope) {
+class TreeNotPagingDataSource : NotPagingDataSource<List<TreeNode0>?>() {
 
     override suspend fun load(requestType: RequestType): List<TreeNode0>? {
         val treeNode1 = TreeNode0(R.drawable.file, "第一人民医院", 8)
