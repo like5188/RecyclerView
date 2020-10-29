@@ -28,11 +28,22 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
 
     private val mOnItemClickListeners = mutableListOf<OnItemClickListener>()
     private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener>()
+    private var recyclerView: RecyclerView? = null
 
     private val mOnListChangedCallback = object : ObservableList.OnListChangedCallback<ObservableArrayList<IRecyclerViewItem>>() {
         override fun onChanged(sender: ObservableArrayList<IRecyclerViewItem>?) {
             Log.d(TAG, "onChanged")
-            notifyDataSetChanged()
+            // java.lang.IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling
+            fun update() {
+                notifyDataSetChanged()
+            }
+            if (recyclerView?.isComputingLayout == true) {
+                recyclerView?.post {
+                    update()
+                }
+            } else {
+                update()
+            }
         }
 
         override fun onItemRangeRemoved(
@@ -41,11 +52,20 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
             itemCount: Int
         ) {
             Log.d(TAG, "onItemRangeRemoved")
-            if (sender?.isEmpty() == true) {
-                notifyDataSetChanged()
+            fun update() {
+                if (sender?.isEmpty() == true) {
+                    notifyDataSetChanged()
+                } else {
+                    notifyItemRangeRemoved(positionStart, itemCount)
+                    notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
+                }
+            }
+            if (recyclerView?.isComputingLayout == true) {
+                recyclerView?.post {
+                    update()
+                }
             } else {
-                notifyItemRangeRemoved(positionStart, itemCount)
-                notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
+                update()
             }
         }
 
@@ -56,13 +76,22 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
             itemCount: Int
         ) {
             Log.d(TAG, "onItemRangeMoved")
-            // 这个回调是在 List 里的连续的元素整个移动的情况下会进行的回调，然而 RecyclerView 的 Adapter 里并没有对应的方法，
-            // 只有单个元素移动时的方法，所以需要在回调方法中做一个判断，如果移动的元素只有一个，就调用 Adapter 对应的方法，
-            // 如果超过一个，就直接调用notifyDataSetChanged()方法即可。
-            if (itemCount == 1) {
-                notifyItemMoved(fromPosition, toPosition)
+            fun update() {
+                // 这个回调是在 List 里的连续的元素整个移动的情况下会进行的回调，然而 RecyclerView 的 Adapter 里并没有对应的方法，
+                // 只有单个元素移动时的方法，所以需要在回调方法中做一个判断，如果移动的元素只有一个，就调用 Adapter 对应的方法，
+                // 如果超过一个，就直接调用notifyDataSetChanged()方法即可。
+                if (itemCount == 1) {
+                    notifyItemMoved(fromPosition, toPosition)
+                } else {
+                    notifyDataSetChanged()
+                }
+            }
+            if (recyclerView?.isComputingLayout == true) {
+                recyclerView?.post {
+                    update()
+                }
             } else {
-                notifyDataSetChanged()
+                update()
             }
         }
 
@@ -72,9 +101,18 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
             itemCount: Int
         ) {
             Log.d(TAG, "onItemRangeInserted")
-            notifyItemRangeInserted(positionStart, itemCount)
-            notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
-            onItemRangeInserted(positionStart, itemCount)
+            fun update() {
+                notifyItemRangeInserted(positionStart, itemCount)
+                notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
+                onItemRangeInserted(positionStart, itemCount)
+            }
+            if (recyclerView?.isComputingLayout == true) {
+                recyclerView?.post {
+                    update()
+                }
+            } else {
+                update()
+            }
         }
 
         override fun onItemRangeChanged(
@@ -83,7 +121,16 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
             itemCount: Int
         ) {
             Log.d(TAG, "onItemRangeChanged")
-            notifyItemRangeChanged(positionStart, itemCount)
+            fun update() {
+                notifyItemRangeChanged(positionStart, itemCount)
+            }
+            if (recyclerView?.isComputingLayout == true) {
+                recyclerView?.post {
+                    update()
+                }
+            } else {
+                update()
+            }
         }
 
     }
@@ -162,6 +209,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
      * 当为GridLayoutManager时，合并header和footer视图
      */
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        this.recyclerView = recyclerView
         val layoutManager = recyclerView.layoutManager
         if (layoutManager is GridLayoutManager) {
             val spanCount = layoutManager.spanCount
