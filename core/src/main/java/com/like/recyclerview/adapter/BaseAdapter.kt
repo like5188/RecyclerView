@@ -250,7 +250,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
     final override fun onViewAttachedToWindow(holder: CommonViewHolder) {
         val lp = holder.binding.root.layoutParams
         if (lp != null && lp is StaggeredGridLayoutManager.LayoutParams) {
-            val item = mAdapterDataManager.get(holder.layoutPosition)
+            val item = mAdapterDataManager.get(holder.adapterPosition)
             if (item is IHeader || item is IFooter) {
                 lp.isFullSpan = true
             }
