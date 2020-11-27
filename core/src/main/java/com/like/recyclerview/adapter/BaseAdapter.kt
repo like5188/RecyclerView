@@ -144,15 +144,11 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
     }
 
     fun addOnItemClickListener(listener: OnItemClickListener) {
-        if (!mOnItemClickListeners.contains(listener)) {
-            mOnItemClickListeners.add(listener)
-        }
+        mOnItemClickListeners.add(listener)
     }
 
     fun addOnItemLongClickListener(listener: OnItemLongClickListener) {
-        if (!mOnItemLongClickListeners.contains(listener)) {
-            mOnItemLongClickListeners.add(listener)
-        }
+        mOnItemLongClickListeners.add(listener)
     }
 
     fun removeOnItemClickListener(listener: OnItemClickListener) {
