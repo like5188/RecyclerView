@@ -129,7 +129,7 @@ open class BaseAddImageViewAdapter(
      * 是否+号图片
      */
     private fun isPlus(viewHolder: RecyclerView.ViewHolder): Boolean =
-        getItem(viewHolder.adapterPosition) == plus
+        mAdapterDataManager.get(viewHolder.adapterPosition) == plus
 
     /**
      * 除了+号的其它图片数量

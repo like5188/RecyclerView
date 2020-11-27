@@ -1,10 +1,10 @@
 package com.like.recyclerview.ext.adapter
 
-import androidx.databinding.ViewDataBinding
 import android.widget.CheckBox
+import androidx.databinding.ViewDataBinding
 import com.like.recyclerview.adapter.BaseAdapter
-import com.like.recyclerview.listener.OnItemClickListener
 import com.like.recyclerview.ext.model.BaseTreeNode
+import com.like.recyclerview.listener.OnItemClickListener
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.viewholder.CommonViewHolder
 
@@ -44,7 +44,7 @@ abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
         }
     }
 
-    override fun bindOtherVariable(holder: CommonViewHolder, position: Int, item: IRecyclerViewItem?) {
+    override fun onBindViewHolder(holder: CommonViewHolder, position: Int, item: IRecyclerViewItem?) {
         val checkBox = getCheckBox(holder.binding)
         if (checkBox == null || item == null || item !is BaseTreeNode) {
             return

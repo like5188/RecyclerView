@@ -4,6 +4,7 @@ import android.util.Log
 import com.like.recyclerview.model.IEmptyItem
 import com.like.recyclerview.model.IErrorItem
 import com.like.recyclerview.model.IRecyclerViewItem
+import com.like.recyclerview.viewholder.CommonViewHolder
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -18,11 +19,12 @@ open class BaseLoadAfterAdapter(private val onLoadAfter: () -> Unit) : BaseAdapt
 
     private var mLoadAfterRunning = AtomicBoolean(false)
 
-    override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+    override fun onItemRangeInsertedForLoadMore(positionStart: Int, itemCount: Int) {
         mLoadAfterRunning.set(false)
     }
 
-    override fun onGetItem(position: Int, item: IRecyclerViewItem?) {
+    override fun onBindViewHolder(holder: CommonViewHolder, position: Int, item: IRecyclerViewItem?) {
+        super.onBindViewHolder(holder, position, item)
         if (item !is IEmptyItem && item !is IErrorItem) {
             if (position == itemCount - 1) {
                 if (mLoadAfterRunning.compareAndSet(false, true)) {

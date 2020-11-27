@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableList
-import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -26,9 +25,9 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
         private const val TAG = "BaseAdapter"
     }
 
+    var recyclerView: RecyclerView? = null
     private val mOnItemClickListeners = mutableListOf<OnItemClickListener>()
     private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener>()
-    private var recyclerView: RecyclerView? = null
 
     private val mOnListChangedCallback = object : ObservableList.OnListChangedCallback<ObservableArrayList<IRecyclerViewItem>>() {
         override fun onChanged(sender: ObservableArrayList<IRecyclerViewItem>?) {
@@ -104,7 +103,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
             fun update() {
                 notifyItemRangeInserted(positionStart, itemCount)
                 notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
-                onItemRangeInserted(positionStart, itemCount)
+                onItemRangeInsertedForLoadMore(positionStart, itemCount)
             }
             if (recyclerView?.isComputingLayout == true) {
                 recyclerView?.post {
@@ -172,43 +171,59 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
         mOnItemLongClickListeners.clear()
     }
 
-    fun getItem(position: Int): IRecyclerViewItem? {
-        val item = mAdapterDataManager.get(position)
-        onGetItem(position, item)
-        return item
-    }
-
-    override fun getItemCount(): Int {
+    final override fun getItemCount(): Int {
         return mAdapterDataManager.getSize()
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return getItem(position)?.layoutId ?: -1
+    final override fun getItemViewType(position: Int): Int {
+        return mAdapterDataManager.get(position)?.layoutId ?: -1
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommonViewHolder {
-        return CommonViewHolder(
-            DataBindingUtil.inflate<ViewDataBinding>(
-                LayoutInflater.from(parent.context),
-                viewType,
-                parent,
-                false
-            )
-        )
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommonViewHolder {
+        return CommonViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
+            // 为list添加Item的点击事件监听
+            if (mOnItemClickListeners.isNotEmpty()) {
+                itemView.setOnClickListener {
+                    val position = recyclerView?.getChildAdapterPosition(itemView) ?: -1
+                    val item = mAdapterDataManager.get(position)
+                    mOnItemClickListeners.forEach {
+                        it.onItemClick(this, position, item)
+                    }
+                }
+            }
+            // 为list添加Item的长按事件监听
+            if (mOnItemLongClickListeners.isNotEmpty()) {
+                itemView.setOnLongClickListener {
+                    val position = recyclerView?.getChildAdapterPosition(itemView) ?: -1
+                    val item = mAdapterDataManager.get(position)
+                    mOnItemLongClickListeners.forEach {
+                        it.onItemLongClick(this, position, item)
+                    }
+                    true
+                }
+            }
+        }
     }
 
-    override fun onBindViewHolder(holder: CommonViewHolder, position: Int) {
+    final override fun onBindViewHolder(holder: CommonViewHolder, position: Int) {
         // 绑定变量
-        val item = getItem(position)
-        bindVariable(holder, position, item)
-        // 设置点击、长按监听
-        setListener(holder, position, item)
+        val item = mAdapterDataManager.get(position)
+        val variableId = item?.variableId() ?: IRecyclerViewItem.INVALID_VARIABLE_ID
+        if (variableId >= 0) {
+            try {
+                holder.binding.setVariable(variableId, item)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        // 绑定指定位置item的其他变量。如果一个布局中有多个变量的话。
+        onBindViewHolder(holder, position, item)
     }
 
     /**
      * 当为GridLayoutManager时，合并header和footer视图
      */
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+    final override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
         val layoutManager = recyclerView.layoutManager
         if (layoutManager is GridLayoutManager) {
@@ -218,7 +233,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
                     object : GridLayoutManager.SpanSizeLookup() {
                         override fun getSpanSize(position: Int): Int {
                             var ss = 1
-                            val item = getItem(position)
+                            val item = mAdapterDataManager.get(position)
                             if (item is IHeader || item is IFooter) {
                                 ss = spanCount
                             }
@@ -232,45 +247,12 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
     /**
      * 当为StaggeredGridLayoutManager时，合并header和footer视图
      */
-    override fun onViewAttachedToWindow(holder: CommonViewHolder) {
+    final override fun onViewAttachedToWindow(holder: CommonViewHolder) {
         val lp = holder.binding.root.layoutParams
         if (lp != null && lp is StaggeredGridLayoutManager.LayoutParams) {
-            val item = getItem(holder.layoutPosition)
+            val item = mAdapterDataManager.get(holder.layoutPosition)
             if (item is IHeader || item is IFooter) {
                 lp.isFullSpan = true
-            }
-        }
-    }
-
-    private fun bindVariable(holder: CommonViewHolder, position: Int, item: IRecyclerViewItem?) {
-        val variableId = item?.variableId() ?: IRecyclerViewItem.INVALID_VARIABLE_ID
-        if (variableId >= 0) {
-            try {
-                holder.binding.setVariable(variableId, item)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        // 绑定指定位置item的其他变量。如果一个布局中有多个变量的话。
-        bindOtherVariable(holder, position, item)
-    }
-
-    private fun setListener(holder: CommonViewHolder, position: Int, item: IRecyclerViewItem?) {
-        // 为list添加Item的点击事件监听
-        if (mOnItemClickListeners.isNotEmpty()) {
-            holder.itemView.setOnClickListener {
-                mOnItemClickListeners.forEach {
-                    it.onItemClick(holder, position, item)
-                }
-            }
-        }
-        // 为list添加Item的长按事件监听
-        if (mOnItemLongClickListeners.isNotEmpty()) {
-            holder.itemView.setOnLongClickListener {
-                mOnItemLongClickListeners.forEach {
-                    it.onItemLongClick(holder, position, item)
-                }
-                true
             }
         }
     }
@@ -278,12 +260,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
     /**
      * item插入成功时回调。用于[BaseLoadAfterAdapter]、[BaseLoadBeforeAdapter]处理加载更多逻辑
      */
-    protected open fun onItemRangeInserted(positionStart: Int, itemCount: Int) {}
-
-    /**
-     * 获取到了item时回调。用于[BaseLoadAfterAdapter]、[BaseLoadBeforeAdapter]处理加载更多逻辑
-     */
-    protected open fun onGetItem(position: Int, item: IRecyclerViewItem?) {}
+    protected open fun onItemRangeInsertedForLoadMore(positionStart: Int, itemCount: Int) {}
 
     /**
      * 绑定指定位置item的其他变量。如果一个布局中有除了[IRecyclerViewItem.variableId]之外的其它变量的话。
@@ -292,6 +269,6 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>() {
      * @param position
      * @param item
      */
-    protected open fun bindOtherVariable(holder: CommonViewHolder, position: Int, item: IRecyclerViewItem?) {}
+    protected open fun onBindViewHolder(holder: CommonViewHolder, position: Int, item: IRecyclerViewItem?) {}
 
 }

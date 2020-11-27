@@ -17,7 +17,7 @@ interface IRecyclerViewItem {
     /**
      * item 数据对应的变量id。默认为 [INVALID_VARIABLE_ID]。比如：BR.xxx
      *
-     * 如果要在此布局中绑定其它类型的变量，请重写[com.like.recyclerview.adapter.BaseAdapter.bindOtherVariable]方法。
+     * 如果要在此布局中绑定其它类型的变量，请重写[com.like.recyclerview.adapter.BaseAdapter.onBindViewHolder]方法。
      */
     fun variableId(): Int {
         return INVALID_VARIABLE_ID

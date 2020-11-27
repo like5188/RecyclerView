@@ -5,13 +5,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.like.common.util.Logger
 import com.like.common.util.datasource.RecyclerViewLoadType
 import com.like.common.util.datasource.collectWithProgressForRecyclerView
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseLoadAfterAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
-import com.like.recyclerview.model.IItem
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import kotlinx.coroutines.launch
@@ -34,6 +34,12 @@ class PagingActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(10))//添加分割线
         mBinding.rv.adapter = mAdapter
 
+        mAdapter.addOnItemClickListener { holder, position, data ->
+            Logger.e("单击 position=$position")
+        }
+        mAdapter.addOnItemLongClickListener { holder, position, data ->
+            Logger.e("长按 position=$position")
+        }
         lifecycleScope.launch {
             mViewModel.getResult().collectWithProgressForRecyclerView(
                 mAdapter,
@@ -42,11 +48,7 @@ class PagingActivity : AppCompatActivity() {
                 {
                     it
                 }
-            ) { holder, position, data ->
-                if (data is IItem) {
-                    mAdapter.mAdapterDataManager.remove(position)
-                }
-            }
+            )
         }
         mViewModel.getResult().initial()
     }
