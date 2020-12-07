@@ -5,5 +5,5 @@ package com.like.recyclerview.model
  */
 interface IErrorItem : IItem {
     // 如果实现类没有对它进行赋值，那么在RecyclerViewHelper中，失败的时候会自动赋值。
-    var errorMessage: String
+    var throwable: Throwable
 }
