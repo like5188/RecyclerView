@@ -1,9 +1,9 @@
 package com.like.recyclerview.sample.paging
 
-import com.like.datasource.RequestType
-import com.like.datasource.RequestType.Initial
-import com.like.datasource.RequestType.Refresh
-import com.like.datasource.paging.byPageNo.PageNoKeyedPagingDataSource
+import com.like.paging.RequestType
+import com.like.paging.RequestType.Initial
+import com.like.paging.RequestType.Refresh
+import com.like.paging.byPageNoKeyed.PageNoKeyedPagingDataSource
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.model.*
 import kotlinx.coroutines.delay

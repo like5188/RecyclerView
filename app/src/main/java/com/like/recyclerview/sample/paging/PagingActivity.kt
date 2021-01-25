@@ -6,14 +6,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.like.common.util.Logger
-import com.like.common.util.datasource.RecyclerViewLoadType
-import com.like.common.util.datasource.collectWithProgressForRecyclerView
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseLoadAfterAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
+import com.like.recyclerview.ui.util.collectAndBindToRV
 import kotlinx.coroutines.launch
 
 class PagingActivity : AppCompatActivity() {
@@ -40,13 +39,18 @@ class PagingActivity : AppCompatActivity() {
         mAdapter.addOnItemLongClickListener { holder, position, data ->
             Logger.e("长按 position=$position")
         }
+
+        mBinding.swipeRefreshLayout.setOnRefreshListener {
+            mViewModel.getResult().refresh()
+        }
         lifecycleScope.launch {
-            mViewModel.getResult().collectWithProgressForRecyclerView(
+            mViewModel.getResult().collectAndBindToRV(
                 mAdapter,
-                RecyclerViewLoadType.LoadAfter,
-                mBinding.swipeRefreshLayout,
-                {
-                    it
+                show = {
+                    mBinding.swipeRefreshLayout.isRefreshing = true
+                },
+                hide = {
+                    mBinding.swipeRefreshLayout.isRefreshing = false
                 }
             )
         }
