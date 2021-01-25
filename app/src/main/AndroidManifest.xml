@@ -18,6 +18,7 @@
         </activity>
         <activity android:name="com.like.recyclerview.sample.paging.PagingActivity" />
         <activity android:name="com.like.recyclerview.sample.tree.TreeActivity" />
+        <activity android:name=".addimage.PictureSelectorActivity" />
     </application>
 
 </manifest>
