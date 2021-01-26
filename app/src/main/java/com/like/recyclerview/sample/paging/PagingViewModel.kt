@@ -7,8 +7,7 @@ class PagingViewModel : ViewModel() {
         const val PAGE_SIZE = 20
     }
 
-    private val loadAfterPagingResult = LoadAfterPagingDataSource(PAGE_SIZE).result()
-    private val loadBeforePagingResult = LoadBeforePagingDataSource(PAGE_SIZE).result()
+    val loadAfterPagingResult = LoadAfterPagingDataSource(PAGE_SIZE).result()
+    val loadBeforePagingResult = LoadBeforePagingDataSource(PAGE_SIZE).result()
 
-    fun getResult() = loadAfterPagingResult
 }

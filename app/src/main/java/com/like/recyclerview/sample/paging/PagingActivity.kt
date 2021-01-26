@@ -5,11 +5,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.like.common.util.Logger
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.hjq.toast.ToastUtils
+import com.like.paging.Result
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseLoadAfterAdapter
+import com.like.recyclerview.adapter.BaseLoadBeforeAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
+import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.ui.util.bindData
@@ -22,38 +27,58 @@ class PagingActivity : AppCompatActivity() {
     private val mViewModel by lazy {
         ViewModelProvider(this).get(PagingViewModel::class.java)
     }
-    private val mAdapter: BaseAdapter by lazy {
-        BaseLoadAfterAdapter { mViewModel.getResult().loadAfter?.invoke() }
-//        BaseLoadBeforeAdapter(PagingViewModel.PAGE_SIZE) { mViewModel.getResult().loadBefore?.invoke() }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
-        mBinding.rv.addItemDecoration(ColorLineItemDecoration(10))//添加分割线
-        mBinding.rv.adapter = mAdapter
+        initRecyclerView(
+            mViewModel.loadAfterPagingResult,
+            BaseLoadAfterAdapter { mViewModel.loadAfterPagingResult.loadAfter?.invoke() },
+            true,
+            mBinding.rv1,
+            mBinding.swipeRefreshLayout1
+        )
+        initRecyclerView(
+            mViewModel.loadBeforePagingResult,
+            BaseLoadBeforeAdapter(PagingViewModel.PAGE_SIZE) { mViewModel.loadBeforePagingResult.loadBefore?.invoke() },
+            false,
+            mBinding.rv2,
+            mBinding.swipeRefreshLayout2
+        )
+    }
 
-        mAdapter.addOnItemClickListener { holder, position, data ->
-            Logger.e("单击 position=$position")
+    private fun initRecyclerView(
+        result: Result<List<IRecyclerViewItem>?>,
+        adapter: BaseAdapter,
+        isLoadAfter: Boolean,
+        recyclerView: RecyclerView,
+        swipeRefreshLayout: SwipeRefreshLayout,
+    ) {
+        recyclerView.layoutManager = WrapLinearLayoutManager(this)
+        recyclerView.addItemDecoration(ColorLineItemDecoration(10))//添加分割线
+        recyclerView.adapter = adapter
+
+        adapter.addOnItemClickListener { holder, position, data ->
+            ToastUtils.show("单击 position=$position")
         }
-        mAdapter.addOnItemLongClickListener { holder, position, data ->
-            Logger.e("长按 position=$position")
+        adapter.addOnItemLongClickListener { holder, position, data ->
+            ToastUtils.show("长按 position=$position")
         }
 
-        mBinding.swipeRefreshLayout.setOnRefreshListener {
-            mViewModel.getResult().refresh()
+        swipeRefreshLayout.setOnRefreshListener {
+            result.refresh()
         }
         lifecycleScope.launch {
-            mAdapter.bindData(
-                mViewModel.getResult(),
+            adapter.bindData(
+                result,
+                isLoadAfter,
                 show = {
-                    mBinding.swipeRefreshLayout.isRefreshing = true
+                    swipeRefreshLayout.isRefreshing = true
                 },
                 hide = {
-                    mBinding.swipeRefreshLayout.isRefreshing = false
+                    swipeRefreshLayout.isRefreshing = false
                 }
             )
         }
-        mViewModel.getResult().initial()
+        result.initial()
     }
 }
