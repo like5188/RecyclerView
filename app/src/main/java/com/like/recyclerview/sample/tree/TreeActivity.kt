@@ -14,11 +14,8 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
-import com.like.recyclerview.ui.util.bindToRV
-import kotlinx.coroutines.CoroutineScope
+import com.like.recyclerview.ui.util.bindData
 import kotlinx.coroutines.launch
-import kotlin.reflect.jvm.internal.impl.builtins.SuspendFunctionTypesKt
-import kotlin.reflect.jvm.internal.impl.serialization.deserialization.SuspendFunctionTypeUtilKt
 
 class TreeActivity : AppCompatActivity() {
     private val mBinding by lazy {
@@ -42,7 +39,7 @@ class TreeActivity : AppCompatActivity() {
                     viewDataBinding: ViewDataBinding,
                     layoutId: Int,
                     item: IPinnedItem,
-                    itemPosition: Int
+                    itemPosition: Int,
                 ) {
                     if (item is TreeNode0 && viewDataBinding is TreeItem0Binding && mAdapter is BaseTreeRecyclerViewAdapter) {
                         viewDataBinding.root.setOnClickListener {
@@ -64,7 +61,7 @@ class TreeActivity : AppCompatActivity() {
         })
 
         lifecycleScope.launch {
-            bindToRV({mViewModel.treeNotPagingDataSource.load()}, mAdapter)
+            mAdapter.bindData({ mViewModel.treeNotPagingDataSource.load() })
         }
     }
 }

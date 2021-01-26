@@ -12,7 +12,7 @@ import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
-import com.like.recyclerview.ui.util.collectAndBindToRV
+import com.like.recyclerview.ui.util.bindData
 import kotlinx.coroutines.launch
 
 class PagingActivity : AppCompatActivity() {
@@ -44,8 +44,8 @@ class PagingActivity : AppCompatActivity() {
             mViewModel.getResult().refresh()
         }
         lifecycleScope.launch {
-            mViewModel.getResult().collectAndBindToRV(
-                mAdapter,
+            mAdapter.bindData(
+                mViewModel.getResult(),
                 show = {
                     mBinding.swipeRefreshLayout.isRefreshing = true
                 },

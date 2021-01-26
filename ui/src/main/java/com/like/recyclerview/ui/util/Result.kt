@@ -21,12 +21,12 @@ import kotlinx.coroutines.flow.onEach
 /**
  * 开始搜集数据。
  *
- * @param onSuccess         成功回调
- * @param onFailed          失败回调
+ * @param onFailed      失败回调，如果需要做其它错误处理，可以从这里获取。
+ * @param onSuccess     成功回调，如果需要结果，可以从这里获取。
  */
 internal suspend fun <ResultType> Result<ResultType>.collect(
     onFailed: ((RequestType, Throwable) -> Unit)? = null,
-    onSuccess: ((RequestType, ResultType) -> Unit)? = null
+    onSuccess: ((RequestType, ResultType) -> Unit)? = null,
 ) {
     resultReportFlow.collect { resultReport ->
         val state = resultReport.state
@@ -46,12 +46,12 @@ internal suspend fun <ResultType> Result<ResultType>.collect(
  * 绑定进度条。
  * 初始化或者刷新时控制进度条的显示隐藏。
  *
- * @param show      初始化或者刷新开始时显示进度条
- * @param hide      初始化或者刷新成功或者失败时隐藏进度条
+ * @param show          初始化或者刷新开始时显示进度条
+ * @param hide          初始化或者刷新成功或者失败时隐藏进度条
  */
 internal fun <ResultType> Result<ResultType>.bindProgress(
     show: () -> Unit,
-    hide: () -> Unit
+    hide: () -> Unit,
 ): Result<ResultType> {
     val newResultReportFlow = resultReportFlow.onEach { resultReport ->
         val state = resultReport.state
@@ -75,7 +75,7 @@ internal fun <ResultType> Result<ResultType>.bindProgress(
  * 功能包括：Item数据的添加、空视图、错误视图、往后加载更多视图、往前加载更多视图
  *
  * @param emptyItem         数据为空时显示的视图。[com.like.recyclerview.ui]库中默认实现了：[DefaultEmptyItem]
- * @param errorItem         失败时显示的视图。[com.like.recyclerview.ui]库中默认实现了：[DefaultErrorItem]
+ * @param errorItem         请求出错时显示的视图。只针对初始化出错时才显示，刷新出错时不显示。[com.like.recyclerview.ui]库中默认实现了：[DefaultErrorItem]
  * @param loadMoreFooter    往后加载更多的视图。[com.like.recyclerview.ui]库中默认实现了：[DefaultLoadMoreFooter]
  * @param loadMoreHeader    往前加载更多的视图。[com.like.recyclerview.ui]库中默认实现了：[DefaultLoadMoreHeader]
  */
@@ -84,7 +84,7 @@ internal fun <ValueInList : IRecyclerViewItem> Result<List<ValueInList>?>.bindRe
     emptyItem: IEmptyItem? = null,
     errorItem: IErrorItem? = null,
     loadMoreFooter: ILoadMoreFooter? = null,
-    loadMoreHeader: ILoadMoreHeader? = null
+    loadMoreHeader: ILoadMoreHeader? = null,
 ): Result<List<ValueInList>?> {
     val newResultReportFlow = resultReportFlow.onEach { resultReport ->
         val state = resultReport.state
