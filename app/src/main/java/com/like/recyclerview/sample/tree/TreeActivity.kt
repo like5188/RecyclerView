@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.ext.adapter.BaseTreeRecyclerViewAdapter
 import com.like.recyclerview.ext.decoration.PinnedItemDecoration
@@ -14,6 +15,10 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
 import com.like.recyclerview.ui.util.bindToRV
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlin.reflect.jvm.internal.impl.builtins.SuspendFunctionTypesKt
+import kotlin.reflect.jvm.internal.impl.serialization.deserialization.SuspendFunctionTypeUtilKt
 
 class TreeActivity : AppCompatActivity() {
     private val mBinding by lazy {
@@ -58,6 +63,8 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        mViewModel.treeNotPagingDataSource.load().bindToRV(mAdapter)
+        lifecycleScope.launch {
+            bindToRV({mViewModel.treeNotPagingDataSource.load()}, mAdapter)
+        }
     }
 }
