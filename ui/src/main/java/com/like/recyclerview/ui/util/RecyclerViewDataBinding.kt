@@ -23,8 +23,6 @@ import kotlinx.coroutines.withContext
  * @param errorItem     请求出错时显示的视图。只针对初始化出错时才显示，刷新出错时不显示。[com.like.recyclerview.ui]库中默认实现了：[DefaultErrorItem]
  * @param show          初始化或者刷新开始时显示进度条
  * @param hide          初始化或者刷新成功或者失败时隐藏进度条
- * @param onFailed      失败回调，如果需要做其它错误处理，可以从这里获取。
- * @param onSuccess     成功回调，如果需要结果，可以从这里获取。
  */
 suspend fun <ValueInList : IRecyclerViewItem> BaseAdapter.bindData(
     block: suspend () -> List<ValueInList>?,
@@ -33,9 +31,7 @@ suspend fun <ValueInList : IRecyclerViewItem> BaseAdapter.bindData(
     errorItem: IErrorItem? = DefaultErrorItem(),
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onFailed: ((Throwable) -> Unit)? = null,
-    onSuccess: ((List<ValueInList>?) -> Unit)? = null,
-) = withContext(Dispatchers.Main) {
+): List<ValueInList>? = withContext(Dispatchers.Main) {
     show?.invoke()
     try {
         val list = withContext(Dispatchers.IO) {
@@ -48,7 +44,7 @@ suspend fun <ValueInList : IRecyclerViewItem> BaseAdapter.bindData(
         } else {
             this@bindData.mAdapterDataManager.clearAndAddAll(list)
         }
-        onSuccess?.invoke(list)
+        list
     } catch (e: Exception) {
         if (!isRefresh) {
             errorItem?.let {
@@ -56,7 +52,7 @@ suspend fun <ValueInList : IRecyclerViewItem> BaseAdapter.bindData(
                 this@bindData.mAdapterDataManager.setErrorItem(errorItem)
             }
         }
-        onFailed?.invoke(e)
+        throw e
     } finally {
         hide?.invoke()
     }
