@@ -78,7 +78,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation 'com.github.like5188:Common:6.4.5'
-    implementation 'com.github.like5188:Paging:0.0.1'
+    implementation 'com.github.like5188:Paging:0.0.2'
 
     implementation project(':core')
     implementation project(':ui')
