@@ -1,32 +1,22 @@
 package com.like.recyclerview.utils
 
 import androidx.databinding.ObservableArrayList
-import androidx.databinding.ObservableList
 import com.like.recyclerview.model.*
 import java.util.*
 
 /**
- * Adapter中的数据管理。包括Header、Footer、Item的增加、删除、更新、查询、交换位置等。
+ * Adapter中的数据管理。包括Header、Footer、Item的增删改查、交换位置。
  */
-class AdapterDataManager {
+internal class AdapterDataManager : IAdapterDataManager {
     private val mList = ObservableArrayList<IRecyclerViewItem>()
+    override fun getAll(): List<IRecyclerViewItem> = mList
+    override fun get(position: Int): IRecyclerViewItem? = if (position < mList.size && position >= 0) mList[position] else null
+    override fun getEmptyItem(): IEmptyItem? = if (isEmptyItemShow()) get(0) as IEmptyItem else null
+    override fun getErrorItem(): IErrorItem? = if (isErrorItemShow()) get(0) as IErrorItem else null
 
-    internal fun addOnListChangedCallback(listener: ObservableList.OnListChangedCallback<ObservableArrayList<IRecyclerViewItem>>) {
-        mList.addOnListChangedCallback(listener)
-    }
-
-    fun getAll(): MutableList<IRecyclerViewItem> = mList
-    fun getSize() = getAll().size
-    fun get(position: Int) = if (position < getSize() && position >= 0) getAll()[position] else null
-    fun getEmptyItem(): IEmptyItem? = if (isEmptyItemShow()) get(0) as IEmptyItem else null
-    fun getErrorItem(): IErrorItem? = if (isErrorItemShow()) get(0) as IErrorItem else null
-
-    fun getHeaders(): List<IHeader> {
-        if (!hasHeader()) {
-            return emptyList()
-        }
+    override fun getHeaders(): List<IHeader> {
         val result = mutableListOf<IHeader>()
-        getAll().forEach {
+        mList.forEach {
             if (it is IHeader) {
                 result.add(it)
             }
@@ -34,12 +24,9 @@ class AdapterDataManager {
         return result
     }
 
-    fun getFooters(): List<IFooter> {
-        if (!hasFooter()) {
-            return emptyList()
-        }
+    override fun getFooters(): List<IFooter> {
         val result = mutableListOf<IFooter>()
-        getAll().forEach {
+        mList.forEach {
             if (it is IFooter) {
                 result.add(it)
             }
@@ -47,12 +34,9 @@ class AdapterDataManager {
         return result
     }
 
-    fun getItems(): List<IItem> {
-        if (!hasItem()) {
-            return emptyList()
-        }
+    override fun getItems(): List<IItem> {
         val result = mutableListOf<IItem>()
-        getAll().forEach {
+        mList.forEach {
             if (it is IItem) {
                 result.add(it)
             }
@@ -60,7 +44,7 @@ class AdapterDataManager {
         return result
     }
 
-    fun getHeader(headerPosition: Int): IHeader? {
+    override fun getHeader(headerPosition: Int): IHeader? {
         val headers = getHeaders()
         if (headers.isEmpty()) {
             return null
@@ -68,7 +52,7 @@ class AdapterDataManager {
         return if (headerPosition < headers.size && headerPosition >= 0) headers[headerPosition] else null
     }
 
-    fun getItem(itemPosition: Int): IItem? {
+    override fun getItem(itemPosition: Int): IItem? {
         val items = getItems()
         if (items.isEmpty()) {
             return null
@@ -76,7 +60,7 @@ class AdapterDataManager {
         return if (itemPosition < items.size && itemPosition >= 0) items[itemPosition] else null
     }
 
-    fun getFooter(footerPosition: Int): IFooter? {
+    override fun getFooter(footerPosition: Int): IFooter? {
         val footers = getFooters()
         if (footers.isEmpty()) {
             return null
@@ -84,62 +68,51 @@ class AdapterDataManager {
         return if (footerPosition < footers.size && footerPosition >= 0) footers[footerPosition] else null
     }
 
-    fun getHeaderCount() = getAll().count { it is IHeader }
-    fun getFooterCount() = getAll().count { it is IFooter }
-    fun getItemCount() = getAll().count { it is IItem }
+    override fun isEmptyItemShow() = mList.size == 1 && get(0) is IEmptyItem
+    override fun isErrorItemShow() = mList.size == 1 && get(0) is IErrorItem
+    override fun isHeader(position: Int) = get(position) is IHeader
+    override fun isFooter(position: Int) = get(position) is IFooter
+    override fun isItem(position: Int) = get(position) is IItem
 
-    fun isEmptyItemShow() = getSize() == 1 && get(0) is IEmptyItem
-    fun isErrorItemShow() = getSize() == 1 && get(0) is IErrorItem
-    fun isHeader(position: Int) = get(position) is IHeader
-    fun isFooter(position: Int) = get(position) is IFooter
-    fun isItem(position: Int) = get(position) is IItem
-
-    fun hasHeader() = getHeaderCount() > 0
-    fun hasFooter() = getFooterCount() > 0
-    fun hasItem() = getItemCount() > 0
-
-    fun containsHeader(layoutId: Int): Boolean {
+    override fun containsHeader(layoutId: Int): Boolean {
         if (layoutId < 0) return false
-        if (!hasHeader()) return false
-        return getAll().any { it is IHeader && it.layoutId == layoutId }
+        return mList.any { it is IHeader && it.layoutId == layoutId }
     }
 
-    fun containsFooter(layoutId: Int): Boolean {
+    override fun containsFooter(layoutId: Int): Boolean {
         if (layoutId < 0) return false
-        if (!hasFooter()) return false
-        return getAll().any { it is IFooter && it.layoutId == layoutId }
+        return mList.any { it is IFooter && it.layoutId == layoutId }
     }
 
-    fun containsItem(layoutId: Int): Boolean {
+    override fun containsItem(layoutId: Int): Boolean {
         if (layoutId < 0) return false
-        if (!hasItem()) return false
-        return getAll().any { it is IItem && it.layoutId == layoutId }
+        return mList.any { it is IItem && it.layoutId == layoutId }
     }
 
-    fun updateHeader(position: Int, newHeader: IHeader) {
+    override fun updateHeader(position: Int, newHeader: IHeader) {
         if (isHeader(position)) {
-            getAll()[position] = newHeader
+            mList[position] = newHeader
         }
     }
 
-    fun updateFooter(position: Int, newFooter: IFooter) {
+    override fun updateFooter(position: Int, newFooter: IFooter) {
         if (isFooter(position)) {
-            getAll()[position] = newFooter
+            mList[position] = newFooter
         }
     }
 
-    fun updateItem(position: Int, newItem: IItem) {
+    override fun updateItem(position: Int, newItem: IItem) {
         if (isItem(position)) {
-            getAll()[position] = newItem
+            mList[position] = newItem
         }
     }
 
-    fun setEmptyItem(emptyItem: IEmptyItem) {
+    override fun setEmptyItem(emptyItem: IEmptyItem) {
         clear()
         addItemToStart(emptyItem)
     }
 
-    fun setErrorItem(errorItem: IErrorItem) {
+    override fun setErrorItem(errorItem: IErrorItem) {
         clear()
         addItemToStart(errorItem)
     }
@@ -148,7 +121,7 @@ class AdapterDataManager {
      * 添加footer到footers的开始位置
      *
      */
-    fun addFooterToStart(footer: IFooter?) {
+    override fun addFooterToStart(footer: IFooter?) {
         addFooter(0, footer)
     }
 
@@ -156,8 +129,8 @@ class AdapterDataManager {
      * 添加footer到footers的末尾
      *
      */
-    fun addFooterToEnd(footer: IFooter?) {
-        addFooter(getFooterCount(), footer)
+    override fun addFooterToEnd(footer: IFooter?) {
+        addFooter(getFooters().size, footer)
     }
 
     /**
@@ -165,7 +138,7 @@ class AdapterDataManager {
      *
      * @param positionInFooters 在footers中的位置
      */
-    fun addFooter(positionInFooters: Int, footer: IFooter?) {
+    override fun addFooter(positionInFooters: Int, footer: IFooter?) {
         add(convertFooterPositionToListPosition(positionInFooters), footer)
     }
 
@@ -173,7 +146,7 @@ class AdapterDataManager {
      * 添加footers到footers的开始位置
      *
      */
-    fun addFootersToStart(footers: List<IFooter>?) {
+    override fun addFootersToStart(footers: List<IFooter>?) {
         addFooters(0, footers)
     }
 
@@ -181,8 +154,8 @@ class AdapterDataManager {
      * 添加footers到footers的末尾
      *
      */
-    fun addFootersToEnd(footers: List<IFooter>?) {
-        addFooters(getFooterCount(), footers)
+    override fun addFootersToEnd(footers: List<IFooter>?) {
+        addFooters(getFooters().size, footers)
     }
 
     /**
@@ -190,7 +163,7 @@ class AdapterDataManager {
      *
      * @param positionInFooters 在footers中的位置
      */
-    fun addFooters(positionInFooters: Int, footers: List<IFooter>?) {
+    override fun addFooters(positionInFooters: Int, footers: List<IFooter>?) {
         addAll(convertFooterPositionToListPosition(positionInFooters), footers)
     }
 
@@ -198,7 +171,7 @@ class AdapterDataManager {
      * 添加header到headers的开始位置
      *
      */
-    fun addHeaderToStart(header: IHeader?) {
+    override fun addHeaderToStart(header: IHeader?) {
         addHeader(0, header)
     }
 
@@ -206,8 +179,8 @@ class AdapterDataManager {
      * 添加header到headers的末尾
      *
      */
-    fun addHeaderToEnd(header: IHeader?) {
-        addHeader(getHeaderCount(), header)
+    override fun addHeaderToEnd(header: IHeader?) {
+        addHeader(getHeaders().size, header)
     }
 
     /**
@@ -215,7 +188,7 @@ class AdapterDataManager {
      *
      * @param positionInHeaders 在headers中的位置
      */
-    fun addHeader(positionInHeaders: Int, header: IHeader?) {
+    override fun addHeader(positionInHeaders: Int, header: IHeader?) {
         add(convertHeaderPositionToListPosition(positionInHeaders), header)
     }
 
@@ -223,7 +196,7 @@ class AdapterDataManager {
      * 添加headers到headers的开始位置
      *
      */
-    fun addHeadersToStart(headers: List<IHeader>?) {
+    override fun addHeadersToStart(headers: List<IHeader>?) {
         addHeaders(0, headers)
     }
 
@@ -231,8 +204,8 @@ class AdapterDataManager {
      * 添加headers到headers的末尾
      *
      */
-    fun addHeadersToEnd(headers: List<IHeader>?) {
-        addHeaders(getHeaderCount(), headers)
+    override fun addHeadersToEnd(headers: List<IHeader>?) {
+        addHeaders(getHeaders().size, headers)
     }
 
     /**
@@ -240,7 +213,7 @@ class AdapterDataManager {
      *
      * @param positionInHeaders 在headers中的位置
      */
-    fun addHeaders(positionInHeaders: Int, headers: List<IHeader>?) {
+    override fun addHeaders(positionInHeaders: Int, headers: List<IHeader>?) {
         addAll(convertHeaderPositionToListPosition(positionInHeaders), headers)
     }
 
@@ -248,7 +221,7 @@ class AdapterDataManager {
      * 添加item到items的开始位置
      *
      */
-    fun addItemToStart(item: IItem?) {
+    override fun addItemToStart(item: IItem?) {
         addItem(0, item)
     }
 
@@ -256,8 +229,8 @@ class AdapterDataManager {
      * 添加item到items的末尾
      *
      */
-    fun addItemToEnd(item: IItem?) {
-        addItem(getItemCount(), item)
+    override fun addItemToEnd(item: IItem?) {
+        addItem(getItems().size, item)
     }
 
     /**
@@ -265,7 +238,7 @@ class AdapterDataManager {
      *
      * @param positionInItems 在items中的位置
      */
-    fun addItem(positionInItems: Int, item: IItem?) {
+    override fun addItem(positionInItems: Int, item: IItem?) {
         add(convertItemPositionToListPosition(positionInItems), item)
     }
 
@@ -273,7 +246,7 @@ class AdapterDataManager {
      * 添加items到items的开始位置
      *
      */
-    fun addItemsToStart(items: List<IItem>?) {
+    override fun addItemsToStart(items: List<IItem>?) {
         addItems(0, items)
     }
 
@@ -281,8 +254,8 @@ class AdapterDataManager {
      * 添加items到items的末尾
      *
      */
-    fun addItemsToEnd(items: List<IItem>?) {
-        addItems(getItemCount(), items)
+    override fun addItemsToEnd(items: List<IItem>?) {
+        addItems(getItems().size, items)
     }
 
     /**
@@ -290,7 +263,7 @@ class AdapterDataManager {
      *
      * @param positionInItems 在items中的位置
      */
-    fun addItems(positionInItems: Int, items: List<IItem>?) {
+    override fun addItems(positionInItems: Int, items: List<IItem>?) {
         addAll(convertItemPositionToListPosition(positionInItems), items)
     }
 
@@ -300,7 +273,7 @@ class AdapterDataManager {
      * 注意：此方法传入的list会自动重新排序，规则为：
      * [IHeader]->[IItem]->[IFooter]，其中这三种类型的集合内部排序是根据 [IRecyclerViewItem.sortTag] 标记来确定的。
      */
-    fun clearAndAddAll(list: List<IRecyclerViewItem>?) {
+    override fun clearAndAddAll(list: List<IRecyclerViewItem>?) {
         clear()
         // 为了防止header、item、footer顺序错乱导致出错。
         if (list.isNullOrEmpty()) return
@@ -329,9 +302,9 @@ class AdapterDataManager {
      */
     private fun add(position: Int, data: IRecyclerViewItem?) {
         data ?: return
-        if (position < 0 || position > getSize()) return
+        if (position < 0 || position > mList.size) return
         if (isEmptyItemShow() || isErrorItemShow()) clear()
-        getAll().add(position, data)
+        mList.add(position, data)
     }
 
     /**
@@ -342,48 +315,43 @@ class AdapterDataManager {
      */
     private fun addAll(position: Int, list: List<IRecyclerViewItem>?) {
         if (list.isNullOrEmpty()) return
-        if (position < 0 || position > getSize()) return
+        if (position < 0 || position > mList.size) return
         if (isEmptyItemShow() || isErrorItemShow()) clear()
-        getAll().addAll(position, list)
+        mList.addAll(position, list)
     }
 
-    fun removeAll(list: List<IRecyclerViewItem>?) {
+    override fun removeAll(list: List<IRecyclerViewItem>?) {
         if (list.isNullOrEmpty()) return
         list.reversed().forEach {
             remove(it)
         }
     }
 
-    fun remove(data: IRecyclerViewItem?) {
+    override fun remove(data: IRecyclerViewItem?) {
         data ?: return
-        val position = getAll().indexOf(data)
+        val position = mList.indexOf(data)
         remove(position)
     }
 
-    fun remove(position: Int) {
-        if (position < 0 || position >= getSize()) return
-        getAll().removeAt(position)
+    override fun remove(position: Int) {
+        if (position < 0 || position >= mList.size) return
+        mList.removeAt(position)
     }
 
-    fun clearHeaders() {
-        if (!hasHeader()) return
-        getAll().removeAll { it is IHeader }
+    override fun clearHeaders() {
+        mList.removeAll { it is IHeader }
     }
 
-    fun clearFooters() {
-        if (!hasFooter()) return
-        getAll().removeAll { it is IFooter }
+    override fun clearFooters() {
+        mList.removeAll { it is IFooter }
     }
 
-    fun clearItems() {
-        if (!hasItem()) return
-        getAll().removeAll { it is IItem }
+    override fun clearItems() {
+        mList.removeAll { it is IItem }
     }
 
-    fun clear() {
-        if (getSize() > 0) {
-            getAll().clear()
-        }
+    override fun clear() {
+        mList.clear()
     }
 
     /**
@@ -400,23 +368,23 @@ class AdapterDataManager {
      * @param fromPosition  移动的开始位置
      * @param toPosition    移动的结束位置
      */
-    fun moveItem(fromPosition: Int, toPosition: Int) {
+    override fun moveItem(fromPosition: Int, toPosition: Int) {
         if (fromPosition == toPosition) return
         if (fromPosition < toPosition) {
             // 循环交换位置是为了避免数据错乱。这里不用notifyItemRangeChanged()，因为这个会导致拖拽的bug。
             for (i in fromPosition until toPosition) {
-                Collections.swap(getAll(), i, i + 1)
+                Collections.swap(mList, i, i + 1)
             }
         } else {
             for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(getAll(), i, i - 1)
+                Collections.swap(mList, i, i - 1)
             }
         }
     }
 
     private fun convertFooterPositionToListPosition(positionInFooters: Int): Int {
-        val footerCount = getFooterCount()
-        return getSize() - footerCount + when {
+        val footerCount = getFooters().size
+        return mList.size - footerCount + when {
             positionInFooters < 0 -> 0
             positionInFooters > footerCount -> footerCount
             else -> positionInFooters
@@ -424,7 +392,7 @@ class AdapterDataManager {
     }
 
     private fun convertHeaderPositionToListPosition(positionInHeaders: Int): Int {
-        val headerCount = getHeaderCount()
+        val headerCount = getHeaders().size
         return when {
             positionInHeaders < 0 -> 0
             positionInHeaders > headerCount -> headerCount
@@ -433,8 +401,8 @@ class AdapterDataManager {
     }
 
     private fun convertItemPositionToListPosition(positionInItems: Int): Int {
-        val itemCount = getItemCount()
-        return getHeaderCount() + when {
+        val itemCount = getItems().size
+        return getHeaders().size + when {
             positionInItems < 0 -> 0
             positionInItems > itemCount -> itemCount
             else -> positionInItems

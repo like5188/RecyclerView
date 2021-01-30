@@ -151,7 +151,7 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
         val firstVisiblePosition = findFirstVisiblePosition(recyclerView)
         if (firstVisiblePosition < mAdapter.itemCount && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition downTo 0) {
-                val item = mAdapter.mAdapterDataManager.get(position)
+                val item = mAdapter.get(position)
                 if (item is IPinnedItem) {
                     return PinnedItem(
                         item.layoutId,
@@ -171,7 +171,7 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
         val firstVisiblePosition = findFirstVisiblePosition(recyclerView)
         if (firstVisiblePosition < mAdapter.itemCount - 1 && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition + 1 until mAdapter.itemCount) {
-                val item = mAdapter.mAdapterDataManager.get(position)
+                val item = mAdapter.get(position)
                 if (item is IPinnedItem) {
                     return PinnedItem(
                         item.layoutId,

@@ -39,17 +39,17 @@ suspend fun <ValueInList : IRecyclerViewItem> BaseAdapter.bindData(
         }
         if (list.isNullOrEmpty()) {
             emptyItem?.let {
-                this@bindData.mAdapterDataManager.setEmptyItem(emptyItem)
+                this@bindData.setEmptyItem(emptyItem)
             }
         } else {
-            this@bindData.mAdapterDataManager.clearAndAddAll(list)
+            this@bindData.clearAndAddAll(list)
         }
         list
     } catch (e: Exception) {
         if (!isRefresh) {
             errorItem?.let {
                 errorItem.throwable = e
-                this@bindData.mAdapterDataManager.setErrorItem(errorItem)
+                this@bindData.setErrorItem(errorItem)
             }
         }
         throw e

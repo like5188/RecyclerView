@@ -20,7 +20,7 @@ open class BaseAddImageViewAdapter(
     private val context: Context = recyclerView.context
 
     init {
-        mAdapterDataManager.addItemToEnd(plus)
+        addItemToEnd(plus)
         ItemTouchHelper(object : ItemTouchHelper.Callback() {
             override fun getMovementFlags(
                 recyclerView: RecyclerView,
@@ -42,7 +42,7 @@ open class BaseAddImageViewAdapter(
                 if (isPlus(target)) {// +号图片不让替换位置
                     return false
                 }
-                mAdapterDataManager.moveItem(viewHolder.adapterPosition, target.adapterPosition)
+                moveItem(viewHolder.adapterPosition, target.adapterPosition)
                 return true
             }
 
@@ -87,7 +87,7 @@ open class BaseAddImageViewAdapter(
      */
     fun getItemsExceptPlus(): List<IItem> {
         val items = mutableListOf<IItem>()
-        mAdapterDataManager.getAll().forEach {
+        getAll().forEach {
             if (it is IItem && it != plus) {
                 items.add(it)
             }
@@ -100,11 +100,11 @@ open class BaseAddImageViewAdapter(
         when {
             curImageCount + items.size < maxImageCount -> {// 不删除+号图片
                 // 添加到+号之前
-                mAdapterDataManager.addItems(mAdapterDataManager.getSize() - 1, items)
+                addItems(itemCount - 1, items)
             }
             curImageCount + items.size == maxImageCount -> {// 删除+号图片
-                mAdapterDataManager.remove(plus)
-                mAdapterDataManager.addItemsToEnd(items)
+                remove(plus)
+                addItemsToEnd(items)
             }
             else -> {// 不能添加
                 Toast.makeText(context, "只能添加 $maxImageCount 张图片", Toast.LENGTH_SHORT).show()
@@ -116,11 +116,11 @@ open class BaseAddImageViewAdapter(
         val curImageCount = getItemCountExceptPlus()
         when {
             curImageCount < maxImageCount -> {// 不添加+号图片
-                mAdapterDataManager.remove(item)
+                remove(item)
             }
             curImageCount == maxImageCount -> {// 添加+号图片
-                mAdapterDataManager.remove(item)
-                mAdapterDataManager.addItemToEnd(plus)
+                remove(item)
+                addItemToEnd(plus)
             }
         }
     }
@@ -129,11 +129,11 @@ open class BaseAddImageViewAdapter(
      * 是否+号图片
      */
     private fun isPlus(viewHolder: RecyclerView.ViewHolder): Boolean =
-        mAdapterDataManager.get(viewHolder.adapterPosition) == plus
+        get(viewHolder.adapterPosition) == plus
 
     /**
      * 除了+号的其它图片数量
      */
-    private fun getItemCountExceptPlus() = mAdapterDataManager.getAll().count { it != plus }
+    private fun getItemCountExceptPlus() = getAll().count { it != plus }
 
 }

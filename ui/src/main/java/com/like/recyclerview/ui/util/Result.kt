@@ -94,24 +94,24 @@ internal fun <ValueInList : IRecyclerViewItem> Result<List<ValueInList>?>.bindRe
                 val list = state.data
                 if (list.isNullOrEmpty()) {
                     emptyItem?.let {
-                        adapter.mAdapterDataManager.setEmptyItem(emptyItem)
+                        adapter.setEmptyItem(emptyItem)
                     }
                 } else {
-                    adapter.mAdapterDataManager.clearAndAddAll(list)
+                    adapter.clearAndAddAll(list)
                     loadMoreFooter?.let {
                         loadMoreFooter.onLoading()
-                        adapter.mAdapterDataManager.addFooterToEnd(loadMoreFooter)
+                        adapter.addFooterToEnd(loadMoreFooter)
                     }
                     loadMoreHeader?.let {
                         loadMoreHeader.onLoading()
-                        adapter.mAdapterDataManager.addHeaderToStart(loadMoreHeader)
+                        adapter.addHeaderToStart(loadMoreHeader)
                     }
                 }
             }
             type is RequestType.Initial && state is RequestState.Failed -> {
                 errorItem?.let {
                     errorItem.throwable = state.throwable
-                    adapter.mAdapterDataManager.setErrorItem(errorItem)
+                    adapter.setErrorItem(errorItem)
                 }
             }
             type is RequestType.After && state is RequestState.Success -> {
@@ -122,7 +122,7 @@ internal fun <ValueInList : IRecyclerViewItem> Result<List<ValueInList>?>.bindRe
                         loadMoreFooter.onEnd()
                     } else {
                         loadMoreFooter.onLoading()
-                        adapter.mAdapterDataManager.addItemsToEnd(list.map {
+                        adapter.addItemsToEnd(list.map {
                             it as IItem
                         })
                     }
@@ -139,7 +139,7 @@ internal fun <ValueInList : IRecyclerViewItem> Result<List<ValueInList>?>.bindRe
                         loadMoreHeader.onEnd()
                     } else {
                         loadMoreHeader.onLoading()
-                        adapter.mAdapterDataManager.addItemsToStart(list.map {
+                        adapter.addItemsToStart(list.map {
                             it as IItem
                         })
                     }

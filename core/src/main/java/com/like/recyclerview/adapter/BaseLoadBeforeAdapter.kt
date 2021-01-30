@@ -29,7 +29,7 @@ open class BaseLoadBeforeAdapter(
     override fun onItemRangeInsertedForLoadMore(positionStart: Int, itemCount: Int) {
         mLoadBeforeRunning.set(false)
         val rv = recyclerView ?: return
-        if (mAdapterDataManager.getItemCount() == pageSize) {
+        if (getItemCount() == pageSize) {
             // 初始化或者刷新时，RecyclerView自动滚动到最底部。
             rv.scrollToPosition(itemCount - 1)
         } else {
@@ -37,7 +37,7 @@ open class BaseLoadBeforeAdapter(
             val layoutManager = rv.layoutManager
             if (layoutManager is WrapLinearLayoutManager) {
                 // 第一个item的视图
-                layoutManager.getChildAt(mAdapterDataManager.getHeaderCount())?.let {
+                layoutManager.getChildAt(getHeaders().size)?.let {
                     val offset = it.top
                     val position = layoutManager.getPosition(it)
                     layoutManager.scrollToPositionWithOffset(itemCount + position, offset)

@@ -4,7 +4,6 @@ import android.widget.CheckBox
 import androidx.databinding.ViewDataBinding
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.ext.model.BaseTreeNode
-import com.like.recyclerview.listener.OnItemClickListener
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.viewholder.CommonViewHolder
 
@@ -13,11 +12,7 @@ import com.like.recyclerview.viewholder.CommonViewHolder
  */
 abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
     init {
-        addOnItemClickListener(object : OnItemClickListener {
-            override fun onItemClick(holder: CommonViewHolder, position: Int, data: IRecyclerViewItem?) {
-                clickItem(holder.binding, position, data)
-            }
-        })
+        addOnItemClickListener { holder, position, data -> clickItem(holder.binding, position, data) }
     }
 
     /**
@@ -26,8 +21,8 @@ abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
     fun clickItem(binding: ViewDataBinding, position: Int, data: IRecyclerViewItem?) {
         if (data is BaseTreeNode) {
             if (data.isExpanded) {
-                val children = mAdapterDataManager.getAll().filter { it is BaseTreeNode && it.isChild(data) }
-                mAdapterDataManager.removeAll(children)
+                val children = getAll().filter { it is BaseTreeNode && it.isChild(data) }
+                removeAll(children)
                 onContract(data, position, binding)
                 data.isExpanded = !data.isExpanded
             } else {
@@ -37,7 +32,7 @@ abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
                         it.parent = data
                         it.isChecked.set(data.isChecked.get())
                     }
-                    mAdapterDataManager.addItems(position + 1, children)
+                    addItems(position + 1, children)
                     data.isExpanded = !data.isExpanded
                 }
             }
@@ -61,7 +56,7 @@ abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
     fun clickCheckBox(checkBox: CheckBox, item: BaseTreeNode) {
         item.isChecked.set(checkBox.isChecked)
         // 改变孩子的checkBox状态
-        val children = mAdapterDataManager.getAll().filter { it is BaseTreeNode && it.isChild(item) }
+        val children = getAll().filter { it is BaseTreeNode && it.isChild(item) }
         children.forEach {
             if (it is BaseTreeNode) {
                 it.isChecked.set(checkBox.isChecked)
@@ -76,7 +71,7 @@ abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
         } else {
             // 取消选中孩子，并不一定要取消选中父亲，因为父亲有可能有其它选中的孩子
             parents.forEach { parent ->
-                val checkedChildren = mAdapterDataManager.getAll()
+                val checkedChildren = getAll()
                     .filter { it is BaseTreeNode && it.isChild(parent) && it.isChecked.get() }
                 if (checkedChildren.isEmpty()) {
                     parent.isChecked.set(checkBox.isChecked)
@@ -88,8 +83,7 @@ abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
     /**
      * 获取已经选中的节点
      */
-    fun getCheckedNodes() = mAdapterDataManager
-        .getAll()
+    fun getCheckedNodes() = getAll()
         .filter { it is BaseTreeNode && it.isChecked.get() }
         .map { it as BaseTreeNode }
 
