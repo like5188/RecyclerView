@@ -2,7 +2,7 @@
 
 1、定义了一系列的 Adapter。
 
-    ① BaseAdapter（不分页时使用）、BaseLoadAfterAdapter（分页时使用）、BaseLoadBeforeAdapter（分页时使用）。
+    ① BaseAdapter（不分页时使用）、BaseLoadAfterAdapter（往后加载更多分页时使用）、BaseLoadBeforeAdapter（往前加载更多分页时使用）。
 
 2、定义了多种数据类型的接口，用于展示不同类型的item：
 
@@ -18,4 +18,4 @@
 
 4、ColorLineItemDecoration（带颜色的分割线）
 
-5、AdapterDataManager 属于 BaseAdapter，专门用于数据的管理。可以通过它来操作集合数据源，包括 Header、Footer、Item 的增加、删除、更新、查询、交换位置等
+5、BaseAdapter 新增了很多方法用于数据的管理。可以通过它来操作集合数据源，包括 Header、Footer、Item 的增删改查、交换位置等。
