@@ -89,15 +89,16 @@ suspend fun <ValueInList : IRecyclerViewItem> BaseAdapter.bindData(
     errorItem: IErrorItem? = DefaultErrorItem(),
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onFailed: ((RequestType, Throwable) -> Unit)? = null,
-    onSuccess: ((RequestType, List<ValueInList>?) -> Unit)? = null,
+    onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
 ) = withContext(Dispatchers.Main) {
     var result1 = result.bindRecyclerView(
         this@bindData,
         emptyItem,
         errorItem,
         loadMoreFooter,
-        loadMoreHeader)
+        loadMoreHeader
+    )
     if (show != null && hide != null) {
         result1 = result1.bindProgress(show, hide)
     }

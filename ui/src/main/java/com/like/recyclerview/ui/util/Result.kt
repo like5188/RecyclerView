@@ -24,9 +24,9 @@ import kotlinx.coroutines.flow.onEach
  * @param onFailed      失败回调，如果需要做其它错误处理，可以从这里获取。
  * @param onSuccess     成功回调，如果需要结果，可以从这里获取。
  */
-internal suspend fun <ResultType> Result<ResultType>.collect(
-    onFailed: ((RequestType, Throwable) -> Unit)? = null,
-    onSuccess: ((RequestType, ResultType) -> Unit)? = null,
+suspend fun <ResultType> Result<ResultType>.collect(
+    onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ) {
     resultReportFlow.collect { resultReport ->
         val state = resultReport.state
@@ -49,7 +49,7 @@ internal suspend fun <ResultType> Result<ResultType>.collect(
  * @param show          初始化或者刷新开始时显示进度条
  * @param hide          初始化或者刷新成功或者失败时隐藏进度条
  */
-internal fun <ResultType> Result<ResultType>.bindProgress(
+fun <ResultType> Result<ResultType>.bindProgress(
     show: () -> Unit,
     hide: () -> Unit,
 ): Result<ResultType> {
@@ -79,7 +79,7 @@ internal fun <ResultType> Result<ResultType>.bindProgress(
  * @param loadMoreFooter    往后加载更多的视图。[com.like.recyclerview.ui]库中默认实现了：[DefaultLoadMoreFooter]
  * @param loadMoreHeader    往前加载更多的视图。[com.like.recyclerview.ui]库中默认实现了：[DefaultLoadMoreHeader]
  */
-internal fun <ValueInList : IRecyclerViewItem> Result<List<ValueInList>?>.bindRecyclerView(
+fun <ValueInList : IRecyclerViewItem> Result<List<ValueInList>?>.bindRecyclerView(
     adapter: BaseAdapter,
     emptyItem: IEmptyItem? = null,
     errorItem: IErrorItem? = null,
@@ -153,6 +153,6 @@ internal fun <ValueInList : IRecyclerViewItem> Result<List<ValueInList>?>.bindRe
     return updateResultReportFlow(newResultReportFlow)
 }
 
-private fun <ResultType> Result<ResultType>.updateResultReportFlow(newResultReportFlow: Flow<ResultReport<ResultType>>): Result<ResultType> {
+fun <ResultType> Result<ResultType>.updateResultReportFlow(newResultReportFlow: Flow<ResultReport<ResultType>>): Result<ResultType> {
     return Result(newResultReportFlow, initial, refresh, retry, loadAfter, loadBefore)
 }
