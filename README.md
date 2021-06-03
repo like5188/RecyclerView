@@ -26,7 +26,7 @@
     dependencies {
         // 核心代码（必须）
         implementation 'com.github.like5188.RecyclerView:core:版本号'
-        // 扩展库
+        // 扩展库。包括item动画、添加图片、树形结构
         implementation 'com.github.like5188.RecyclerView:ext:版本号'
         // 默认实现的 UI 视图，及 UI 相关的帮助类
         implementation 'com.github.like5188.RecyclerView:ui:版本号'
