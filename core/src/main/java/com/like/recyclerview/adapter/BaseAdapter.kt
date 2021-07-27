@@ -54,7 +54,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                     positionStart: Int,
                     itemCount: Int
                 ) {
-                    Log.d(TAG, "onItemRangeRemoved")
+                    Log.d(TAG, "onItemRangeRemoved positionStart=$positionStart itemCount=$itemCount")
                     fun update() {
                         if (sender?.isEmpty() == true) {
                             notifyDataSetChanged()
@@ -78,7 +78,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                     toPosition: Int,
                     itemCount: Int
                 ) {
-                    Log.d(TAG, "onItemRangeMoved")
+                    Log.d(TAG, "onItemRangeMoved fromPosition=$fromPosition toPosition=$toPosition itemCount=$itemCount")
                     fun update() {
                         // 这个回调是在 List 里的连续的元素整个移动的情况下会进行的回调，然而 RecyclerView 的 Adapter 里并没有对应的方法，
                         // 只有单个元素移动时的方法，所以需要在回调方法中做一个判断，如果移动的元素只有一个，就调用 Adapter 对应的方法，
@@ -103,7 +103,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                     positionStart: Int,
                     itemCount: Int
                 ) {
-                    Log.d(TAG, "onItemRangeInserted")
+                    Log.d(TAG, "onItemRangeInserted positionStart=$positionStart itemCount=$itemCount")
                     fun update() {
                         notifyItemRangeInserted(positionStart, itemCount)
                         notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
@@ -123,7 +123,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                     positionStart: Int,
                     itemCount: Int
                 ) {
-                    Log.d(TAG, "onItemRangeChanged")
+                    Log.d(TAG, "onItemRangeChanged positionStart=$positionStart itemCount=$itemCount")
                     fun update() {
                         notifyItemRangeChanged(positionStart, itemCount)
                     }
@@ -209,6 +209,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                 e.printStackTrace()
             }
         }
+        Log.e(TAG, "onBindViewHolder position=$position")
         // 绑定指定位置item的其他变量。如果一个布局中有多个变量的话。
         onBindViewHolder(holder, position, item)
     }
