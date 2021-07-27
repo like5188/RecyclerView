@@ -62,6 +62,7 @@ class PagingActivity : AppCompatActivity() {
         }
         adapter.addOnItemLongClickListener { holder, position, data ->
             ToastUtils.show("长按 position=$position")
+            adapter.remove(data)
         }
 
         swipeRefreshLayout.setOnRefreshListener {

@@ -3,7 +3,7 @@ package com.like.recyclerview.sample.paging
 import com.like.paging.RequestType
 import com.like.paging.RequestType.Initial
 import com.like.paging.RequestType.Refresh
-import com.like.paging.byPageNoKeyed.PageNoKeyedPagingDataSource
+import com.like.paging.dataSource.byPageNoKeyed.PageNoKeyedPagingDataSource
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.model.*
 import kotlinx.coroutines.delay
