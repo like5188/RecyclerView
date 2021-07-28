@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.hjq.toast.ToastUtils
 import com.like.recyclerview.sample.addimage.PictureSelectorActivity
+import com.like.recyclerview.sample.concat.ConcatActivity
 import com.like.recyclerview.sample.paging.PagingActivity
 import com.like.recyclerview.sample.tree.TreeActivity
 
@@ -27,5 +28,9 @@ class MainActivity : AppCompatActivity() {
 
     fun startPictureSelectorActivity(view: View) {
         startActivity(Intent(this, PictureSelectorActivity::class.java))
+    }
+
+    fun startConcatActivity(view: View) {
+        startActivity(Intent(this, ConcatActivity::class.java))
     }
 }
