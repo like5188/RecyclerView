@@ -1,32 +1,39 @@
 package com.like.recyclerview.adapter
 
-import android.util.Log
 import androidx.databinding.ViewDataBinding
+import com.like.recyclerview.listener.OnLoadMoreListener
+import com.like.recyclerview.model.*
 import com.like.recyclerview.viewholder.BindingViewHolder
-import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class AbstractLoadAfterAdapter<T : ViewDataBinding> : AbstractItemAdapter<T>() {
-    companion object {
-        private const val TAG = "LoadAfterAdapter"
-    }
-
-    private var isRunning = AtomicBoolean(false)
-    var onLoad: (() -> Unit)? = null
-    var onStart: (() -> Unit)? = null
-    var onComplete: (() -> Unit)? = null
-    var onError: ((Throwable) -> Unit)? = null
+    lateinit var onLoadMore: () -> Boolean
+    var onLoadMoreListener: OnLoadMoreListener? = null
+    private var mLoadMoreStatus: LoadMoreStatus = LoadMoreComplete()
 
     override fun onBindViewHolder(holder: BindingViewHolder<T>, position: Int) {
-        if (isRunning.compareAndSet(false, true)) {
-            onStart?.invoke()
-            Log.v(TAG, "触发往后加载更多")
+        loadMore()
+    }
+
+    fun retry() {
+        mLoadMoreStatus = LoadMoreComplete()
+        loadMore()
+    }
+
+    private fun loadMore() {
+        if (mLoadMoreStatus is LoadMoreComplete) {
+            mLoadMoreStatus = LoadMoreLoading()
+            onLoadMoreListener?.onLoading()
             try {
-                onLoad?.invoke()
-                isRunning.set(false)
-                onComplete?.invoke()
+                if (onLoadMore()) {
+                    mLoadMoreStatus = LoadMoreEnd()
+                    onLoadMoreListener?.onEnd()
+                } else {
+                    mLoadMoreStatus = LoadMoreComplete()
+                    onLoadMoreListener?.onComplete()
+                }
             } catch (e: Exception) {
-                isRunning.set(false)
-                onError?.invoke(e)
+                mLoadMoreStatus = LoadMoreError()
+                onLoadMoreListener?.onError(e)
             }
         }
     }
