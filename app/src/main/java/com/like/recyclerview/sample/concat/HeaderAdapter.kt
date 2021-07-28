@@ -28,4 +28,7 @@ class HeaderAdapter : RecyclerView.Adapter<CommonViewHolder>() {
         return 2
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return R.layout.header1
+    }
 }

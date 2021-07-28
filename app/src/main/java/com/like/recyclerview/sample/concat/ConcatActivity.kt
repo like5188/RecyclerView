@@ -19,7 +19,12 @@ class ConcatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        mBinding.rv.adapter = ConcatAdapter(HeaderAdapter(), ContentAdapter(), FooterAdapter())
+        mBinding.rv.adapter = ConcatAdapter(
+            ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build(),
+            HeaderAdapter(),
+            ContentAdapter(),
+            FooterAdapter()
+        )
     }
 
 }

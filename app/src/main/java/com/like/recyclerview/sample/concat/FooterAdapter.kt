@@ -28,4 +28,7 @@ class FooterAdapter : RecyclerView.Adapter<CommonViewHolder>() {
         return 3
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return  R.layout.footer1
+    }
 }

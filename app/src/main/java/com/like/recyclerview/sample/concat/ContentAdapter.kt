@@ -28,4 +28,7 @@ class ContentAdapter : RecyclerView.Adapter<CommonViewHolder>() {
         return 5
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return R.layout.item
+    }
 }
