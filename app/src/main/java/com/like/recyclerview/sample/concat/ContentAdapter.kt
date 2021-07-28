@@ -8,15 +8,24 @@ import com.like.recyclerview.sample.databinding.ItemBinding
 import com.like.recyclerview.sample.model.Item
 import com.like.recyclerview.viewholder.BindingViewHolder
 
-class ContentAdapter(private val list: List<Item>) : AbstractItemAdapter<ItemBinding>() {
+class ContentAdapter : AbstractItemAdapter<ItemBinding>() {
+    private val mList = mutableListOf<Item>()
+
+    fun addItems(list: List<Item>) {
+        mList.addAll(list)
+        notifyDataSetChanged()
+    }
 
     override fun onBindViewHolder(holder: BindingViewHolder<ItemBinding>, position: Int) {
-        Log.v("ContentAdapter", "position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}")
-        holder.binding.setVariable(BR.item, list[position])
+        Log.v(
+            "ContentAdapter",
+            "position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}"
+        )
+        holder.binding.setVariable(BR.item, mList[position])
     }
 
     override fun getItemCount(): Int {
-        return list.size
+        return mList.size
     }
 
     override fun getItemViewType(position: Int): Int {
