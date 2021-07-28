@@ -12,7 +12,7 @@ import com.like.recyclerview.viewholder.CommonViewHolder
  */
 abstract class BaseTreeRecyclerViewAdapter : BaseAdapter() {
     init {
-        addOnItemClickListener { holder, position, data -> clickItem(holder.binding, position, data) }
+//        addOnItemClickListener { holder, position, data -> clickItem(holder.binding, position, data) }
     }
 
     /**

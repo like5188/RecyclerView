@@ -9,8 +9,6 @@ import androidx.databinding.ObservableList
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.like.recyclerview.listener.OnItemClickListener
-import com.like.recyclerview.listener.OnItemLongClickListener
 import com.like.recyclerview.model.IFooter
 import com.like.recyclerview.model.IHeader
 import com.like.recyclerview.model.IRecyclerViewItem
@@ -28,8 +26,8 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
     }
 
     var recyclerView: RecyclerView? = null
-    private val mOnItemClickListeners = mutableListOf<OnItemClickListener>()
-    private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener>()
+//    private val mOnItemClickListeners = mutableListOf<OnItemClickListener>()
+//    private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener>()
 
     init {
         (getAll() as ObservableArrayList).addOnListChangedCallback(
@@ -52,7 +50,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                 override fun onItemRangeRemoved(
                     sender: ObservableArrayList<IRecyclerViewItem>?,
                     positionStart: Int,
-                    itemCount: Int
+                    itemCount: Int,
                 ) {
                     Log.d(TAG, "onItemRangeRemoved positionStart=$positionStart itemCount=$itemCount")
                     fun update() {
@@ -76,7 +74,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                     sender: ObservableArrayList<IRecyclerViewItem>?,
                     fromPosition: Int,
                     toPosition: Int,
-                    itemCount: Int
+                    itemCount: Int,
                 ) {
                     Log.d(TAG, "onItemRangeMoved fromPosition=$fromPosition toPosition=$toPosition itemCount=$itemCount")
                     fun update() {
@@ -101,7 +99,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                 override fun onItemRangeInserted(
                     sender: ObservableArrayList<IRecyclerViewItem>?,
                     positionStart: Int,
-                    itemCount: Int
+                    itemCount: Int,
                 ) {
                     Log.d(TAG, "onItemRangeInserted positionStart=$positionStart itemCount=$itemCount")
                     fun update() {
@@ -121,7 +119,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
                 override fun onItemRangeChanged(
                     sender: ObservableArrayList<IRecyclerViewItem>?,
                     positionStart: Int,
-                    itemCount: Int
+                    itemCount: Int,
                 ) {
                     Log.d(TAG, "onItemRangeChanged positionStart=$positionStart itemCount=$itemCount")
                     fun update() {
@@ -140,29 +138,29 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
         )
     }
 
-    fun addOnItemClickListener(listener: OnItemClickListener) {
-        mOnItemClickListeners.add(listener)
-    }
-
-    fun addOnItemLongClickListener(listener: OnItemLongClickListener) {
-        mOnItemLongClickListeners.add(listener)
-    }
-
-    fun removeOnItemClickListener(listener: OnItemClickListener) {
-        mOnItemClickListeners.remove(listener)
-    }
-
-    fun removeOnItemLongClickListener(listener: OnItemLongClickListener) {
-        mOnItemLongClickListeners.remove(listener)
-    }
-
-    fun clearOnItemClickListeners() {
-        mOnItemClickListeners.clear()
-    }
-
-    fun clearOnItemLongClickListeners() {
-        mOnItemLongClickListeners.clear()
-    }
+//    fun addOnItemClickListener(listener: OnItemClickListener) {
+//        mOnItemClickListeners.add(listener)
+//    }
+//
+//    fun addOnItemLongClickListener(listener: OnItemLongClickListener) {
+//        mOnItemLongClickListeners.add(listener)
+//    }
+//
+//    fun removeOnItemClickListener(listener: OnItemClickListener) {
+//        mOnItemClickListeners.remove(listener)
+//    }
+//
+//    fun removeOnItemLongClickListener(listener: OnItemLongClickListener) {
+//        mOnItemLongClickListeners.remove(listener)
+//    }
+//
+//    fun clearOnItemClickListeners() {
+//        mOnItemClickListeners.clear()
+//    }
+//
+//    fun clearOnItemLongClickListeners() {
+//        mOnItemLongClickListeners.clear()
+//    }
 
     final override fun getItemCount(): Int {
         return getAll().size
@@ -173,29 +171,7 @@ open class BaseAdapter : RecyclerView.Adapter<CommonViewHolder>(), IAdapterDataM
     }
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommonViewHolder {
-        return CommonViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
-            // 为list添加Item的点击事件监听
-            if (mOnItemClickListeners.isNotEmpty()) {
-                itemView.setOnClickListener {
-                    val position = recyclerView?.getChildAdapterPosition(itemView) ?: -1
-                    val item = get(position)
-                    mOnItemClickListeners.forEach {
-                        it.onItemClick(this, position, item)
-                    }
-                }
-            }
-            // 为list添加Item的长按事件监听
-            if (mOnItemLongClickListeners.isNotEmpty()) {
-                itemView.setOnLongClickListener {
-                    val position = recyclerView?.getChildAdapterPosition(itemView) ?: -1
-                    val item = get(position)
-                    mOnItemLongClickListeners.forEach {
-                        it.onItemLongClick(this, position, item)
-                    }
-                    true
-                }
-            }
-        }
+        return CommonViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), viewType, parent, false))
     }
 
     final override fun onBindViewHolder(holder: CommonViewHolder, position: Int) {

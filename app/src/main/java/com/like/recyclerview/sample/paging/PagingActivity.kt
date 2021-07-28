@@ -57,13 +57,13 @@ class PagingActivity : AppCompatActivity() {
         recyclerView.addItemDecoration(ColorLineItemDecoration(10))//添加分割线
         recyclerView.adapter = adapter
 
-        adapter.addOnItemClickListener { holder, position, data ->
-            ToastUtils.show("单击 position=$position")
-        }
-        adapter.addOnItemLongClickListener { holder, position, data ->
-            ToastUtils.show("长按 position=$position")
-            adapter.remove(data)
-        }
+//        adapter.addOnItemClickListener { holder, position, data ->
+//            ToastUtils.show("单击 position=$position")
+//        }
+//        adapter.addOnItemLongClickListener { holder, position, data ->
+//            ToastUtils.show("长按 position=$position")
+//            adapter.remove(data)
+//        }
 
         swipeRefreshLayout.setOnRefreshListener {
             result.refresh()
