@@ -1,159 +1,20 @@
 package com.like.recyclerview.utils
 
-import com.like.recyclerview.model.*
+import androidx.databinding.ObservableArrayList
 
-internal interface IAdapterDataManager {
-    fun getAll(): List<IRecyclerViewItem>
-    fun get(position: Int): IRecyclerViewItem?
-    fun getEmptyItem(): IEmptyItem?
-    fun getErrorItem(): IErrorItem?
-    fun getHeaders(): List<IHeader>
-    fun getFooters(): List<IFooter>
-    fun getItems(): List<IItem>
-    fun getHeader(headerPosition: Int): IHeader?
-    fun getItem(itemPosition: Int): IItem?
-    fun getFooter(footerPosition: Int): IFooter?
-    fun isEmptyItemShow(): Boolean
-    fun isErrorItemShow(): Boolean
-    fun isHeader(position: Int): Boolean
-    fun isFooter(position: Int): Boolean
-    fun isItem(position: Int): Boolean
-    fun containsHeader(layoutId: Int): Boolean
-    fun containsFooter(layoutId: Int): Boolean
-    fun containsItem(layoutId: Int): Boolean
-    fun updateHeader(position: Int, newHeader: IHeader)
-    fun updateFooter(position: Int, newFooter: IFooter)
-    fun updateItem(position: Int, newItem: IItem)
-    fun setEmptyItem(emptyItem: IEmptyItem)
-    fun setErrorItem(errorItem: IErrorItem)
-
-    /**
-     * 添加footer到footers的开始位置
-     *
-     */
-    fun addFooterToStart(footer: IFooter?)
-
-    /**
-     * 添加footer到footers的末尾
-     *
-     */
-    fun addFooterToEnd(footer: IFooter?)
-
-    /**
-     * 添加footer
-     *
-     * @param positionInFooters 在footers中的位置
-     */
-    fun addFooter(positionInFooters: Int, footer: IFooter?)
-
-    /**
-     * 添加footers到footers的开始位置
-     *
-     */
-    fun addFootersToStart(footers: List<IFooter>?)
-
-    /**
-     * 添加footers到footers的末尾
-     *
-     */
-    fun addFootersToEnd(footers: List<IFooter>?)
-
-    /**
-     * 添加footers
-     *
-     * @param positionInFooters 在footers中的位置
-     */
-    fun addFooters(positionInFooters: Int, footers: List<IFooter>?)
-
-    /**
-     * 添加header到headers的开始位置
-     *
-     */
-    fun addHeaderToStart(header: IHeader?)
-
-    /**
-     * 添加header到headers的末尾
-     *
-     */
-    fun addHeaderToEnd(header: IHeader?)
-
-    /**
-     * 添加header
-     *
-     * @param positionInHeaders 在headers中的位置
-     */
-    fun addHeader(positionInHeaders: Int, header: IHeader?)
-
-    /**
-     * 添加headers到headers的开始位置
-     *
-     */
-    fun addHeadersToStart(headers: List<IHeader>?)
-
-    /**
-     * 添加headers到headers的末尾
-     *
-     */
-    fun addHeadersToEnd(headers: List<IHeader>?)
-
-    /**
-     * 添加headers
-     *
-     * @param positionInHeaders 在headers中的位置
-     */
-    fun addHeaders(positionInHeaders: Int, headers: List<IHeader>?)
-
-    /**
-     * 添加item到items的开始位置
-     *
-     */
-    fun addItemToStart(item: IItem?)
-
-    /**
-     * 添加item到items的末尾
-     *
-     */
-    fun addItemToEnd(item: IItem?)
-
-    /**
-     * 添加item
-     *
-     * @param positionInItems 在items中的位置
-     */
-    fun addItem(positionInItems: Int, item: IItem?)
-
-    /**
-     * 添加items到items的开始位置
-     *
-     */
-    fun addItemsToStart(items: List<IItem>?)
-
-    /**
-     * 添加items到items的末尾
-     *
-     */
-    fun addItemsToEnd(items: List<IItem>?)
-
-    /**
-     * 添加items
-     *
-     * @param positionInItems 在items中的位置
-     */
-    fun addItems(positionInItems: Int, items: List<IItem>?)
-
-    /**
-     * 清除所有数据，并添加新的数据集合。
-     *
-     * 注意：此方法传入的list会自动重新排序，规则为：
-     * [IHeader]->[IItem]->[IFooter]，其中这三种类型的集合内部排序是根据 [IRecyclerViewItem.sortTag] 标记来确定的。
-     */
-    fun clearAndAddAll(list: List<IRecyclerViewItem>?)
-    fun removeAll(list: List<IRecyclerViewItem>?)
-    fun remove(data: IRecyclerViewItem?)
+internal interface IAdapterDataManager<Data> {
+    val mList: ObservableArrayList<Data>
+    fun get(position: Int): Data
+    fun update(position: Int, newData: Data)
+    fun addToStart(data: Data)
+    fun addToEnd(data: Data)
+    fun add(position: Int, data: Data)
+    fun addAllToStart(list: List<Data>)
+    fun addAllToEnd(list: List<Data>)
+    fun addAll(position: Int, list: List<Data>)
+    fun removeAll(list: List<Data>)
+    fun remove(data: Data)
     fun remove(position: Int)
-    fun clearHeaders()
-    fun clearFooters()
-    fun clearItems()
     fun clear()
 
     /**

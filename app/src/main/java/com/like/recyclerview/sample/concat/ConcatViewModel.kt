@@ -7,6 +7,6 @@ class ConcatViewModel : ViewModel() {
         const val PAGE_SIZE = 20
     }
 
-    val loadAfterPagingResult = LoadAfterPagingDataSource(PAGE_SIZE).result()
+    val loadAfterResult = LoadAfterDataSource(PAGE_SIZE).result()
 
 }
