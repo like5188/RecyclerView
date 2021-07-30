@@ -40,8 +40,8 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-//        initLoadAfter()
-        initLoadBefore()
+        initLoadAfter()
+//        initLoadBefore()
     }
 
     private fun initLoadAfter() {
@@ -84,10 +84,6 @@ class ConcatActivity : AppCompatActivity() {
                         type is RequestType.After && state is RequestState.Failed -> {
                             loadMoreAdapter.onError(state.throwable)
                         }
-                        type is RequestType.Before && state is RequestState.Success -> {
-                        }
-                        type is RequestType.Before && state is RequestState.Failed -> {
-                        }
                     }
                 }
                 .collect()
@@ -122,10 +118,6 @@ class ConcatActivity : AppCompatActivity() {
                         }
                         type is RequestType.Initial && state is RequestState.Failed -> {
                             // 错误视图
-                        }
-                        type is RequestType.After && state is RequestState.Success -> {
-                        }
-                        type is RequestType.After && state is RequestState.Failed -> {
                         }
                         type is RequestType.Before && state is RequestState.Success -> {
                             val list = state.data
