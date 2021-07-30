@@ -11,16 +11,33 @@ abstract class AbstractFooterAdapter<VB : ViewDataBinding, Data>(private val onL
     }
 
     private var isRunning = AtomicBoolean(false)
+    private lateinit var mHolder: BindingViewHolder<VB>
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
+        mHolder = holder
+        load()
+    }
+
+    private fun load() {
         if (isRunning.compareAndSet(false, true)) {
-            Log.v(TAG, "触发往后加载更多")
+            Log.v(TAG, "往后加载更多")
             onLoad()
         }
     }
 
-    fun trigger() {
+    open fun onComplete() {
+        mHolder.binding.root.setOnClickListener(null)
         isRunning.compareAndSet(true, false)
     }
 
+    open fun onEnd() {
+        mHolder.binding.root.setOnClickListener(null)
+    }
+
+    open fun onError(throwable: Throwable) {
+        mHolder.binding.root.setOnClickListener {
+            onComplete()
+            load()
+        }
+    }
 }

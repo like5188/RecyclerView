@@ -34,7 +34,7 @@ abstract class AbstractHeaderAdapter<VB : ViewDataBinding, Data>(private val pag
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         if (isRunning.compareAndSet(false, true)) {
-            Log.v(TAG, "触发往前加载更多")
+            Log.v(TAG, "往前加载更多")
             try {
                 if (onLoad()) {
                     onComplete()

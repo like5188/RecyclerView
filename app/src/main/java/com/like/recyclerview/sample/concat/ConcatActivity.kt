@@ -71,8 +71,7 @@ class ConcatActivity : AppCompatActivity() {
                                 footerAdapter.onEnd()
                             } else {
                                 contentAdapter.addAllToEnd(list)
-                                footerAdapter.onLoading()
-                                footerAdapter.trigger()
+                                footerAdapter.onComplete()
                             }
                         }
                         type is RequestType.After && state is RequestState.Failed -> {

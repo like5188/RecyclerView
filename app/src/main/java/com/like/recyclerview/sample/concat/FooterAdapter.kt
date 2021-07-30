@@ -8,7 +8,7 @@ import com.like.recyclerview.sample.databinding.FooterBinding
 import com.like.recyclerview.sample.model.Footer
 import com.like.recyclerview.viewholder.BindingViewHolder
 
-class FooterAdapter(private val onLoad: () -> Unit) : AbstractFooterAdapter<FooterBinding, Footer>(onLoad) {
+class FooterAdapter(onLoad: () -> Unit) : AbstractFooterAdapter<FooterBinding, Footer>(onLoad) {
     private lateinit var mFooter: Footer
     private lateinit var mBinding: FooterBinding
 
@@ -25,22 +25,19 @@ class FooterAdapter(private val onLoad: () -> Unit) : AbstractFooterAdapter<Foot
         return R.layout.footer
     }
 
-    fun onLoading() {
+    override fun onComplete() {
+        super.onComplete()
         mFooter.name.set("onLoading")
-        mBinding.root.setOnClickListener(null)
     }
 
-    fun onEnd() {
+    override fun onEnd() {
+        super.onEnd()
         mFooter.name.set("onEnd")
-        mBinding.root.setOnClickListener(null)
     }
 
-    fun onError(throwable: Throwable) {
+    override fun onError(throwable: Throwable) {
+        super.onError(throwable)
         mFooter.name.set("onError ${throwable.message} 点击重试")
-        mBinding.root.setOnClickListener {
-            trigger()
-            onLoad()
-        }
     }
 
 }
