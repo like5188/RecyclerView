@@ -10,13 +10,11 @@ import com.like.recyclerview.viewholder.BindingViewHolder
 
 class FooterAdapter(onLoad: () -> Unit) : AbstractFooterAdapter<FooterBinding, Footer>(onLoad) {
     private lateinit var mFooter: Footer
-    private lateinit var mBinding: FooterBinding
 
     override fun onBindViewHolder(holder: BindingViewHolder<FooterBinding>, position: Int) {
         Log.i("FooterAdapter",
             "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}")
         mFooter = mList[position]
-        mBinding = holder.binding
         super.onBindViewHolder(holder, position)
         holder.binding.setVariable(BR.footer, mFooter)
     }
