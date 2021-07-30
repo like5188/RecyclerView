@@ -96,6 +96,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
                     update {
                         notifyItemRangeInserted(positionStart, itemCount)
                         notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
+                        onItemRangeInserted()
                     }
                 }
 
@@ -166,6 +167,10 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
 
     fun clearOnItemLongClickListeners() {
         mOnItemLongClickListeners.clear()
+    }
+
+    open fun onItemRangeInserted() {
+
     }
 
 }

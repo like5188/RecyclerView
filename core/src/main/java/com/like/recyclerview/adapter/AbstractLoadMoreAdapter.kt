@@ -13,12 +13,17 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, Data>(private val o
         private const val TAG = "AbstractLoadMoreAdapter"
     }
 
-    private var isRunning = AtomicBoolean(false)
+    private var isRunning = AtomicBoolean(true)
     private lateinit var mHolder: BindingViewHolder<VB>
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         mHolder = holder
         load()
+    }
+
+    override fun onItemRangeInserted() {
+        // 避免刷新后重新添加 Footer 时无法触发加载更多
+        isRunning.compareAndSet(true, false)
     }
 
     private fun load() {

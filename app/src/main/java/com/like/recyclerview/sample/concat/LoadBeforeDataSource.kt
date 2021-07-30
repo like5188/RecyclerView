@@ -10,6 +10,9 @@ class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Ite
 
     override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<Item> {
         delay(1000)
+        if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
+            i = 0
+        }
         return getBefore(pageNo, pageSize)
     }
 
