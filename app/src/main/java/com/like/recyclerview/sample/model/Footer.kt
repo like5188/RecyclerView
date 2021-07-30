@@ -1,3 +1,3 @@
 package com.like.recyclerview.sample.model
 
-data class Footer(val id: Int, val name: String)
+data class Footer(val id: Int, var name: String)

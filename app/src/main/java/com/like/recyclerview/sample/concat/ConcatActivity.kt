@@ -2,7 +2,6 @@ package com.like.recyclerview.sample.concat
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -36,14 +35,11 @@ class ConcatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        var i = 0
         mBinding.rv.adapter = mAdapter
 
         val contentAdapter = ContentAdapter()
         val footerAdapter = FooterAdapter {
             mViewModel.loadAfterResult.loadAfter?.invoke()
-            Log.e(TAG, "onLoadMore")
-            i++ > 3
         }
         mAdapter.addAdapter(contentAdapter)
         mAdapter.addAdapter(footerAdapter)
@@ -57,22 +53,29 @@ class ConcatActivity : AppCompatActivity() {
                         (type is RequestType.Initial || type is RequestType.Refresh) && state is RequestState.Success -> {
                             val list = state.data
                             if (list.isNullOrEmpty()) {
+                                // 空视图
                             } else {
+                                contentAdapter.clear()
                                 contentAdapter.addAllToEnd(list)
                                 footerAdapter.addToEnd(Footer(1, "1"))
                             }
                         }
                         type is RequestType.Initial && state is RequestState.Failed -> {
+                            // 错误视图
                         }
                         type is RequestType.After && state is RequestState.Success -> {
                             val list = state.data
                             if (list.isNullOrEmpty()) {
                                 // 到底了
+                                footerAdapter.onEnd()
                             } else {
                                 contentAdapter.addAllToEnd(list)
+                                footerAdapter.onLoading()
+                                footerAdapter.trigger()
                             }
                         }
                         type is RequestType.After && state is RequestState.Failed -> {
+                            footerAdapter.onError(state.throwable)
                         }
                         type is RequestType.Before && state is RequestState.Success -> {
                         }

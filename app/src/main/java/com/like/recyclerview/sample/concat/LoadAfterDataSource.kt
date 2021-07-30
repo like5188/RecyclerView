@@ -6,6 +6,7 @@ import com.like.recyclerview.sample.model.Item
 import kotlinx.coroutines.delay
 
 class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item>?>(pageSize) {
+    private var i = 0
 
     override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<Item> {
         delay(2000)
@@ -19,12 +20,22 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item
     private fun getAfter(pageNo: Int, pageSize: Int): List<Item> {
         val start = pageNo * pageSize + 1
         val end = start + pageSize
-        return (start until end).map {
-            Item(
-                id = it,
-                name = "name $it",
-                des = "des $it"
-            )
+        return when (i++) {
+            2 -> {
+                throw RuntimeException("test error")
+            }
+            4 -> {
+                emptyList()
+            }
+            else -> {
+                (start until end).map {
+                    Item(
+                        id = it,
+                        name = "name $it",
+                        des = "des $it"
+                    )
+                }
+            }
         }
     }
 

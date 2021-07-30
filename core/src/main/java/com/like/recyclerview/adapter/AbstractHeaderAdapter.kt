@@ -6,18 +6,14 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.viewholder.BindingViewHolder
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class AbstractHeaderAdapter<VB : ViewDataBinding, Data>(
-    private val pageSize: Int,
-    private val onLoadBefore: () -> Unit,
-) : AbstractAdapter<VB, Data>() {
+abstract class AbstractHeaderAdapter<VB : ViewDataBinding, Data>(private val pageSize: Int) : AbstractAdapter<VB, Data>() {
     companion object {
         private const val TAG = "AbstractHeaderAdapter"
     }
 
     private var isRunning = AtomicBoolean(false)
 
-    override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-        isRunning.set(false)
+    fun onItemRangeInserted(itemCount: Int) {
         val rv = recyclerView ?: return
         if (getItemCount() == pageSize) {
             // 初始化或者刷新时，RecyclerView自动滚动到最底部。
@@ -39,7 +35,22 @@ abstract class AbstractHeaderAdapter<VB : ViewDataBinding, Data>(
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         if (isRunning.compareAndSet(false, true)) {
             Log.v(TAG, "触发往前加载更多")
-            onLoadBefore()
+            try {
+                if (onLoad()) {
+                    onComplete()
+                } else {
+                    onEnd()
+                }
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                isRunning.compareAndSet(true, false)
+            }
         }
     }
+
+    abstract fun onLoad(): Boolean
+    abstract fun onComplete()
+    abstract fun onEnd()
+    abstract fun onError(throwable: Throwable)
 }
