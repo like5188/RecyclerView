@@ -6,7 +6,7 @@ import com.like.recyclerview.viewholder.BindingViewHolder
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * 封装了加载更多逻辑
+ * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
  */
 abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, Data>(private val onLoad: () -> Unit) : AbstractAdapter<VB, Data>() {
     companion object {
