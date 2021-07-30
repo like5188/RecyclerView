@@ -15,6 +15,8 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.model.Footer
+import com.like.recyclerview.utils.keepPosition
+import com.like.recyclerview.utils.scrollToBottom
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -44,7 +46,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadAfter() {
         val contentAdapter = ContentAdapter()
-        val loadMoreAdapter = LoadMoreFooterAdapter {
+        val loadMoreAdapter = LoadMoreAdapter {
             mViewModel.loadAfterResult.loadAfter?.invoke()
         }
         mAdapter.addAdapter(contentAdapter)
@@ -95,7 +97,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadBefore() {
         val contentAdapter = ContentAdapter()
-        val loadMoreAdapter = LoadMoreHeaderAdapter {
+        val loadMoreAdapter = LoadMoreAdapter {
             mViewModel.loadBeforeResult.loadBefore?.invoke()
         }
         mAdapter.addAdapter(loadMoreAdapter)
@@ -114,6 +116,7 @@ class ConcatActivity : AppCompatActivity() {
                             } else {
                                 contentAdapter.clear()
                                 contentAdapter.addAllToEnd(list)
+                                mBinding.rv.scrollToBottom()
                                 loadMoreAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
                             }
                         }
@@ -131,6 +134,7 @@ class ConcatActivity : AppCompatActivity() {
                                 loadMoreAdapter.onEnd()
                             } else {
                                 contentAdapter.addAllToStart(list)
+                                mBinding.rv.keepPosition(list.size, 1)
                                 loadMoreAdapter.onComplete()
                             }
                         }

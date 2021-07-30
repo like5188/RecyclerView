@@ -5,7 +5,7 @@ import androidx.databinding.ViewDataBinding
 import com.like.recyclerview.viewholder.BindingViewHolder
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class AbstractLoadMoreFooterAdapter<VB : ViewDataBinding, Data>(private val onLoad: () -> Unit) : AbstractAdapter<VB, Data>() {
+abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, Data>(private val onLoad: () -> Unit) : AbstractAdapter<VB, Data>() {
     companion object {
         private const val TAG = "AbstractFooterAdapter"
     }

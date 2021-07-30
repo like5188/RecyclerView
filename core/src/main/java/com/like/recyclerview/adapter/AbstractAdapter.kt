@@ -21,7 +21,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
         private const val TAG = "AbstractAdapter"
     }
 
-    var recyclerView: RecyclerView? = null
+    lateinit var recyclerView: RecyclerView
     private val mOnItemClickListeners = mutableListOf<OnItemClickListener<VB>>()
     private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener<VB>>()
 
@@ -29,8 +29,8 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
         mList.addOnListChangedCallback(
             object : ObservableList.OnListChangedCallback<ObservableArrayList<Data>>() {
                 private fun update(block: () -> Unit) {
-                    if (recyclerView?.isComputingLayout == true) {
-                        recyclerView?.post {
+                    if (recyclerView.isComputingLayout) {
+                        recyclerView.post {
                             block()
                         }
                     } else {

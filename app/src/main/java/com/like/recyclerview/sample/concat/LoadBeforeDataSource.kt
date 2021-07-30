@@ -9,7 +9,7 @@ class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Ite
     private var i = 0
 
     override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<Item> {
-        delay(2000)
+        delay(1000)
         return getBefore(pageNo, pageSize)
     }
 

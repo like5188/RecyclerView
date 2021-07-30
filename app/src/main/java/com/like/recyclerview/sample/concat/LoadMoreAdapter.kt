@@ -1,18 +1,18 @@
 package com.like.recyclerview.sample.concat
 
 import android.util.Log
-import com.like.recyclerview.adapter.AbstractLoadMoreFooterAdapter
+import com.like.recyclerview.adapter.AbstractLoadMoreAdapter
 import com.like.recyclerview.sample.BR
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.FooterBinding
 import com.like.recyclerview.sample.model.Footer
 import com.like.recyclerview.viewholder.BindingViewHolder
 
-class LoadMoreHeaderAdapter(onLoad: () -> Unit) : AbstractLoadMoreFooterAdapter<FooterBinding, Footer>(onLoad) {
+class LoadMoreAdapter(onLoad: () -> Unit) : AbstractLoadMoreAdapter<FooterBinding, Footer>(onLoad) {
     private lateinit var mFooter: Footer
 
     override fun onBindViewHolder(holder: BindingViewHolder<FooterBinding>, position: Int) {
-        Log.i("LoadMoreHeaderAdapter",
+        Log.i("LoadMoreFooterAdapter",
             "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}")
         mFooter = mList[position]
         super.onBindViewHolder(holder, position)
