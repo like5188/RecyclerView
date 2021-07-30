@@ -8,5 +8,6 @@ class ConcatViewModel : ViewModel() {
     }
 
     val loadAfterResult = LoadAfterDataSource(PAGE_SIZE).result()
+    val loadBeforeResult = LoadBeforeDataSource(PAGE_SIZE).result()
 
 }

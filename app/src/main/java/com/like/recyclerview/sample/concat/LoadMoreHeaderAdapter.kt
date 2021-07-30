@@ -8,11 +8,11 @@ import com.like.recyclerview.sample.databinding.FooterBinding
 import com.like.recyclerview.sample.model.Footer
 import com.like.recyclerview.viewholder.BindingViewHolder
 
-class LoadMoreFooterAdapter(onLoad: () -> Unit) : AbstractLoadMoreFooterAdapter<FooterBinding, Footer>(onLoad) {
+class LoadMoreHeaderAdapter(onLoad: () -> Unit) : AbstractLoadMoreFooterAdapter<FooterBinding, Footer>(onLoad) {
     private lateinit var mFooter: Footer
 
     override fun onBindViewHolder(holder: BindingViewHolder<FooterBinding>, position: Int) {
-        Log.i("LoadMoreFooterAdapter",
+        Log.i("LoadMoreHeaderAdapter",
             "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}")
         mFooter = mList[position]
         super.onBindViewHolder(holder, position)

@@ -34,7 +34,7 @@ abstract class AbstractLoadMoreHeaderAdapter<VB : ViewDataBinding, Data>(private
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         if (isRunning.compareAndSet(false, true)) {
-            Log.v(TAG, "往前加载更多")
+            Log.v(TAG, "触发加载更多")
             try {
                 if (onLoad()) {
                     onComplete()

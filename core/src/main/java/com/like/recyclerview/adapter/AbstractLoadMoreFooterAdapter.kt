@@ -20,7 +20,7 @@ abstract class AbstractLoadMoreFooterAdapter<VB : ViewDataBinding, Data>(private
 
     private fun load() {
         if (isRunning.compareAndSet(false, true)) {
-            Log.v(TAG, "往后加载更多")
+            Log.v(TAG, "触发加载更多")
             onLoad()
         }
     }

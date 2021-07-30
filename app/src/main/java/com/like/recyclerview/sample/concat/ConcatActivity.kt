@@ -38,12 +38,17 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
+//        initLoadAfter()
+        initLoadBefore()
+    }
+
+    private fun initLoadAfter() {
         val contentAdapter = ContentAdapter()
-        val footerAdapter = LoadMoreFooterAdapter {
+        val loadMoreAdapter = LoadMoreFooterAdapter {
             mViewModel.loadAfterResult.loadAfter?.invoke()
         }
         mAdapter.addAdapter(contentAdapter)
-        mAdapter.addAdapter(footerAdapter)
+        mAdapter.addAdapter(loadMoreAdapter)
 
         lifecycleScope.launch {
             mViewModel.loadAfterResult.resultReportFlow
@@ -58,7 +63,7 @@ class ConcatActivity : AppCompatActivity() {
                             } else {
                                 contentAdapter.clear()
                                 contentAdapter.addAllToEnd(list)
-                                footerAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
+                                loadMoreAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
                             }
                         }
                         type is RequestType.Initial && state is RequestState.Failed -> {
@@ -68,14 +73,14 @@ class ConcatActivity : AppCompatActivity() {
                             val list = state.data
                             if (list.isNullOrEmpty()) {
                                 // 到底了
-                                footerAdapter.onEnd()
+                                loadMoreAdapter.onEnd()
                             } else {
                                 contentAdapter.addAllToEnd(list)
-                                footerAdapter.onComplete()
+                                loadMoreAdapter.onComplete()
                             }
                         }
                         type is RequestType.After && state is RequestState.Failed -> {
-                            footerAdapter.onError(state.throwable)
+                            loadMoreAdapter.onError(state.throwable)
                         }
                         type is RequestType.Before && state is RequestState.Success -> {
                         }
@@ -86,5 +91,56 @@ class ConcatActivity : AppCompatActivity() {
                 .collect()
         }
         mViewModel.loadAfterResult.initial()
+    }
+
+    private fun initLoadBefore() {
+        val contentAdapter = ContentAdapter()
+        val loadMoreAdapter = LoadMoreHeaderAdapter {
+            mViewModel.loadBeforeResult.loadBefore?.invoke()
+        }
+        mAdapter.addAdapter(loadMoreAdapter)
+        mAdapter.addAdapter(contentAdapter)
+
+        lifecycleScope.launch {
+            mViewModel.loadBeforeResult.resultReportFlow
+                .onEach { resultReport ->
+                    val state = resultReport.state
+                    val type = resultReport.type
+                    when {
+                        (type is RequestType.Initial || type is RequestType.Refresh) && state is RequestState.Success -> {
+                            val list = state.data
+                            if (list.isNullOrEmpty()) {
+                                // 空视图
+                            } else {
+                                contentAdapter.clear()
+                                contentAdapter.addAllToEnd(list)
+                                loadMoreAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
+                            }
+                        }
+                        type is RequestType.Initial && state is RequestState.Failed -> {
+                            // 错误视图
+                        }
+                        type is RequestType.After && state is RequestState.Success -> {
+                        }
+                        type is RequestType.After && state is RequestState.Failed -> {
+                        }
+                        type is RequestType.Before && state is RequestState.Success -> {
+                            val list = state.data
+                            if (list.isNullOrEmpty()) {
+                                // 到底了
+                                loadMoreAdapter.onEnd()
+                            } else {
+                                contentAdapter.addAllToStart(list)
+                                loadMoreAdapter.onComplete()
+                            }
+                        }
+                        type is RequestType.Before && state is RequestState.Failed -> {
+                            loadMoreAdapter.onError(state.throwable)
+                        }
+                    }
+                }
+                .collect()
+        }
+        mViewModel.loadBeforeResult.initial()
     }
 }
