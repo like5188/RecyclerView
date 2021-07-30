@@ -12,7 +12,7 @@ fun RecyclerView.scrollToBottom() {
 }
 
 /**
- * 保持位置（类似于聊天界面的处理）
+ * 保持位置（类似于聊天界面的处理，实际上就是使得往前加载更多和往后加载更多的效果一致）
  */
 fun RecyclerView.keepPosition(insertedItemCount: Int, headerCount: Int) {
     // 做类似于聊天界面的处理
