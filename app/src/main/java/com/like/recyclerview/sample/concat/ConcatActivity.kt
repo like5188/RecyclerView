@@ -12,6 +12,7 @@ import com.like.paging.RequestState
 import com.like.paging.RequestType
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
+import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.model.Footer
@@ -31,6 +32,9 @@ class ConcatActivity : AppCompatActivity() {
     }
     private val mViewModel by lazy {
         ViewModelProvider(this).get(ConcatViewModel::class.java)
+    }
+    private val mProgressDialog by lazy {
+        ProgressDialog(this)
     }
     private val mAdapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
 
@@ -52,11 +56,22 @@ class ConcatActivity : AppCompatActivity() {
         mAdapter.addAdapter(contentAdapter)
         mAdapter.addAdapter(loadMoreAdapter)
 
+        mBinding.btnRefresh.setOnClickListener {
+            mViewModel.loadAfterResult.refresh()
+        }
+
         lifecycleScope.launch {
             mViewModel.loadAfterResult.resultReportFlow
                 .onEach { resultReport ->
                     val state = resultReport.state
                     val type = resultReport.type
+                    if (type is RequestType.Initial || type is RequestType.Refresh) {
+                        if (state is RequestState.Running) {
+                            mProgressDialog.show()
+                        } else {
+                            mProgressDialog.hide()
+                        }
+                    }
                     when {
                         (type is RequestType.Initial || type is RequestType.Refresh) && state is RequestState.Success -> {
                             val list = state.data
@@ -65,6 +80,7 @@ class ConcatActivity : AppCompatActivity() {
                             } else {
                                 contentAdapter.clear()
                                 contentAdapter.addAllToEnd(list)
+                                loadMoreAdapter.clear()
                                 loadMoreAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
                             }
                         }
@@ -99,11 +115,22 @@ class ConcatActivity : AppCompatActivity() {
         mAdapter.addAdapter(loadMoreAdapter)
         mAdapter.addAdapter(contentAdapter)
 
+        mBinding.btnRefresh.setOnClickListener {
+            mViewModel.loadBeforeResult.refresh()
+        }
+
         lifecycleScope.launch {
             mViewModel.loadBeforeResult.resultReportFlow
                 .onEach { resultReport ->
                     val state = resultReport.state
                     val type = resultReport.type
+                    if (type is RequestType.Initial || type is RequestType.Refresh) {
+                        if (state is RequestState.Running) {
+                            mProgressDialog.show()
+                        } else {
+                            mProgressDialog.hide()
+                        }
+                    }
                     when {
                         (type is RequestType.Initial || type is RequestType.Refresh) && state is RequestState.Success -> {
                             val list = state.data
@@ -113,6 +140,7 @@ class ConcatActivity : AppCompatActivity() {
                                 contentAdapter.clear()
                                 contentAdapter.addAllToEnd(list)
                                 mBinding.rv.scrollToBottom()
+                                loadMoreAdapter.clear()
                                 loadMoreAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
                             }
                         }
