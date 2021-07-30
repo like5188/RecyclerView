@@ -6,7 +6,7 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.viewholder.BindingViewHolder
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class AbstractHeaderAdapter<VB : ViewDataBinding, Data>(private val pageSize: Int) : AbstractAdapter<VB, Data>() {
+abstract class AbstractLoadMoreHeaderAdapter<VB : ViewDataBinding, Data>(private val pageSize: Int) : AbstractAdapter<VB, Data>() {
     companion object {
         private const val TAG = "AbstractHeaderAdapter"
     }

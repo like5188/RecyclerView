@@ -39,7 +39,7 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.adapter = mAdapter
 
         val contentAdapter = ContentAdapter()
-        val footerAdapter = FooterAdapter {
+        val footerAdapter = LoadMoreFooterAdapter {
             mViewModel.loadAfterResult.loadAfter?.invoke()
         }
         mAdapter.addAdapter(contentAdapter)
