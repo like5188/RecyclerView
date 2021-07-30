@@ -14,6 +14,12 @@ import com.like.recyclerview.utils.AdapterDataManager
 import com.like.recyclerview.utils.IAdapterDataManager
 import com.like.recyclerview.viewholder.BindingViewHolder
 
+/**
+ * 封装了
+ * 1：单击、长按监听；
+ * 2：数据处理；
+ * 3：界面更新；
+ */
 abstract class AbstractAdapter<VB : ViewDataBinding, Data>
     : RecyclerView.Adapter<BindingViewHolder<VB>>(),
     IAdapterDataManager<Data> by AdapterDataManager() {
@@ -21,7 +27,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
         private const val TAG = "AbstractAdapter"
     }
 
-    lateinit var recyclerView: RecyclerView
+    protected lateinit var recyclerView: RecyclerView
     private val mOnItemClickListeners = mutableListOf<OnItemClickListener<VB>>()
     private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener<VB>>()
 
