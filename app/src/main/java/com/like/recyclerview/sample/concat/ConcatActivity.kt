@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -57,7 +58,7 @@ class ConcatActivity : AppCompatActivity() {
                             } else {
                                 contentAdapter.clear()
                                 contentAdapter.addAllToEnd(list)
-                                footerAdapter.addToEnd(Footer(1, "1"))
+                                footerAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
                             }
                         }
                         type is RequestType.Initial && state is RequestState.Failed -> {

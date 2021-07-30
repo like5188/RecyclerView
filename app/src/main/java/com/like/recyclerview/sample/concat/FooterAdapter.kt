@@ -26,17 +26,17 @@ class FooterAdapter(private val onLoad: () -> Unit) : AbstractFooterAdapter<Foot
     }
 
     fun onLoading() {
-        mFooter.name = "onLoading"
+        mFooter.name.set("onLoading")
         mBinding.root.setOnClickListener(null)
     }
 
     fun onEnd() {
-        mFooter.name = "onEnd"
+        mFooter.name.set("onEnd")
         mBinding.root.setOnClickListener(null)
     }
 
     fun onError(throwable: Throwable) {
-        mFooter.name = "onError ${throwable.message}"
+        mFooter.name.set("onError ${throwable.message} 点击重试")
         mBinding.root.setOnClickListener {
             trigger()
             onLoad()

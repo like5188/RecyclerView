@@ -1,3 +1,5 @@
 package com.like.recyclerview.sample.model
 
-data class Footer(val id: Int, var name: String)
+import androidx.databinding.ObservableField
+
+data class Footer(val id: Int, var name: ObservableField<String>)
