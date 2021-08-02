@@ -4,7 +4,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 /**
- * 滚动到最底部
+ * 滚动到最顶部
  */
 fun RecyclerView.scrollToTop() {
     scrollToPosition(0)
