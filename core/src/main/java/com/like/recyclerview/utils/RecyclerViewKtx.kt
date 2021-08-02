@@ -6,6 +6,13 @@ import androidx.recyclerview.widget.RecyclerView
 /**
  * 滚动到最底部
  */
+fun RecyclerView.scrollToTop() {
+    scrollToPosition(0)
+}
+
+/**
+ * 滚动到最底部
+ */
 fun RecyclerView.scrollToBottom() {
     val adapter = this.adapter ?: return
     scrollToPosition(adapter.itemCount - 1)

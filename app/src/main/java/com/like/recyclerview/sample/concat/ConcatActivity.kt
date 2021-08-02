@@ -7,8 +7,8 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
-import com.like.paging.RequestState
-import com.like.paging.RequestType
+import com.hjq.toast.ToastUtils
+import com.like.paging.util.bind
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
@@ -17,8 +17,8 @@ import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.model.Footer
 import com.like.recyclerview.utils.keepPosition
 import com.like.recyclerview.utils.scrollToBottom
+import com.like.recyclerview.utils.scrollToTop
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -64,48 +64,35 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            mViewModel.loadAfterResult.resultReportFlow
-                .onEach { resultReport ->
-                    val state = resultReport.state
-                    val type = resultReport.type
-                    if (type is RequestType.Initial || type is RequestType.Refresh) {
-                        if (state is RequestState.Running) {
-                            mProgressDialog.show()
-                        } else {
-                            mProgressDialog.hide()
-                        }
-                    }
-                    when {
-                        (type is RequestType.Initial || type is RequestType.Refresh) && state is RequestState.Success -> {
-                            val list = state.data
-                            if (list.isNullOrEmpty()) {
-                                // 空视图
-                            } else {
-                                contentAdapter.clear()
-                                contentAdapter.addAllToEnd(list)
-                                loadMoreAdapter.clear()
-                                loadMoreAdapter.addToEnd(Footer())
-                            }
-                        }
-                        type is RequestType.Initial && state is RequestState.Failed -> {
-                            // 错误视图
-                        }
-                        type is RequestType.After && state is RequestState.Success -> {
-                            val list = state.data
-                            if (list.isNullOrEmpty()) {
-                                // 到底了
-                                loadMoreAdapter.onEnd()
-                            } else {
-                                contentAdapter.addAllToEnd(list)
-                                loadMoreAdapter.onComplete()
-                            }
-                        }
-                        type is RequestType.After && state is RequestState.Failed -> {
-                            loadMoreAdapter.onError(state.throwable)
-                        }
-                    }
-                }
-                .collect()
+            mViewModel.loadAfterResult.bind(
+                onInitialOrRefresh = {
+                    contentAdapter.clear()
+                    contentAdapter.addAllToEnd(it)
+                    mBinding.rv.scrollToTop()
+                    loadMoreAdapter.clear()
+                    loadMoreAdapter.addToEnd(Footer())
+                },
+                onLoadMore = {
+                    contentAdapter.addAllToEnd(it)
+                    loadMoreAdapter.onComplete()
+                },
+                onLoadMoreEnd = { loadMoreAdapter.onEnd() },
+                onLoadMoreError = { loadMoreAdapter.onError(it) },
+                onInitialOrRefreshEmpty = {
+                    ToastUtils.show("onInitialOrRefreshEmpty")
+                },
+                onInitialError = {
+                    ToastUtils.show("onInitialError ${it.message}")
+                },
+                show = { mProgressDialog.show() },
+                hide = { mProgressDialog.hide() },
+                onFailed = { requestType, throwable ->
+                    ToastUtils.show("onFailed ${throwable.message}")
+                },
+                onSuccess = { requestType, list ->
+                    ToastUtils.show("onSuccess")
+                },
+            ).collect()
         }
 
         lifecycleScope.launch {
@@ -130,50 +117,36 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            mViewModel.loadBeforeResult.resultReportFlow
-                .onEach { resultReport ->
-                    val state = resultReport.state
-                    val type = resultReport.type
-                    if (type is RequestType.Initial || type is RequestType.Refresh) {
-                        if (state is RequestState.Running) {
-                            mProgressDialog.show()
-                        } else {
-                            mProgressDialog.hide()
-                        }
-                    }
-                    when {
-                        (type is RequestType.Initial || type is RequestType.Refresh) && state is RequestState.Success -> {
-                            val list = state.data
-                            if (list.isNullOrEmpty()) {
-                                // 空视图
-                            } else {
-                                contentAdapter.clear()
-                                contentAdapter.addAllToEnd(list)
-                                mBinding.rv.scrollToBottom()
-                                loadMoreAdapter.clear()
-                                loadMoreAdapter.addToEnd(Footer())
-                            }
-                        }
-                        type is RequestType.Initial && state is RequestState.Failed -> {
-                            // 错误视图
-                        }
-                        type is RequestType.Before && state is RequestState.Success -> {
-                            val list = state.data
-                            if (list.isNullOrEmpty()) {
-                                // 到底了
-                                loadMoreAdapter.onEnd()
-                            } else {
-                                contentAdapter.addAllToStart(list)
-                                mBinding.rv.keepPosition(list.size, 1)
-                                loadMoreAdapter.onComplete()
-                            }
-                        }
-                        type is RequestType.Before && state is RequestState.Failed -> {
-                            loadMoreAdapter.onError(state.throwable)
-                        }
-                    }
-                }
-                .collect()
+            mViewModel.loadAfterResult.bind(
+                onInitialOrRefresh = {
+                    contentAdapter.clear()
+                    contentAdapter.addAllToEnd(it)
+                    mBinding.rv.scrollToBottom()
+                    loadMoreAdapter.clear()
+                    loadMoreAdapter.addToEnd(Footer())
+                },
+                onLoadMore = {
+                    contentAdapter.addAllToStart(it)
+                    mBinding.rv.keepPosition(it.size, 1)
+                    loadMoreAdapter.onComplete()
+                },
+                onLoadMoreEnd = { loadMoreAdapter.onEnd() },
+                onLoadMoreError = { loadMoreAdapter.onError(it) },
+                onInitialOrRefreshEmpty = {
+                    ToastUtils.show("onInitialOrRefreshEmpty")
+                },
+                onInitialError = {
+                    ToastUtils.show("onInitialError ${it.message}")
+                },
+                show = { mProgressDialog.show() },
+                hide = { mProgressDialog.hide() },
+                onFailed = { requestType, throwable ->
+                    ToastUtils.show("onFailed ${throwable.message}")
+                },
+                onSuccess = { requestType, list ->
+                    ToastUtils.show("onSuccess")
+                },
+            ).collect()
         }
         lifecycleScope.launch {
             mViewModel.loadBeforeResult.initial()

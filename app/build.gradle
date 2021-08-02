@@ -78,7 +78,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation 'com.github.like5188:Common:6.6.6'
-    implementation 'com.github.like5188:Paging:0.0.5'
+    implementation 'com.github.like5188:Paging:0.0.6'
     implementation "io.github.lucksiege:pictureselector:v2.7.3-rc05"
     implementation "io.coil-kt:coil:1.2.2"
     implementation "com.github.getActivity:ToastUtils:9.5"
