@@ -1,4 +1,4 @@
-package com.like.recyclerview.ui
+package com.like.recyclerview.ui.util
 
 import android.graphics.PorterDuff
 import android.view.View

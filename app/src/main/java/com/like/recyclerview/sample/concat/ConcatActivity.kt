@@ -14,8 +14,12 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
-import com.like.recyclerview.ui.LoadMoreAdapter
-import com.like.recyclerview.ui.LoadMoreItem
+import com.like.recyclerview.ui.adapter.EmptyAdapter
+import com.like.recyclerview.ui.adapter.ErrorAdapter
+import com.like.recyclerview.ui.adapter.LoadMoreAdapter
+import com.like.recyclerview.ui.model.EmptyItem
+import com.like.recyclerview.ui.model.ErrorItem
+import com.like.recyclerview.ui.model.LoadMoreItem
 import com.like.recyclerview.utils.keepPosition
 import com.like.recyclerview.utils.scrollToBottom
 import com.like.recyclerview.utils.scrollToTop
@@ -55,8 +59,8 @@ class ConcatActivity : AppCompatActivity() {
                 mViewModel.loadAfterResult.loadAfter?.invoke()
             }
         }
-        mAdapter.addAdapter(contentAdapter)
-        mAdapter.addAdapter(loadMoreAdapter)
+        val emptyAdapter = EmptyAdapter()
+        val errorAdapter = ErrorAdapter()
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -67,6 +71,10 @@ class ConcatActivity : AppCompatActivity() {
         lifecycleScope.launch {
             mViewModel.loadAfterResult.bind(
                 onInitialOrRefresh = {
+                    mAdapter.removeAdapter(emptyAdapter)
+                    mAdapter.removeAdapter(errorAdapter)
+                    mAdapter.addAdapter(contentAdapter)
+                    mAdapter.addAdapter(loadMoreAdapter)
                     contentAdapter.clear()
                     contentAdapter.addAllToEnd(it)
                     mBinding.rv.scrollToTop()
@@ -80,10 +88,20 @@ class ConcatActivity : AppCompatActivity() {
                 onLoadMoreEnd = { loadMoreAdapter.onEnd() },
                 onLoadMoreError = { loadMoreAdapter.onError(it) },
                 onInitialOrRefreshEmpty = {
-                    ToastUtils.show("onInitialOrRefreshEmpty")
+                    mAdapter.removeAdapter(contentAdapter)
+                    mAdapter.removeAdapter(loadMoreAdapter)
+                    mAdapter.removeAdapter(errorAdapter)
+                    mAdapter.addAdapter(emptyAdapter)
+                    emptyAdapter.clear()
+                    emptyAdapter.addToEnd(EmptyItem())
                 },
                 onInitialError = {
-                    ToastUtils.show("onInitialError ${it.message}")
+                    mAdapter.removeAdapter(contentAdapter)
+                    mAdapter.removeAdapter(loadMoreAdapter)
+                    mAdapter.removeAdapter(emptyAdapter)
+                    mAdapter.addAdapter(errorAdapter)
+                    errorAdapter.clear()
+                    errorAdapter.addToEnd(ErrorItem(it))
                 },
                 show = { mProgressDialog.show() },
                 hide = { mProgressDialog.hide() },
@@ -108,8 +126,8 @@ class ConcatActivity : AppCompatActivity() {
                 mViewModel.loadBeforeResult.loadBefore?.invoke()
             }
         }
-        mAdapter.addAdapter(loadMoreAdapter)
-        mAdapter.addAdapter(contentAdapter)
+        val emptyAdapter = EmptyAdapter()
+        val errorAdapter = ErrorAdapter()
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -120,6 +138,10 @@ class ConcatActivity : AppCompatActivity() {
         lifecycleScope.launch {
             mViewModel.loadBeforeResult.bind(
                 onInitialOrRefresh = {
+                    mAdapter.removeAdapter(emptyAdapter)
+                    mAdapter.removeAdapter(errorAdapter)
+                    mAdapter.addAdapter(contentAdapter)
+                    mAdapter.addAdapter(loadMoreAdapter)
                     contentAdapter.clear()
                     contentAdapter.addAllToEnd(it)
                     mBinding.rv.scrollToBottom()
@@ -134,10 +156,20 @@ class ConcatActivity : AppCompatActivity() {
                 onLoadMoreEnd = { loadMoreAdapter.onEnd() },
                 onLoadMoreError = { loadMoreAdapter.onError(it) },
                 onInitialOrRefreshEmpty = {
-                    ToastUtils.show("onInitialOrRefreshEmpty")
+                    mAdapter.removeAdapter(contentAdapter)
+                    mAdapter.removeAdapter(loadMoreAdapter)
+                    mAdapter.removeAdapter(errorAdapter)
+                    mAdapter.addAdapter(emptyAdapter)
+                    emptyAdapter.clear()
+                    emptyAdapter.addToEnd(EmptyItem())
                 },
                 onInitialError = {
-                    ToastUtils.show("onInitialError ${it.message}")
+                    mAdapter.removeAdapter(contentAdapter)
+                    mAdapter.removeAdapter(loadMoreAdapter)
+                    mAdapter.removeAdapter(emptyAdapter)
+                    mAdapter.addAdapter(errorAdapter)
+                    errorAdapter.clear()
+                    errorAdapter.addToEnd(ErrorItem(it))
                 },
                 show = { mProgressDialog.show() },
                 hide = { mProgressDialog.hide() },

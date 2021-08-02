@@ -7,6 +7,7 @@ import kotlinx.coroutines.delay
 
 class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item>?>(pageSize) {
     private var i = 0
+    private var j = 0
 
     override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<Item> {
         delay(1000)
@@ -24,8 +25,23 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item
         val start = pageNo * pageSize + 1
         val end = start + pageSize
         return when (i++) {
+            0 -> {
+                when (j++) {
+                    0 -> throw RuntimeException("initial error")
+                    1 -> emptyList()
+                    else -> {
+                        (start until end).map {
+                            Item(
+                                id = it,
+                                name = "name $it",
+                                des = "des $it"
+                            )
+                        }
+                    }
+                }
+            }
             2 -> {
-                throw RuntimeException("test error")
+                throw RuntimeException("load more error")
             }
             4 -> {
                 emptyList()

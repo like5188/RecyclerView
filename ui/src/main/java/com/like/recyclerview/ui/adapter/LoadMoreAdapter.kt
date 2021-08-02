@@ -1,15 +1,19 @@
-package com.like.recyclerview.ui
+package com.like.recyclerview.ui.adapter
 
 import android.util.Log
 import com.like.recyclerview.adapter.AbstractLoadMoreAdapter
+import com.like.recyclerview.ui.BR
+import com.like.recyclerview.ui.R
 import com.like.recyclerview.ui.databinding.ItemLoadMoreBinding
+import com.like.recyclerview.ui.model.LoadMoreItem
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 class LoadMoreAdapter(onLoad: () -> Unit) : AbstractLoadMoreAdapter<ItemLoadMoreBinding, LoadMoreItem>(onLoad) {
     private lateinit var mLoadMoreItem: LoadMoreItem
 
     override fun onBindViewHolder(holder: BindingViewHolder<ItemLoadMoreBinding>, position: Int) {
-        Log.i("LoadMoreAdapter", "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}")
+        Log.i("LoadMoreAdapter",
+            "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}")
         mLoadMoreItem = mList[position]
         super.onBindViewHolder(holder, position)
         holder.binding.setVariable(BR.loadMoreItem, mLoadMoreItem)

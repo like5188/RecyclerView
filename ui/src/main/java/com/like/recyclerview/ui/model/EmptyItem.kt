@@ -1,7 +1,8 @@
-package com.like.recyclerview.ui
+package com.like.recyclerview.ui.model
 
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import com.like.recyclerview.ui.R
 
 /**
  * 用于 RecyclerView 的空视图
