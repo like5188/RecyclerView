@@ -14,7 +14,8 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
-import com.like.recyclerview.sample.model.Footer
+import com.like.recyclerview.ui.LoadMoreAdapter
+import com.like.recyclerview.ui.LoadMoreItem
 import com.like.recyclerview.utils.keepPosition
 import com.like.recyclerview.utils.scrollToBottom
 import com.like.recyclerview.utils.scrollToTop
@@ -43,8 +44,8 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-//        initLoadAfter()
-        initLoadBefore()
+        initLoadAfter()
+//        initLoadBefore()
     }
 
     private fun initLoadAfter() {
@@ -70,7 +71,7 @@ class ConcatActivity : AppCompatActivity() {
                     contentAdapter.addAllToEnd(it)
                     mBinding.rv.scrollToTop()
                     loadMoreAdapter.clear()
-                    loadMoreAdapter.addToEnd(Footer())
+                    loadMoreAdapter.addToEnd(LoadMoreItem())
                 },
                 onLoadMore = {
                     contentAdapter.addAllToEnd(it)
@@ -123,7 +124,7 @@ class ConcatActivity : AppCompatActivity() {
                     contentAdapter.addAllToEnd(it)
                     mBinding.rv.scrollToBottom()
                     loadMoreAdapter.clear()
-                    loadMoreAdapter.addToEnd(Footer())
+                    loadMoreAdapter.addToEnd(LoadMoreItem())
                 },
                 onLoadMore = {
                     contentAdapter.addAllToStart(it)
