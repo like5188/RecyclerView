@@ -6,53 +6,53 @@ import java.util.*
 /**
  * Adapter中的数据管理。包括Header、Footer、Item的增删改查、交换位置。
  */
-internal class AdapterDataManager<Data> : IAdapterDataManager<Data> {
-    override val mList: ObservableArrayList<Data> = ObservableArrayList<Data>()
+internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList> {
+    override val mList: ObservableArrayList<ValueInList> = ObservableArrayList<ValueInList>()
 
-    override fun get(position: Int): Data {
+    override fun get(position: Int): ValueInList {
         return mList[position]
     }
 
-    override fun update(position: Int, newData: Data) {
+    override fun update(position: Int, newData: ValueInList) {
         mList[position] = newData
     }
 
-    override fun addToStart(data: Data) {
+    override fun addToStart(data: ValueInList) {
         add(0, data)
     }
 
-    override fun addToEnd(data: Data) {
+    override fun addToEnd(data: ValueInList) {
         add(mList.size, data)
     }
 
-    override fun add(position: Int, data: Data) {
+    override fun add(position: Int, data: ValueInList) {
         data ?: return
         if (position < 0 || position > mList.size) return
         mList.add(position, data)
     }
 
-    override fun addAllToStart(list: List<Data>) {
+    override fun addAllToStart(list: List<ValueInList>) {
         addAll(0, list)
     }
 
-    override fun addAllToEnd(list: List<Data>) {
+    override fun addAllToEnd(list: List<ValueInList>) {
         addAll(mList.size, list)
     }
 
-    override fun addAll(position: Int, list: List<Data>) {
+    override fun addAll(position: Int, list: List<ValueInList>) {
         if (list.isEmpty()) return
         if (position < 0 || position > mList.size) return
         mList.addAll(position, list)
     }
 
-    override fun removeAll(list: List<Data>) {
+    override fun removeAll(list: List<ValueInList>) {
         if (list.isEmpty()) return
         list.reversed().forEach {
             remove(it)
         }
     }
 
-    override fun remove(data: Data) {
+    override fun remove(data: ValueInList) {
         data ?: return
         val position = mList.indexOf(data)
         remove(position)

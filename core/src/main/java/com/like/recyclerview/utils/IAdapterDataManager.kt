@@ -2,18 +2,18 @@ package com.like.recyclerview.utils
 
 import androidx.databinding.ObservableArrayList
 
-internal interface IAdapterDataManager<Data> {
-    val mList: ObservableArrayList<Data>
-    fun get(position: Int): Data
-    fun update(position: Int, newData: Data)
-    fun addToStart(data: Data)
-    fun addToEnd(data: Data)
-    fun add(position: Int, data: Data)
-    fun addAllToStart(list: List<Data>)
-    fun addAllToEnd(list: List<Data>)
-    fun addAll(position: Int, list: List<Data>)
-    fun removeAll(list: List<Data>)
-    fun remove(data: Data)
+internal interface IAdapterDataManager<ValueInList> {
+    val mList: ObservableArrayList<ValueInList>
+    fun get(position: Int): ValueInList
+    fun update(position: Int, newData: ValueInList)
+    fun addToStart(data: ValueInList)
+    fun addToEnd(data: ValueInList)
+    fun add(position: Int, data: ValueInList)
+    fun addAllToStart(list: List<ValueInList>)
+    fun addAllToEnd(list: List<ValueInList>)
+    fun addAll(position: Int, list: List<ValueInList>)
+    fun removeAll(list: List<ValueInList>)
+    fun remove(data: ValueInList)
     fun remove(position: Int)
     fun clear()
 

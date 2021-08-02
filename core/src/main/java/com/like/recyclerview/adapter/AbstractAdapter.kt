@@ -20,9 +20,9 @@ import com.like.recyclerview.viewholder.BindingViewHolder
  * 2：数据处理；
  * 3：界面更新；
  */
-abstract class AbstractAdapter<VB : ViewDataBinding, Data>
+abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
     : RecyclerView.Adapter<BindingViewHolder<VB>>(),
-    IAdapterDataManager<Data> by AdapterDataManager() {
+    IAdapterDataManager<ValueInList> by AdapterDataManager() {
     companion object {
         private const val TAG = "AbstractAdapter"
     }
@@ -33,7 +33,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
 
     init {
         mList.addOnListChangedCallback(
-            object : ObservableList.OnListChangedCallback<ObservableArrayList<Data>>() {
+            object : ObservableList.OnListChangedCallback<ObservableArrayList<ValueInList>>() {
                 private fun update(block: () -> Unit) {
                     if (recyclerView.isComputingLayout) {
                         recyclerView.post {
@@ -44,7 +44,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
                     }
                 }
 
-                override fun onChanged(sender: ObservableArrayList<Data>?) {
+                override fun onChanged(sender: ObservableArrayList<ValueInList>?) {
                     Log.d(TAG, "onChanged")
                     // java.lang.IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling
                     update {
@@ -53,7 +53,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
                 }
 
                 override fun onItemRangeRemoved(
-                    sender: ObservableArrayList<Data>?,
+                    sender: ObservableArrayList<ValueInList>?,
                     positionStart: Int,
                     itemCount: Int,
                 ) {
@@ -69,7 +69,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
                 }
 
                 override fun onItemRangeMoved(
-                    sender: ObservableArrayList<Data>?,
+                    sender: ObservableArrayList<ValueInList>?,
                     fromPosition: Int,
                     toPosition: Int,
                     itemCount: Int,
@@ -88,7 +88,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
                 }
 
                 override fun onItemRangeInserted(
-                    sender: ObservableArrayList<Data>?,
+                    sender: ObservableArrayList<ValueInList>?,
                     positionStart: Int,
                     itemCount: Int,
                 ) {
@@ -101,7 +101,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, Data>
                 }
 
                 override fun onItemRangeChanged(
-                    sender: ObservableArrayList<Data>?,
+                    sender: ObservableArrayList<ValueInList>?,
                     positionStart: Int,
                     itemCount: Int,
                 ) {
