@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -44,20 +43,24 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-//        initLoadAfter()
-        initLoadBefore()
+        initLoadAfter()
+//        initLoadBefore()
     }
 
     private fun initLoadAfter() {
         val contentAdapter = ContentAdapter()
         val loadMoreAdapter = LoadMoreAdapter {
-            mViewModel.loadAfterResult.loadAfter?.invoke()
+            lifecycleScope.launch {
+                mViewModel.loadAfterResult.loadAfter?.invoke()
+            }
         }
         mAdapter.addAdapter(contentAdapter)
         mAdapter.addAdapter(loadMoreAdapter)
 
         mBinding.btnRefresh.setOnClickListener {
-            mViewModel.loadAfterResult.refresh()
+            lifecycleScope.launch {
+                mViewModel.loadAfterResult.refresh()
+            }
         }
 
         lifecycleScope.launch {
@@ -81,7 +84,7 @@ class ConcatActivity : AppCompatActivity() {
                                 contentAdapter.clear()
                                 contentAdapter.addAllToEnd(list)
                                 loadMoreAdapter.clear()
-                                loadMoreAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
+                                loadMoreAdapter.addToEnd(Footer())
                             }
                         }
                         type is RequestType.Initial && state is RequestState.Failed -> {
@@ -104,19 +107,26 @@ class ConcatActivity : AppCompatActivity() {
                 }
                 .collect()
         }
-        mViewModel.loadAfterResult.initial()
+
+        lifecycleScope.launch {
+            mViewModel.loadAfterResult.initial()
+        }
     }
 
     private fun initLoadBefore() {
         val contentAdapter = ContentAdapter()
         val loadMoreAdapter = LoadMoreAdapter {
-            mViewModel.loadBeforeResult.loadBefore?.invoke()
+            lifecycleScope.launch {
+                mViewModel.loadBeforeResult.loadBefore?.invoke()
+            }
         }
         mAdapter.addAdapter(loadMoreAdapter)
         mAdapter.addAdapter(contentAdapter)
 
         mBinding.btnRefresh.setOnClickListener {
-            mViewModel.loadBeforeResult.refresh()
+            lifecycleScope.launch {
+                mViewModel.loadBeforeResult.refresh()
+            }
         }
 
         lifecycleScope.launch {
@@ -141,7 +151,7 @@ class ConcatActivity : AppCompatActivity() {
                                 contentAdapter.addAllToEnd(list)
                                 mBinding.rv.scrollToBottom()
                                 loadMoreAdapter.clear()
-                                loadMoreAdapter.addToEnd(Footer(1, ObservableField("onLoading")))
+                                loadMoreAdapter.addToEnd(Footer())
                             }
                         }
                         type is RequestType.Initial && state is RequestState.Failed -> {
@@ -165,6 +175,8 @@ class ConcatActivity : AppCompatActivity() {
                 }
                 .collect()
         }
-        mViewModel.loadBeforeResult.initial()
+        lifecycleScope.launch {
+            mViewModel.loadBeforeResult.initial()
+        }
     }
 }

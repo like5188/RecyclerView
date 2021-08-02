@@ -25,17 +25,17 @@ class LoadMoreAdapter(onLoad: () -> Unit) : AbstractLoadMoreAdapter<FooterBindin
 
     override fun onComplete() {
         super.onComplete()
-        mFooter.name.set("onLoading")
+        mFooter.onComplete()
     }
 
     override fun onEnd() {
         super.onEnd()
-        mFooter.name.set("onEnd")
+        mFooter.onEnd()
     }
 
     override fun onError(throwable: Throwable) {
         super.onError(throwable)
-        mFooter.name.set("onError ${throwable.message} 点击重试")
+        mFooter.onError(throwable)
     }
 
 }
