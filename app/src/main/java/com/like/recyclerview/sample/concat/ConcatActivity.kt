@@ -43,8 +43,8 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-        initLoadAfter()
-//        initLoadBefore()
+//        initLoadAfter()
+        initLoadBefore()
     }
 
     private fun initLoadAfter() {
@@ -117,7 +117,7 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            mViewModel.loadAfterResult.bind(
+            mViewModel.loadBeforeResult.bind(
                 onInitialOrRefresh = {
                     contentAdapter.clear()
                     contentAdapter.addAllToEnd(it)
