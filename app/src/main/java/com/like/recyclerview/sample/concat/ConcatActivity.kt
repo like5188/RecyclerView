@@ -12,6 +12,12 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
+import com.like.recyclerview.ui.adapter.EmptyAdapter
+import com.like.recyclerview.ui.adapter.ErrorAdapter
+import com.like.recyclerview.ui.adapter.LoadMoreAdapter
+import com.like.recyclerview.ui.model.EmptyItem
+import com.like.recyclerview.ui.model.ErrorItem
+import com.like.recyclerview.ui.model.LoadMoreItem
 import com.like.recyclerview.ui.util.LoadMoreAdapterManager
 import kotlinx.coroutines.launch
 
@@ -29,12 +35,15 @@ class ConcatActivity : AppCompatActivity() {
     private val mProgressDialog by lazy {
         ProgressDialog(this)
     }
-    private val isLoadAfter = true
     private val mLoadMoreAdapterManager by lazy {
+        LoadMoreAdapterManager(lifecycleScope, mBinding.rv)
+    }
+    private val isLoadAfter = true
+    private val mResult by lazy {
         if (isLoadAfter) {
-            LoadMoreAdapterManager(lifecycleScope, mBinding.rv, true, mViewModel.loadAfterResult, listOf(ContentAdapter()))
+            mViewModel.loadAfterResult
         } else {
-            LoadMoreAdapterManager(lifecycleScope, mBinding.rv, false, mViewModel.loadBeforeResult, listOf(ContentAdapter()))
+            mViewModel.loadBeforeResult
         }
     }
 
@@ -46,15 +55,36 @@ class ConcatActivity : AppCompatActivity() {
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                if (isLoadAfter) {
-                    mViewModel.loadAfterResult.refresh()
-                } else {
-                    mViewModel.loadBeforeResult.refresh()
-                }
+                mResult.refresh()
             }
         }
 
+        val contentAdapters = listOf(ContentAdapter())
+        val loadMoreAdapter = LoadMoreAdapter {
+            lifecycleScope.launch {
+                if (isLoadAfter) {
+                    mResult.loadAfter?.invoke()
+                } else {
+                    mResult.loadBefore?.invoke()
+                }
+            }
+        }.apply {
+            addToEnd(LoadMoreItem())
+        }
+        val emptyAdapter = EmptyAdapter().apply {
+            addToEnd(EmptyItem())
+        }
+        val errorAdapter = ErrorAdapter().apply {
+            addToEnd(ErrorItem())
+        }
+
         mLoadMoreAdapterManager.collect(
+            isLoadAfter = isLoadAfter,
+            result = mResult,
+            contentAdapters = contentAdapters,
+            loadMoreAdapter = loadMoreAdapter,
+            emptyAdapter = emptyAdapter,
+            errorAdapter = errorAdapter,
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
             onFailed = { requestType, throwable ->

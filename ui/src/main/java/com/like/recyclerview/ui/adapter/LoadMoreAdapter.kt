@@ -12,8 +12,10 @@ class LoadMoreAdapter(onLoad: () -> Unit) : AbstractLoadMoreAdapter<ItemLoadMore
     private lateinit var mLoadMoreItem: LoadMoreItem
 
     override fun onBindViewHolder(holder: BindingViewHolder<ItemLoadMoreBinding>, position: Int) {
-        Log.i("LoadMoreAdapter",
-            "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}")
+        Log.i(
+            "LoadMoreAdapter",
+            "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}"
+        )
         mLoadMoreItem = mList[position]
         super.onBindViewHolder(holder, position)
         holder.binding.setVariable(BR.loadMoreItem, mLoadMoreItem)
@@ -25,17 +27,23 @@ class LoadMoreAdapter(onLoad: () -> Unit) : AbstractLoadMoreAdapter<ItemLoadMore
 
     override fun onComplete() {
         super.onComplete()
-        mLoadMoreItem.onComplete()
+        if (::mLoadMoreItem.isInitialized) {
+            mLoadMoreItem.onComplete()
+        }
     }
 
     override fun onEnd() {
         super.onEnd()
-        mLoadMoreItem.onEnd()
+        if (::mLoadMoreItem.isInitialized) {
+            mLoadMoreItem.onEnd()
+        }
     }
 
     override fun onError(throwable: Throwable) {
         super.onError(throwable)
-        mLoadMoreItem.onError(throwable)
+        if (::mLoadMoreItem.isInitialized) {
+            mLoadMoreItem.onError(throwable)
+        }
     }
 
 }

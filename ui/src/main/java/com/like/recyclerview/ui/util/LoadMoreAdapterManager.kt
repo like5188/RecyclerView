@@ -6,12 +6,7 @@ import com.like.paging.RequestType
 import com.like.paging.Result
 import com.like.paging.util.bind
 import com.like.recyclerview.adapter.AbstractAdapter
-import com.like.recyclerview.ui.adapter.EmptyAdapter
-import com.like.recyclerview.ui.adapter.ErrorAdapter
-import com.like.recyclerview.ui.adapter.LoadMoreAdapter
-import com.like.recyclerview.ui.model.EmptyItem
-import com.like.recyclerview.ui.model.ErrorItem
-import com.like.recyclerview.ui.model.LoadMoreItem
+import com.like.recyclerview.adapter.AbstractLoadMoreAdapter
 import com.like.recyclerview.utils.keepPosition
 import com.like.recyclerview.utils.scrollToBottom
 import com.like.recyclerview.utils.scrollToTop
@@ -19,29 +14,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class LoadMoreAdapterManager<ValueInList>(
+class LoadMoreAdapterManager(
     private val coroutineScope: CoroutineScope,
     private val recyclerView: RecyclerView,
-    private val isLoadAfter: Boolean = true,
-    private val result: Result<List<ValueInList>?>,
-    private val contentAdapters: List<AbstractAdapter<*, ValueInList>>,
 ) {
     private val mAdapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    private val loadMoreAdapter = LoadMoreAdapter {
-        coroutineScope.launch {
-            if (isLoadAfter) {
-                result.loadAfter?.invoke()
-            } else {
-                result.loadBefore?.invoke()
-            }
-        }
-    }
-    private val emptyAdapter = EmptyAdapter()
-    private val errorAdapter = ErrorAdapter()
 
     fun getAdapter(): ConcatAdapter = mAdapter
 
-    fun collect(
+    fun <ValueInList> collect(
+        isLoadAfter: Boolean,
+        result: Result<List<ValueInList>?>,
+        contentAdapters: List<AbstractAdapter<*, ValueInList>>,
+        loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
+        emptyAdapter: AbstractAdapter<*, *>,
+        errorAdapter: AbstractAdapter<*, *>,
         show: (() -> Unit)? = null,
         hide: (() -> Unit)? = null,
         onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
@@ -66,8 +53,7 @@ class LoadMoreAdapterManager<ValueInList>(
                         contentAdapter.addAllToEnd(it)
                     }
                 }
-                loadMoreAdapter.clear()
-                loadMoreAdapter.addToEnd(LoadMoreItem())
+                loadMoreAdapter.onComplete()
                 if (isLoadAfter) {
                     recyclerView.scrollToTop()
                 } else {
@@ -96,8 +82,6 @@ class LoadMoreAdapterManager<ValueInList>(
                 mAdapter.removeAdapter(loadMoreAdapter)
                 mAdapter.removeAdapter(errorAdapter)
                 mAdapter.addAdapter(emptyAdapter)
-                emptyAdapter.clear()
-                emptyAdapter.addToEnd(EmptyItem())
             },
             onInitialError = {
                 for (contentAdapter in contentAdapters) {
@@ -106,8 +90,6 @@ class LoadMoreAdapterManager<ValueInList>(
                 mAdapter.removeAdapter(loadMoreAdapter)
                 mAdapter.removeAdapter(emptyAdapter)
                 mAdapter.addAdapter(errorAdapter)
-                errorAdapter.clear()
-                errorAdapter.addToEnd(ErrorItem())
             },
             show = show,
             hide = hide,

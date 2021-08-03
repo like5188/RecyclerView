@@ -8,7 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
  */
-abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val onLoad: () -> Unit) : AbstractAdapter<VB, ValueInList>() {
+abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val onLoad: () -> Unit) :
+    AbstractAdapter<VB, ValueInList>() {
     companion object {
         private const val TAG = "AbstractLoadMoreAdapter"
     }
@@ -37,7 +38,9 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
      * 请求数据完成时调用此方法。子类可以重写此方法进行界面更新。
      */
     open fun onComplete() {
-        mHolder.binding.root.setOnClickListener(null)
+        if (::mHolder.isInitialized) {
+            mHolder.binding.root.setOnClickListener(null)
+        }
         isRunning.compareAndSet(true, false)
     }
 
@@ -45,7 +48,9 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
      * 没有更多数据时调用此方法。子类可以重写此方法进行界面更新。
      */
     open fun onEnd() {
-        mHolder.binding.root.setOnClickListener(null)
+        if (::mHolder.isInitialized) {
+            mHolder.binding.root.setOnClickListener(null)
+        }
     }
 
     /**
@@ -53,9 +58,11 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
      * 此方法中添加了出错重试点击监听。
      */
     open fun onError(throwable: Throwable) {
-        mHolder.binding.root.setOnClickListener {
-            onComplete()
-            load()
+        if (::mHolder.isInitialized) {
+            mHolder.binding.root.setOnClickListener {
+                onComplete()
+                load()
+            }
         }
     }
 }

@@ -35,7 +35,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
         mList.addOnListChangedCallback(
             object : ObservableList.OnListChangedCallback<ObservableArrayList<ValueInList>>() {
                 private fun update(block: () -> Unit) {
-                    if (recyclerView.isComputingLayout) {
+                    if (::recyclerView.isInitialized && recyclerView.isComputingLayout) {
                         recyclerView.post {
                             block()
                         }
