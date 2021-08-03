@@ -39,3 +39,15 @@ fun ConcatAdapter.removeAllExclude(vararg adapters: RecyclerView.Adapter<out Rec
         }
     }
 }
+
+/**
+ * 移除所有，除了指定的 adapter，如果指定的 adapter 不存在，则按顺序添加。
+ */
+fun ConcatAdapter.removeAllExcludeAndAdd(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
+    removeAllExclude(*adapters)
+    adapters.forEachIndexed { index, adapter ->
+        if (!contains(adapter)) {
+            addAdapter(index, adapter)
+        }
+    }
+}

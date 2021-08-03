@@ -31,27 +31,18 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     ) {
         result.bind(
             onData = {
-                mAdapter.removeAllExclude(contentAdapter)
-                if (!mAdapter.contains(contentAdapter)) {
-                    mAdapter.addAdapter(contentAdapter)
-                }
+                mAdapter.removeAllExcludeAndAdd(contentAdapter)
                 contentAdapter.clear()
                 contentAdapter.addAllToEnd(it)
             },
             onEmpty = {
                 emptyAdapter?.apply {
-                    mAdapter.removeAllExclude(this)
-                    if (!mAdapter.contains(this)) {
-                        mAdapter.addAdapter(this)
-                    }
+                    mAdapter.removeAllExcludeAndAdd(this)
                 }
             },
             onError = {
                 errorAdapter?.apply {
-                    mAdapter.removeAllExclude(this)
-                    if (!mAdapter.contains(this)) {
-                        mAdapter.addAdapter(this)
-                    }
+                    mAdapter.removeAllExcludeAndAdd(this)
                     onError(it)
                 }
             },
@@ -78,15 +69,10 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     ) = withContext(Dispatchers.Main) {
         val flow = result.bind(
             onInitialOrRefresh = {
-                mAdapter.removeAllExclude(contentAdapter, loadMoreAdapter)
-                if (!mAdapter.contains(contentAdapter)) {
-                    if (isLoadAfter) {
-                        mAdapter.addAdapter(contentAdapter)
-                        mAdapter.addAdapter(loadMoreAdapter)
-                    } else {
-                        mAdapter.addAdapter(loadMoreAdapter)
-                        mAdapter.addAdapter(contentAdapter)
-                    }
+                if (isLoadAfter) {
+                    mAdapter.removeAllExcludeAndAdd(contentAdapter, loadMoreAdapter)
+                } else {
+                    mAdapter.removeAllExcludeAndAdd(loadMoreAdapter, contentAdapter)
                 }
                 contentAdapter.clear()
                 contentAdapter.addAllToEnd(it)
@@ -110,18 +96,12 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
             onLoadMoreError = { loadMoreAdapter.onError(it) },
             onInitialOrRefreshEmpty = {
                 emptyAdapter?.apply {
-                    mAdapter.removeAllExclude(this)
-                    if (!mAdapter.contains(this)) {
-                        mAdapter.addAdapter(this)
-                    }
+                    mAdapter.removeAllExcludeAndAdd(this)
                 }
             },
             onInitialError = {
                 errorAdapter?.apply {
-                    mAdapter.removeAllExclude(this)
-                    if (!mAdapter.contains(this)) {
-                        mAdapter.addAdapter(this)
-                    }
+                    mAdapter.removeAllExcludeAndAdd(this)
                     onError(it)
                 }
             },
