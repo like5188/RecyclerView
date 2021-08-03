@@ -18,6 +18,9 @@ class ConcatAdapterWrapper {
 
     fun getAdapter(): ConcatAdapter = mAdapter
 
+    /**
+     * 不分页
+     */
     suspend fun <ValueInList> collect(
         result: (suspend () -> List<ValueInList>?),
         contentAdapters: List<AbstractAdapter<*, ValueInList>>,
@@ -68,6 +71,9 @@ class ConcatAdapterWrapper {
         )
     }
 
+    /**
+     * 分页
+     */
     suspend fun <ValueInList> collect(
         recyclerView: RecyclerView,
         isLoadAfter: Boolean,
