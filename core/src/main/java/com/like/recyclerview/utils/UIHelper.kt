@@ -86,7 +86,7 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         hide: (() -> Unit)? = null,
         onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
         onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
-    ) = withContext(Dispatchers.IO) {
+    ) = withContext(Dispatchers.Main) {
         val flow = result.bind(
             onInitialOrRefresh = {
                 emptyAdapter?.apply {
