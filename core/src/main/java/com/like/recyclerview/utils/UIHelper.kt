@@ -23,7 +23,7 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
      */
     suspend fun <ValueInList> collect(
         result: (suspend () -> List<ValueInList>?),
-        contentAdapters: List<AbstractAdapter<*, ValueInList>>,
+        contentAdapter: AbstractAdapter<*, ValueInList>,
         emptyAdapter: AbstractAdapter<*, *>? = null,
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
         show: (() -> Unit)? = null,
@@ -31,36 +31,19 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     ) {
         result.bind(
             onData = {
-                emptyAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
-                errorAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
-                for (contentAdapter in contentAdapters) {
-                    mAdapter.addAdapter(contentAdapter)
-                    contentAdapter.clear()
-                    contentAdapter.addAllToEnd(it)
-                }
+                mAdapter.clear()
+                mAdapter.addAdapter(contentAdapter)
+                contentAdapter.clear()
+                contentAdapter.addAllToEnd(it)
             },
             onEmpty = {
-                for (contentAdapter in contentAdapters) {
-                    mAdapter.removeAdapter(contentAdapter)
-                }
-                errorAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
+                mAdapter.clear()
                 emptyAdapter?.apply {
                     mAdapter.addAdapter(this)
                 }
             },
             onError = {
-                for (contentAdapter in contentAdapters) {
-                    mAdapter.removeAdapter(contentAdapter)
-                }
-                emptyAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
+                mAdapter.clear()
                 errorAdapter?.apply {
                     mAdapter.addAdapter(this)
                     onError(it)

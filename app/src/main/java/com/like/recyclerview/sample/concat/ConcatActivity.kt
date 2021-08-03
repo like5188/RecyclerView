@@ -55,7 +55,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoad() {
-        val contentAdapters = listOf(ContentAdapter())
+        val contentAdapter = ContentAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -67,8 +67,8 @@ class ConcatActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 mUIHelper.collect(
                     result = mViewModel::getData,
-                    contentAdapters = contentAdapters,
-                    emptyAdapter = emptyAdapter,
+                    contentAdapter = contentAdapter,
+//                    emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
                     show = { mProgressDialog.show() },
                     hide = { mProgressDialog.hide() },
