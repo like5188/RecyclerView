@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import com.hjq.toast.ToastUtils
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
@@ -18,7 +19,7 @@ import com.like.recyclerview.ui.adapter.LoadMoreAdapter
 import com.like.recyclerview.ui.model.EmptyItem
 import com.like.recyclerview.ui.model.ErrorItem
 import com.like.recyclerview.ui.model.LoadMoreItem
-import com.like.recyclerview.ui.util.ConcatAdapterWrapper
+import com.like.recyclerview.utils.UIHelper
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -35,8 +36,11 @@ class ConcatActivity : AppCompatActivity() {
     private val mProgressDialog by lazy {
         ProgressDialog(this)
     }
-    private val mLoadMoreAdapterManager by lazy {
-        ConcatAdapterWrapper()
+    private val mAdapter by lazy {
+        ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
+    }
+    private val mUIHelper by lazy {
+        UIHelper(mAdapter)
     }
     private val isLoadAfter = false
 
@@ -44,7 +48,7 @@ class ConcatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        mBinding.rv.adapter = mLoadMoreAdapterManager.getAdapter()
+        mBinding.rv.adapter = mAdapter
 
         initLoad()
 //        initLoadMore()
@@ -61,7 +65,7 @@ class ConcatActivity : AppCompatActivity() {
 
         fun getData() {
             lifecycleScope.launch {
-                mLoadMoreAdapterManager.collect(
+                mUIHelper.collect(
                     result = mViewModel::getData,
                     contentAdapters = contentAdapters,
                     emptyAdapter = emptyAdapter,
@@ -112,7 +116,7 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            mLoadMoreAdapterManager.collect(
+            mUIHelper.collect(
                 recyclerView = mBinding.rv,
                 isLoadAfter = isLoadAfter,
                 result = result,

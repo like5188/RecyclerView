@@ -1,4 +1,4 @@
-package com.like.recyclerview.ui.util
+package com.like.recyclerview.utils
 
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ConcatAdapterWrapper {
-    private val mAdapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-
-    fun getAdapter(): ConcatAdapter = mAdapter
+/**
+ * 辅助搜集分页或者不分页数据，并绑定到界面。
+ */
+class UIHelper(private val mAdapter: ConcatAdapter) {
 
     /**
      * 不分页
