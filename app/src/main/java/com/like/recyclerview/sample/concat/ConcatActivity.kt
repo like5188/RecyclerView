@@ -36,7 +36,7 @@ class ConcatActivity : AppCompatActivity() {
         ProgressDialog(this)
     }
     private val mLoadMoreAdapterManager by lazy {
-        LoadMoreAdapterManager(lifecycleScope, mBinding.rv)
+        LoadMoreAdapterManager()
     }
     private val isLoadAfter = false
 
@@ -46,6 +46,40 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mLoadMoreAdapterManager.getAdapter()
 
+        initLoad()
+//        initLoadMore()
+    }
+
+    private fun initLoad() {
+        val contentAdapters = listOf(ContentAdapter())
+        val emptyAdapter = EmptyAdapter().apply {
+            addToEnd(EmptyItem())
+        }
+        val errorAdapter = ErrorAdapter().apply {
+            addToEnd(ErrorItem())
+        }
+
+        fun getData() {
+            lifecycleScope.launch {
+                mLoadMoreAdapterManager.collect(
+                    result = mViewModel::getData,
+                    contentAdapters = contentAdapters,
+                    emptyAdapter = emptyAdapter,
+                    errorAdapter = errorAdapter,
+                    show = { mProgressDialog.show() },
+                    hide = { mProgressDialog.hide() },
+                )
+            }
+        }
+
+        mBinding.btnRefresh.setOnClickListener {
+            getData()
+        }
+
+        getData()
+    }
+
+    private fun initLoadMore() {
         val result = if (isLoadAfter) {
             mViewModel.loadAfterResult
         } else {
@@ -77,22 +111,25 @@ class ConcatActivity : AppCompatActivity() {
             addToEnd(LoadMoreItem())
         }
 
-        mLoadMoreAdapterManager.collect(
-            isLoadAfter = isLoadAfter,
-            result = result,
-            contentAdapters = contentAdapters,
-            emptyAdapter = emptyAdapter,
-            errorAdapter = errorAdapter,
-            loadMoreAdapter = loadMoreAdapter,
-            show = { mProgressDialog.show() },
-            hide = { mProgressDialog.hide() },
-            onFailed = { requestType, throwable ->
-                ToastUtils.show("onFailed ${throwable.message}")
-            },
-            onSuccess = { requestType, list ->
-                ToastUtils.show("onSuccess")
-            },
-        )
+        lifecycleScope.launch {
+            mLoadMoreAdapterManager.collect(
+                recyclerView = mBinding.rv,
+                isLoadAfter = isLoadAfter,
+                result = result,
+                contentAdapters = contentAdapters,
+                emptyAdapter = emptyAdapter,
+                errorAdapter = errorAdapter,
+                loadMoreAdapter = loadMoreAdapter,
+                show = { mProgressDialog.show() },
+                hide = { mProgressDialog.hide() },
+                onFailed = { requestType, throwable ->
+                    ToastUtils.show("onFailed ${throwable.message}")
+                },
+                onSuccess = { requestType, list ->
+                    ToastUtils.show("onSuccess")
+                },
+            )
+        }
     }
 
 }

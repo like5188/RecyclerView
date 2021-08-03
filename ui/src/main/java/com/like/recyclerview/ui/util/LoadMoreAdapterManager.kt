@@ -8,19 +8,68 @@ import com.like.paging.util.bind
 import com.like.recyclerview.adapter.AbstractAdapter
 import com.like.recyclerview.adapter.AbstractErrorAdapter
 import com.like.recyclerview.adapter.AbstractLoadMoreAdapter
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class LoadMoreAdapterManager(
-    private val coroutineScope: CoroutineScope,
-    private val recyclerView: RecyclerView,
-) {
+class LoadMoreAdapterManager {
     private val mAdapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
 
     fun getAdapter(): ConcatAdapter = mAdapter
 
-    fun <ValueInList> collect(
+    suspend fun <ValueInList> collect(
+        result: (suspend () -> List<ValueInList>?),
+        contentAdapters: List<AbstractAdapter<*, ValueInList>>,
+        emptyAdapter: AbstractAdapter<*, *>? = null,
+        errorAdapter: AbstractErrorAdapter<*, *>? = null,
+        show: (() -> Unit)? = null,
+        hide: (() -> Unit)? = null,
+    ) {
+        result.bind(
+            onData = {
+                emptyAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                errorAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                for (contentAdapter in contentAdapters) {
+                    mAdapter.addAdapter(contentAdapter)
+                    contentAdapter.clear()
+                    contentAdapter.addAllToEnd(it)
+                }
+            },
+            onEmpty = {
+                for (contentAdapter in contentAdapters) {
+                    mAdapter.removeAdapter(contentAdapter)
+                }
+                errorAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                emptyAdapter?.apply {
+                    mAdapter.addAdapter(this)
+                }
+            },
+            onError = {
+                for (contentAdapter in contentAdapters) {
+                    mAdapter.removeAdapter(contentAdapter)
+                }
+                emptyAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                errorAdapter?.apply {
+                    mAdapter.addAdapter(this)
+                    onError(it)
+                }
+            },
+            show = show,
+            hide = hide,
+        )
+    }
+
+    suspend fun <ValueInList> collect(
+        recyclerView: RecyclerView,
         isLoadAfter: Boolean,
         result: Result<List<ValueInList>?>,
         contentAdapters: List<AbstractAdapter<*, ValueInList>>,
@@ -31,7 +80,7 @@ class LoadMoreAdapterManager(
         hide: (() -> Unit)? = null,
         onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
         onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
-    ) {
+    ) = withContext(Dispatchers.IO) {
         val flow = result.bind(
             onInitialOrRefresh = {
                 emptyAdapter?.apply {
@@ -116,10 +165,10 @@ class LoadMoreAdapterManager(
             onFailed = onFailed,
             onSuccess = onSuccess,
         )
-        coroutineScope.launch {
+        launch {
             flow.collect()
         }
-        coroutineScope.launch {
+        launch {
             result.initial()
         }
     }

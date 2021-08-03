@@ -1,6 +1,7 @@
 package com.like.recyclerview.sample.concat
 
 import androidx.lifecycle.ViewModel
+import com.like.recyclerview.sample.model.Item
 
 class ConcatViewModel : ViewModel() {
     companion object {
@@ -9,5 +10,9 @@ class ConcatViewModel : ViewModel() {
 
     val loadAfterResult = LoadAfterDataSource(PAGE_SIZE).result()
     val loadBeforeResult = LoadBeforeDataSource(PAGE_SIZE).result()
+    private val loadResult = LoadDataSource()
 
+    suspend fun getData(): List<Item> {
+        return loadResult.load()
+    }
 }
