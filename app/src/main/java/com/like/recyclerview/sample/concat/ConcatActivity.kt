@@ -68,7 +68,7 @@ class ConcatActivity : AppCompatActivity() {
                 mUIHelper.collect(
                     result = mViewModel::getData,
                     contentAdapter = contentAdapter,
-//                    emptyAdapter = emptyAdapter,
+                    emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
                     show = { mProgressDialog.show() },
                     hide = { mProgressDialog.hide() },

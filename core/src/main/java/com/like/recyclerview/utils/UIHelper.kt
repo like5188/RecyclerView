@@ -31,21 +31,27 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     ) {
         result.bind(
             onData = {
-                mAdapter.clear()
-                mAdapter.addAdapter(contentAdapter)
+                mAdapter.removeAllExclude(contentAdapter)
+                if (!mAdapter.contains(contentAdapter)) {
+                    mAdapter.addAdapter(contentAdapter)
+                }
                 contentAdapter.clear()
                 contentAdapter.addAllToEnd(it)
             },
             onEmpty = {
-                mAdapter.clear()
                 emptyAdapter?.apply {
-                    mAdapter.addAdapter(this)
+                    mAdapter.removeAllExclude(this)
+                    if (!mAdapter.contains(this)) {
+                        mAdapter.addAdapter(this)
+                    }
                 }
             },
             onError = {
-                mAdapter.clear()
                 errorAdapter?.apply {
-                    mAdapter.addAdapter(this)
+                    mAdapter.removeAllExclude(this)
+                    if (!mAdapter.contains(this)) {
+                        mAdapter.addAdapter(this)
+                    }
                     onError(it)
                 }
             },
