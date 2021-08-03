@@ -1,4 +1,4 @@
-package com.like.recyclerview.utils
+package com.like.recyclerview.ui.util
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView

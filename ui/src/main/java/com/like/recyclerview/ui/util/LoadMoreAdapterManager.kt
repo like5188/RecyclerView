@@ -8,9 +8,6 @@ import com.like.paging.util.bind
 import com.like.recyclerview.adapter.AbstractAdapter
 import com.like.recyclerview.adapter.AbstractErrorAdapter
 import com.like.recyclerview.adapter.AbstractLoadMoreAdapter
-import com.like.recyclerview.utils.keepPosition
-import com.like.recyclerview.utils.scrollToBottom
-import com.like.recyclerview.utils.scrollToTop
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
