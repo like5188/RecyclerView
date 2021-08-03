@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LoadMoreAdapterManager {
+class ConcatAdapterWrapper {
     private val mAdapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
 
     fun getAdapter(): ConcatAdapter = mAdapter

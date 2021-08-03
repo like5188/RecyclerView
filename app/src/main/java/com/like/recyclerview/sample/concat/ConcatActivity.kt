@@ -18,7 +18,7 @@ import com.like.recyclerview.ui.adapter.LoadMoreAdapter
 import com.like.recyclerview.ui.model.EmptyItem
 import com.like.recyclerview.ui.model.ErrorItem
 import com.like.recyclerview.ui.model.LoadMoreItem
-import com.like.recyclerview.ui.util.LoadMoreAdapterManager
+import com.like.recyclerview.ui.util.ConcatAdapterWrapper
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -36,7 +36,7 @@ class ConcatActivity : AppCompatActivity() {
         ProgressDialog(this)
     }
     private val mLoadMoreAdapterManager by lazy {
-        LoadMoreAdapterManager()
+        ConcatAdapterWrapper()
     }
     private val isLoadAfter = false
 
