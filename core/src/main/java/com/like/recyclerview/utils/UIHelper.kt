@@ -67,10 +67,10 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         recyclerView: RecyclerView,
         isLoadAfter: Boolean,
         result: Result<List<ValueInList>?>,
-        contentAdapters: List<AbstractAdapter<*, ValueInList>>,
+        contentAdapter: AbstractAdapter<*, ValueInList>,
+        loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
         emptyAdapter: AbstractAdapter<*, *>? = null,
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
-        loadMoreAdapter: AbstractLoadMoreAdapter<*, *>? = null,
         show: (() -> Unit)? = null,
         hide: (() -> Unit)? = null,
         onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
@@ -78,33 +78,19 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     ) = withContext(Dispatchers.Main) {
         val flow = result.bind(
             onInitialOrRefresh = {
-                emptyAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
-                errorAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
-                if (isLoadAfter) {
-                    for (contentAdapter in contentAdapters) {
+                mAdapter.removeAllExclude(contentAdapter, loadMoreAdapter)
+                if (!mAdapter.contains(contentAdapter)) {
+                    if (isLoadAfter) {
                         mAdapter.addAdapter(contentAdapter)
-                        contentAdapter.clear()
-                        contentAdapter.addAllToEnd(it)
-                    }
-                    loadMoreAdapter?.apply {
-                        mAdapter.addAdapter(this)
-                        onComplete()
-                    }
-                } else {
-                    loadMoreAdapter?.apply {
-                        mAdapter.addAdapter(this)
-                        onComplete()
-                    }
-                    for (contentAdapter in contentAdapters) {
+                        mAdapter.addAdapter(loadMoreAdapter)
+                    } else {
+                        mAdapter.addAdapter(loadMoreAdapter)
                         mAdapter.addAdapter(contentAdapter)
-                        contentAdapter.clear()
-                        contentAdapter.addAllToEnd(it)
                     }
                 }
+                contentAdapter.clear()
+                contentAdapter.addAllToEnd(it)
+                loadMoreAdapter.onComplete()
                 if (isLoadAfter) {
                     recyclerView.scrollToTop()
                 } else {
@@ -113,45 +99,29 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
             },
             onLoadMore = {
                 if (isLoadAfter) {
-                    for (contentAdapter in contentAdapters) {
-                        contentAdapter.addAllToEnd(it)
-                    }
+                    contentAdapter.addAllToEnd(it)
                 } else {
-                    for (contentAdapter in contentAdapters) {
-                        contentAdapter.addAllToStart(it)
-                    }
+                    contentAdapter.addAllToStart(it)
                     recyclerView.keepPosition(it.size, 1)
                 }
-                loadMoreAdapter?.onComplete()
+                loadMoreAdapter.onComplete()
             },
-            onLoadMoreEnd = { loadMoreAdapter?.onEnd() },
-            onLoadMoreError = { loadMoreAdapter?.onError(it) },
+            onLoadMoreEnd = { loadMoreAdapter.onEnd() },
+            onLoadMoreError = { loadMoreAdapter.onError(it) },
             onInitialOrRefreshEmpty = {
-                for (contentAdapter in contentAdapters) {
-                    mAdapter.removeAdapter(contentAdapter)
-                }
-                loadMoreAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
-                errorAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
                 emptyAdapter?.apply {
-                    mAdapter.addAdapter(this)
+                    mAdapter.removeAllExclude(this)
+                    if (!mAdapter.contains(this)) {
+                        mAdapter.addAdapter(this)
+                    }
                 }
             },
             onInitialError = {
-                for (contentAdapter in contentAdapters) {
-                    mAdapter.removeAdapter(contentAdapter)
-                }
-                loadMoreAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
-                emptyAdapter?.apply {
-                    mAdapter.removeAdapter(this)
-                }
                 errorAdapter?.apply {
-                    mAdapter.addAdapter(this)
+                    mAdapter.removeAllExclude(this)
+                    if (!mAdapter.contains(this)) {
+                        mAdapter.addAdapter(this)
+                    }
                     onError(it)
                 }
             },

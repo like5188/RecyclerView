@@ -42,7 +42,7 @@ class ConcatActivity : AppCompatActivity() {
     private val mUIHelper by lazy {
         UIHelper(mAdapter)
     }
-    private val isLoadAfter = false
+    private val isLoadAfter = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,8 +50,8 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-        initLoad()
-//        initLoadMore()
+//        initLoad()
+        initLoadMore()
     }
 
     private fun initLoad() {
@@ -96,7 +96,7 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        val contentAdapters = listOf(ContentAdapter())
+        val contentAdapter = ContentAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -120,10 +120,10 @@ class ConcatActivity : AppCompatActivity() {
                 recyclerView = mBinding.rv,
                 isLoadAfter = isLoadAfter,
                 result = result,
-                contentAdapters = contentAdapters,
+                contentAdapter = contentAdapter,
+                loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,
-                loadMoreAdapter = loadMoreAdapter,
                 show = { mProgressDialog.show() },
                 hide = { mProgressDialog.hide() },
                 onFailed = { requestType, throwable ->
