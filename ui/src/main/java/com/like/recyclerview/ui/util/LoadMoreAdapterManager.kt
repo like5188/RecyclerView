@@ -6,6 +6,7 @@ import com.like.paging.RequestType
 import com.like.paging.Result
 import com.like.paging.util.bind
 import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.adapter.AbstractErrorAdapter
 import com.like.recyclerview.adapter.AbstractLoadMoreAdapter
 import com.like.recyclerview.utils.keepPosition
 import com.like.recyclerview.utils.scrollToBottom
@@ -26,9 +27,9 @@ class LoadMoreAdapterManager(
         isLoadAfter: Boolean,
         result: Result<List<ValueInList>?>,
         contentAdapters: List<AbstractAdapter<*, ValueInList>>,
-        loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
         emptyAdapter: AbstractAdapter<*, *>,
-        errorAdapter: AbstractAdapter<*, *>,
+        errorAdapter: AbstractErrorAdapter<*, *>,
+        loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
         show: (() -> Unit)? = null,
         hide: (() -> Unit)? = null,
         onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,

@@ -169,14 +169,11 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
         mOnItemLongClickListeners.clear()
     }
 
+    /**
+     * 数据插入成功回调
+     */
     open fun onItemRangeInserted() {
 
-    }
-
-    /**
-     * 初始化出错时调用此方法。子类可以重写此方法进行界面更新。
-     */
-    open fun onError(throwable: Throwable) {
     }
 
 }

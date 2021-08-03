@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
  */
 abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val onLoad: () -> Unit) :
-    AbstractAdapter<VB, ValueInList>() {
+    AbstractErrorAdapter<VB, ValueInList>() {
     companion object {
         private const val TAG = "AbstractLoadMoreAdapter"
     }

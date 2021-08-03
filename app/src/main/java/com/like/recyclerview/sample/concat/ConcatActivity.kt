@@ -60,6 +60,12 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         val contentAdapters = listOf(ContentAdapter())
+        val emptyAdapter = EmptyAdapter().apply {
+            addToEnd(EmptyItem())
+        }
+        val errorAdapter = ErrorAdapter().apply {
+            addToEnd(ErrorItem())
+        }
         val loadMoreAdapter = LoadMoreAdapter {
             lifecycleScope.launch {
                 if (isLoadAfter) {
@@ -71,20 +77,14 @@ class ConcatActivity : AppCompatActivity() {
         }.apply {
             addToEnd(LoadMoreItem())
         }
-        val emptyAdapter = EmptyAdapter().apply {
-            addToEnd(EmptyItem())
-        }
-        val errorAdapter = ErrorAdapter().apply {
-            addToEnd(ErrorItem())
-        }
 
         mLoadMoreAdapterManager.collect(
             isLoadAfter = isLoadAfter,
             result = mResult,
             contentAdapters = contentAdapters,
-            loadMoreAdapter = loadMoreAdapter,
             emptyAdapter = emptyAdapter,
             errorAdapter = errorAdapter,
+            loadMoreAdapter = loadMoreAdapter,
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
             onFailed = { requestType, throwable ->
