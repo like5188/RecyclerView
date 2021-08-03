@@ -24,9 +24,9 @@ class LoadMoreAdapterManager(
         isLoadAfter: Boolean,
         result: Result<List<ValueInList>?>,
         contentAdapters: List<AbstractAdapter<*, ValueInList>>,
-        emptyAdapter: AbstractAdapter<*, *>,
-        errorAdapter: AbstractErrorAdapter<*, *>,
-        loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
+        emptyAdapter: AbstractAdapter<*, *>? = null,
+        errorAdapter: AbstractErrorAdapter<*, *>? = null,
+        loadMoreAdapter: AbstractLoadMoreAdapter<*, *>? = null,
         show: (() -> Unit)? = null,
         hide: (() -> Unit)? = null,
         onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
@@ -34,24 +34,33 @@ class LoadMoreAdapterManager(
     ) {
         val flow = result.bind(
             onInitialOrRefresh = {
-                mAdapter.removeAdapter(emptyAdapter)
-                mAdapter.removeAdapter(errorAdapter)
+                emptyAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                errorAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
                 if (isLoadAfter) {
                     for (contentAdapter in contentAdapters) {
                         mAdapter.addAdapter(contentAdapter)
                         contentAdapter.clear()
                         contentAdapter.addAllToEnd(it)
                     }
-                    mAdapter.addAdapter(loadMoreAdapter)
+                    loadMoreAdapter?.apply {
+                        mAdapter.addAdapter(this)
+                        onComplete()
+                    }
                 } else {
-                    mAdapter.addAdapter(loadMoreAdapter)
+                    loadMoreAdapter?.apply {
+                        mAdapter.addAdapter(this)
+                        onComplete()
+                    }
                     for (contentAdapter in contentAdapters) {
                         mAdapter.addAdapter(contentAdapter)
                         contentAdapter.clear()
                         contentAdapter.addAllToEnd(it)
                     }
                 }
-                loadMoreAdapter.onComplete()
                 if (isLoadAfter) {
                     recyclerView.scrollToTop()
                 } else {
@@ -69,26 +78,38 @@ class LoadMoreAdapterManager(
                     }
                     recyclerView.keepPosition(it.size, 1)
                 }
-                loadMoreAdapter.onComplete()
+                loadMoreAdapter?.onComplete()
             },
-            onLoadMoreEnd = { loadMoreAdapter.onEnd() },
-            onLoadMoreError = { loadMoreAdapter.onError(it) },
+            onLoadMoreEnd = { loadMoreAdapter?.onEnd() },
+            onLoadMoreError = { loadMoreAdapter?.onError(it) },
             onInitialOrRefreshEmpty = {
                 for (contentAdapter in contentAdapters) {
                     mAdapter.removeAdapter(contentAdapter)
                 }
-                mAdapter.removeAdapter(loadMoreAdapter)
-                mAdapter.removeAdapter(errorAdapter)
-                mAdapter.addAdapter(emptyAdapter)
+                loadMoreAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                errorAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                emptyAdapter?.apply {
+                    mAdapter.addAdapter(this)
+                }
             },
             onInitialError = {
                 for (contentAdapter in contentAdapters) {
                     mAdapter.removeAdapter(contentAdapter)
                 }
-                mAdapter.removeAdapter(loadMoreAdapter)
-                mAdapter.removeAdapter(emptyAdapter)
-                mAdapter.addAdapter(errorAdapter)
-                errorAdapter.onError(it)
+                loadMoreAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                emptyAdapter?.apply {
+                    mAdapter.removeAdapter(this)
+                }
+                errorAdapter?.apply {
+                    mAdapter.addAdapter(this)
+                    onError(it)
+                }
             },
             show = show,
             hide = hide,
