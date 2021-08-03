@@ -22,6 +22,7 @@ fun ConcatAdapter.contains(adapter: RecyclerView.Adapter<out RecyclerView.ViewHo
  * 移除所有指定的 adapter
  */
 fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
+    if (adapters.isEmpty()) return
     this.adapters.forEach {
         if (adapters.contains(it)) {
             this.removeAdapter(it)
@@ -33,9 +34,13 @@ fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerVi
  * 移除所有，除了指定的 adapter
  */
 fun ConcatAdapter.removeAllExclude(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
-    this.adapters.forEach {
-        if (!adapters.contains(it)) {
-            this.removeAdapter(it)
+    if (adapters.isEmpty()) {
+        clear()
+    } else {
+        this.adapters.forEach {
+            if (!adapters.contains(it)) {
+                this.removeAdapter(it)
+            }
         }
     }
 }
