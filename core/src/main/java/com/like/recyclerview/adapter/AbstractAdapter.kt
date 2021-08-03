@@ -59,12 +59,8 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                 ) {
                     Log.d(TAG, "onItemRangeRemoved positionStart=$positionStart itemCount=$itemCount")
                     update {
-                        if (sender?.isEmpty() == true) {
-                            notifyDataSetChanged()
-                        } else {
-                            notifyItemRangeRemoved(positionStart, itemCount)
-                            notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
-                        }
+                        notifyItemRangeRemoved(positionStart, itemCount)
+                        notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
                     }
                 }
 
