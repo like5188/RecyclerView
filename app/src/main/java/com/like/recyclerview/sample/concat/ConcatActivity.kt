@@ -55,7 +55,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoad() {
-        val contentAdapter = ContentAdapter()
+        val listAdapter = ListAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -67,7 +67,7 @@ class ConcatActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 mUIHelper.collect(
                     result = mViewModel::getData,
-                    contentAdapter = contentAdapter,
+                    listAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
                     show = { mProgressDialog.show() },
@@ -96,7 +96,7 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        val contentAdapter = ContentAdapter()
+        val listAdapter = ListAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -120,7 +120,7 @@ class ConcatActivity : AppCompatActivity() {
                 recyclerView = mBinding.rv,
                 isLoadAfter = isLoadAfter,
                 result = result,
-                contentAdapter = contentAdapter,
+                listAdapter = listAdapter,
                 loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,

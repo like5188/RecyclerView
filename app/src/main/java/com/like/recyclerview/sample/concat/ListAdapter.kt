@@ -8,7 +8,7 @@ import com.like.recyclerview.sample.databinding.Item1Binding
 import com.like.recyclerview.sample.model.Item
 import com.like.recyclerview.viewholder.BindingViewHolder
 
-class ContentAdapter : AbstractAdapter<Item1Binding, Item>() {
+class ListAdapter : AbstractAdapter<Item1Binding, Item>() {
 
     override fun onBindViewHolder(holder: BindingViewHolder<Item1Binding>, position: Int) {
         Log.v(

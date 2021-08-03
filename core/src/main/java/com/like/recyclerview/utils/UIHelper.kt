@@ -23,7 +23,7 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
      */
     suspend fun <ValueInList> collect(
         result: (suspend () -> List<ValueInList>?),
-        contentAdapter: AbstractAdapter<*, ValueInList>,
+        listAdapter: AbstractAdapter<*, ValueInList>,
         emptyAdapter: AbstractAdapter<*, *>? = null,
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
         show: (() -> Unit)? = null,
@@ -31,9 +31,9 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     ) {
         result.bind(
             onData = {
-                mAdapter.removeAllExcludeAndAdd(contentAdapter)
-                contentAdapter.clear()
-                contentAdapter.addAllToEnd(it)
+                mAdapter.removeAllExcludeAndAdd(listAdapter)
+                listAdapter.clear()
+                listAdapter.addAllToEnd(it)
             },
             onEmpty = {
                 emptyAdapter?.apply {
@@ -58,7 +58,7 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         recyclerView: RecyclerView,
         isLoadAfter: Boolean,
         result: Result<List<ValueInList>?>,
-        contentAdapter: AbstractAdapter<*, ValueInList>,
+        listAdapter: AbstractAdapter<*, ValueInList>,
         loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
         emptyAdapter: AbstractAdapter<*, *>? = null,
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
@@ -70,12 +70,12 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         val flow = result.bind(
             onInitialOrRefresh = {
                 if (isLoadAfter) {
-                    mAdapter.removeAllExcludeAndAdd(contentAdapter, loadMoreAdapter)
+                    mAdapter.removeAllExcludeAndAdd(listAdapter, loadMoreAdapter)
                 } else {
-                    mAdapter.removeAllExcludeAndAdd(loadMoreAdapter, contentAdapter)
+                    mAdapter.removeAllExcludeAndAdd(loadMoreAdapter, listAdapter)
                 }
-                contentAdapter.clear()
-                contentAdapter.addAllToEnd(it)
+                listAdapter.clear()
+                listAdapter.addAllToEnd(it)
                 loadMoreAdapter.reload()// 为了触发加载更多，避免在数据量太少时，不能多次触发加载更多。
                 loadMoreAdapter.onComplete()
                 if (isLoadAfter) {
@@ -86,9 +86,9 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
             },
             onLoadMore = {
                 if (isLoadAfter) {
-                    contentAdapter.addAllToEnd(it)
+                    listAdapter.addAllToEnd(it)
                 } else {
-                    contentAdapter.addAllToStart(it)
+                    listAdapter.addAllToStart(it)
                     recyclerView.keepPosition(it.size, 1)
                 }
                 loadMoreAdapter.reload()// 为了触发加载更多，避免在数据量太少时，不能多次触发加载更多。
