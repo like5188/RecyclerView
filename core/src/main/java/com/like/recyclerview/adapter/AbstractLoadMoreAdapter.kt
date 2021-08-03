@@ -22,11 +22,6 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
         load()
     }
 
-    override fun onItemRangeInserted() {
-        // 避免刷新后重新添加 Footer 时无法触发加载更多
-        isRunning.compareAndSet(true, false)
-    }
-
     private fun load() {
         if (isRunning.compareAndSet(false, true)) {
             Log.v(TAG, "触发加载更多")
