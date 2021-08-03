@@ -90,6 +90,7 @@ class LoadMoreAdapterManager(
                 mAdapter.removeAdapter(loadMoreAdapter)
                 mAdapter.removeAdapter(emptyAdapter)
                 mAdapter.addAdapter(errorAdapter)
+                errorAdapter.onError(it)
             },
             show = show,
             hide = hide,

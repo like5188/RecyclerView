@@ -15,4 +15,8 @@ data class ErrorItem(
     @ColorRes val bgColor: Int = R.color.recyclerview_bg_white_0,
     @ColorRes val textColor: Int = R.color.recyclerview_text_gray_0,
     val textSize: Float = 16f,
-)
+) {
+    fun onError(throwable: Throwable) {
+        this.throwable = throwable
+    }
+}

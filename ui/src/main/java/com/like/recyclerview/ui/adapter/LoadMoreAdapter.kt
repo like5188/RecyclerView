@@ -9,16 +9,14 @@ import com.like.recyclerview.ui.model.LoadMoreItem
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 class LoadMoreAdapter(onLoad: () -> Unit) : AbstractLoadMoreAdapter<ItemLoadMoreBinding, LoadMoreItem>(onLoad) {
-    private lateinit var mLoadMoreItem: LoadMoreItem
 
     override fun onBindViewHolder(holder: BindingViewHolder<ItemLoadMoreBinding>, position: Int) {
         Log.i(
             "LoadMoreAdapter",
             "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}"
         )
-        mLoadMoreItem = mList[position]
         super.onBindViewHolder(holder, position)
-        holder.binding.setVariable(BR.loadMoreItem, mLoadMoreItem)
+        holder.binding.setVariable(BR.loadMoreItem, get(0))
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -27,23 +25,17 @@ class LoadMoreAdapter(onLoad: () -> Unit) : AbstractLoadMoreAdapter<ItemLoadMore
 
     override fun onComplete() {
         super.onComplete()
-        if (::mLoadMoreItem.isInitialized) {
-            mLoadMoreItem.onComplete()
-        }
+        get(0)?.onComplete()
     }
 
     override fun onEnd() {
         super.onEnd()
-        if (::mLoadMoreItem.isInitialized) {
-            mLoadMoreItem.onEnd()
-        }
+        get(0)?.onEnd()
     }
 
     override fun onError(throwable: Throwable) {
         super.onError(throwable)
-        if (::mLoadMoreItem.isInitialized) {
-            mLoadMoreItem.onError(throwable)
-        }
+        get(0)?.onError(throwable)
     }
 
 }

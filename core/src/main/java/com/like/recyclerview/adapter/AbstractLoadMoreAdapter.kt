@@ -57,7 +57,7 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
      * 请求数据出错时调用此方法。子类可以重写此方法进行界面更新。
      * 此方法中添加了出错重试点击监听。
      */
-    open fun onError(throwable: Throwable) {
+    override fun onError(throwable: Throwable) {
         if (::mHolder.isInitialized) {
             mHolder.binding.root.setOnClickListener {
                 onComplete()

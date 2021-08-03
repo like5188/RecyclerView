@@ -11,8 +11,10 @@ import com.like.recyclerview.viewholder.BindingViewHolder
 class ErrorAdapter : AbstractAdapter<ItemErrorBinding, ErrorItem>() {
 
     override fun onBindViewHolder(holder: BindingViewHolder<ItemErrorBinding>, position: Int) {
-        Log.i("ErrorAdapter",
-            "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}")
+        Log.i(
+            "ErrorAdapter",
+            "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}"
+        )
         holder.binding.setVariable(BR.errorItem, get(position))
     }
 
@@ -20,4 +22,7 @@ class ErrorAdapter : AbstractAdapter<ItemErrorBinding, ErrorItem>() {
         return R.layout.item_error
     }
 
+    override fun onError(throwable: Throwable) {
+        get(0)?.onError(throwable)
+    }
 }

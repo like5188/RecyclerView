@@ -9,7 +9,8 @@ import java.util.*
 internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList> {
     override val mList: ObservableArrayList<ValueInList> = ObservableArrayList<ValueInList>()
 
-    override fun get(position: Int): ValueInList {
+    override fun get(position: Int): ValueInList? {
+        if (position < 0 || position > mList.size) return null
         return mList[position]
     }
 
@@ -31,36 +32,39 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
         mList.add(position, data)
     }
 
-    override fun addAllToStart(list: List<ValueInList>) {
-        addAll(0, list)
+    override fun addAllToStart(list: List<ValueInList>): Boolean {
+        return addAll(0, list)
     }
 
-    override fun addAllToEnd(list: List<ValueInList>) {
-        addAll(mList.size, list)
+    override fun addAllToEnd(list: List<ValueInList>): Boolean {
+        return addAll(mList.size, list)
     }
 
-    override fun addAll(position: Int, list: List<ValueInList>) {
-        if (list.isEmpty()) return
-        if (position < 0 || position > mList.size) return
-        mList.addAll(position, list)
+    override fun addAll(position: Int, list: List<ValueInList>): Boolean {
+        if (list.isEmpty()) return false
+        if (position < 0 || position > mList.size) return false
+        return mList.addAll(position, list)
     }
 
-    override fun removeAll(list: List<ValueInList>) {
-        if (list.isEmpty()) return
+    override fun removeAll(list: List<ValueInList>): Boolean {
+        if (list.isEmpty()) return false
         list.reversed().forEach {
-            remove(it)
+            if (!remove(it)) {
+                return false
+            }
         }
+        return true
     }
 
-    override fun remove(data: ValueInList) {
-        data ?: return
+    override fun remove(data: ValueInList): Boolean {
+        data ?: return false
         val position = mList.indexOf(data)
-        remove(position)
+        return remove(position) != null
     }
 
-    override fun remove(position: Int) {
-        if (position < 0 || position >= mList.size) return
-        mList.removeAt(position)
+    override fun remove(position: Int): ValueInList? {
+        if (position < 0 || position >= mList.size) return null
+        return mList.removeAt(position)
     }
 
     override fun clear() {
