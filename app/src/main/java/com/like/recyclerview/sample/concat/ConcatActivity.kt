@@ -38,14 +38,7 @@ class ConcatActivity : AppCompatActivity() {
     private val mLoadMoreAdapterManager by lazy {
         LoadMoreAdapterManager(lifecycleScope, mBinding.rv)
     }
-    private val isLoadAfter = true
-    private val mResult by lazy {
-        if (isLoadAfter) {
-            mViewModel.loadAfterResult
-        } else {
-            mViewModel.loadBeforeResult
-        }
-    }
+    private val isLoadAfter = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,9 +46,15 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mLoadMoreAdapterManager.getAdapter()
 
+        val result = if (isLoadAfter) {
+            mViewModel.loadAfterResult
+        } else {
+            mViewModel.loadBeforeResult
+        }
+
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                mResult.refresh()
+                result.refresh()
             }
         }
 
@@ -69,9 +68,9 @@ class ConcatActivity : AppCompatActivity() {
         val loadMoreAdapter = LoadMoreAdapter {
             lifecycleScope.launch {
                 if (isLoadAfter) {
-                    mResult.loadAfter?.invoke()
+                    result.loadAfter?.invoke()
                 } else {
-                    mResult.loadBefore?.invoke()
+                    result.loadBefore?.invoke()
                 }
             }
         }.apply {
@@ -80,7 +79,7 @@ class ConcatActivity : AppCompatActivity() {
 
         mLoadMoreAdapterManager.collect(
             isLoadAfter = isLoadAfter,
-            result = mResult,
+            result = result,
             contentAdapters = contentAdapters,
             emptyAdapter = emptyAdapter,
             errorAdapter = errorAdapter,
