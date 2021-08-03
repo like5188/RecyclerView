@@ -76,6 +76,8 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                 }
                 contentAdapter.clear()
                 contentAdapter.addAllToEnd(it)
+                // 为了触发加载更多，添加了下面一句代码，避免在数据量太少时，不能多次触发加载更多。
+                loadMoreAdapter.reload()
                 loadMoreAdapter.onComplete()
                 if (isLoadAfter) {
                     recyclerView.scrollToTop()
@@ -90,10 +92,8 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                     contentAdapter.addAllToStart(it)
                     recyclerView.keepPosition(it.size, 1)
                 }
-                // 为了触发加载更多，添加了下面两句代码，避免在数据量太少时，不能多次触发加载更多。
-                mAdapter.removeAdapter(loadMoreAdapter)
-                mAdapter.addAdapter(loadMoreAdapter)
-
+                // 为了触发加载更多，添加了下面一句代码，避免在数据量太少时，不能多次触发加载更多。
+                loadMoreAdapter.reload()
                 loadMoreAdapter.onComplete()
             },
             onLoadMoreEnd = { loadMoreAdapter.onEnd() },

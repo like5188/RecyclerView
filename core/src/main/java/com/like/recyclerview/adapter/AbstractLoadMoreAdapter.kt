@@ -22,6 +22,15 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
         load()
     }
 
+    /**
+     * 重新加载数据，触发 onBindViewHolder 方法，从而触发加载更多逻辑。
+     */
+    fun reload() {
+        val data = get(0) ?: return
+        clear()
+        addToEnd(data)
+    }
+
     private fun load() {
         if (isRunning.compareAndSet(false, true)) {
             Log.v(TAG, "触发加载更多")
