@@ -76,6 +76,7 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                     }
                     listAdapter.clear()
                     listAdapter.addAllToEnd(it)
+                    loadMoreAdapter.reload()
                     loadMoreAdapter.onComplete()
                     if (isLoadAfter) {
                         recyclerView.scrollToTop()
@@ -98,6 +99,7 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                         listAdapter.addAllToStart(it)
                         recyclerView.keepPosition(it.size, 1)
                     }
+                    loadMoreAdapter.reload()
                     loadMoreAdapter.onComplete()
                 }
             },

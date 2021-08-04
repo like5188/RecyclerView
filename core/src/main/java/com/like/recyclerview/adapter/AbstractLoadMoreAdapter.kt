@@ -29,6 +29,17 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
         }
     }
 
+
+    /**
+     * 重新加载数据，从而触发 onBindViewHolder 方法，触发加载更多逻辑。
+     * 因为在数据量太少时，比如 pagesize==1，不能多次触发加载更多。
+     */
+    fun reload() {
+        val data = get(0) ?: return
+        clear()
+        addToEnd(data)
+    }
+
     /**
      * 请求数据完成时调用此方法。子类可以重写此方法进行界面更新。
      */
