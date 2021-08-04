@@ -50,13 +50,13 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-        initLoad()
-//        initLoadMore()
+//        initLoad()
+        initLoadMore()
     }
 
     private fun initLoad() {
         val headerAdapter = HeaderAdapter()
-        val listAdapter = ListAdapter()
+        val itemAdapter = ItemAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -67,8 +67,8 @@ class ConcatActivity : AppCompatActivity() {
         fun getData() {
             lifecycleScope.launch {
                 mUIHelper.collect(
-                    result = mViewModel::getData,
-                    listAdapter = listAdapter,
+                    result = mViewModel::getItems,
+                    listAdapter = itemAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
                     show = { mProgressDialog.show() },
@@ -77,7 +77,7 @@ class ConcatActivity : AppCompatActivity() {
             }
             lifecycleScope.launch {
                 mUIHelper.collect(
-                    result = mViewModel::getHeader,
+                    result = mViewModel::getHeaders,
                     listAdapter = headerAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
@@ -107,7 +107,7 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        val listAdapter = ListAdapter()
+        val itemAdapter = ItemAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -131,7 +131,7 @@ class ConcatActivity : AppCompatActivity() {
                 recyclerView = mBinding.rv,
                 isLoadAfter = isLoadAfter,
                 result = result,
-                listAdapter = listAdapter,
+                listAdapter = itemAdapter,
                 loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,

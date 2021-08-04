@@ -3,28 +3,28 @@
     <data>
 
         <variable
-            name="item"
-            type="com.like.recyclerview.sample.model.Item" />
+            name="item2"
+            type="com.like.recyclerview.sample.model.Item2" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#55a755"
-        android:onClick="@{item.onClick}"
+        android:onClick="@{item2.onClick}"
         android:orientation="vertical"
         android:padding="10dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{item.name}" />
+            android:text="@{item2.name}" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="@{item.des}" />
+            android:text="@{item2.des}" />
 
     </LinearLayout>
 

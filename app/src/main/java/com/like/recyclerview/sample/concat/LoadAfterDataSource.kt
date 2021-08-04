@@ -2,14 +2,13 @@ package com.like.recyclerview.sample.concat
 
 import com.like.paging.RequestType
 import com.like.paging.dataSource.byPageNoKeyed.PageNoKeyedPagingDataSource
-import com.like.recyclerview.sample.model.Item
 import kotlinx.coroutines.delay
 
-class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item>?>(pageSize) {
+class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Any>?>(pageSize) {
     private var i = 0
     private var j = 0
 
-    override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<Item> {
+    override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<Any> {
         delay(1000)
         if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
             i = 0
@@ -21,7 +20,7 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item
         return 0
     }
 
-    private fun getAfter(pageNo: Int, pageSize: Int): List<Item> {
+    private fun getAfter(pageNo: Int, pageSize: Int): List<Any> {
         val start = pageNo * pageSize + 1
         val end = start + pageSize
         return when (i++) {
@@ -31,11 +30,7 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item
                     1 -> emptyList()
                     else -> {
                         (start until end).map {
-                            Item(
-                                id = it,
-                                name = "item $it",
-                                des = "des $it"
-                            )
+                            DataFactory.createItem(it)
                         }
                     }
                 }
@@ -48,11 +43,7 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item
             }
             else -> {
                 (start until end).map {
-                    Item(
-                        id = it,
-                        name = "item $it",
-                        des = "des $it"
-                    )
+                    DataFactory.createItem(it)
                 }
             }
         }
