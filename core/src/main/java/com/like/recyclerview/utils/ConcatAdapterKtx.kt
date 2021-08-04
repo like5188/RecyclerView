@@ -9,7 +9,8 @@ fun ConcatAdapter.clear() {
     }
 }
 
-fun ConcatAdapter.contains(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>): Boolean {
+fun ConcatAdapter.contains(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?): Boolean {
+    adapter ?: return false
     adapters.forEach {
         if (it == adapter) {
             return true
@@ -19,12 +20,15 @@ fun ConcatAdapter.contains(adapter: RecyclerView.Adapter<out RecyclerView.ViewHo
 }
 
 /**
- * 移除所有指定的 adapter
+ * 移除所有指定的 adapter。如果指定的 adapter 为 null，则不做任何操作。
  */
-fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
-    if (adapters.isEmpty()) return
+fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    val nonNullAdapters = adapters.filterNotNull().toTypedArray()
+    if (nonNullAdapters.isEmpty()) {
+        return
+    }
     this.adapters.forEach {
-        if (adapters.contains(it)) {
+        if (nonNullAdapters.contains(it)) {
             this.removeAdapter(it)
         }
     }
@@ -33,12 +37,13 @@ fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerVi
 /**
  * 移除所有，除了指定的 adapter
  */
-fun ConcatAdapter.removeAllExclude(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
-    if (adapters.isEmpty()) {
+fun ConcatAdapter.removeAllExclude(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    val nonNullAdapters = adapters.filterNotNull().toTypedArray()
+    if (nonNullAdapters.isEmpty()) {
         clear()
     } else {
         this.adapters.forEach {
-            if (!adapters.contains(it)) {
+            if (!nonNullAdapters.contains(it)) {
                 this.removeAdapter(it)
             }
         }
@@ -47,17 +52,21 @@ fun ConcatAdapter.removeAllExclude(vararg adapters: RecyclerView.Adapter<out Rec
 
 /**
  * 如果指定的 adapter 为 null，则不做任何操作。
- * 否则就移除所有，除了指定的 adapter，如果指定的 adapter 不存在于 ConcatAdapter 中，则按顺序添加到其中。
+ * 如果指定的 adapter 不存在于 ConcatAdapter 中，则按顺序添加到其中。
  */
-fun ConcatAdapter.removeAllExcludeAndAdd(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+fun ConcatAdapter.addAllIfAbsent(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
     val nonNullAdapters = adapters.filterNotNull().toTypedArray()
     if (nonNullAdapters.isEmpty()) {
         return
     }
-    removeAllExclude(*nonNullAdapters)
     nonNullAdapters.forEachIndexed { index, adapter ->
         if (!contains(adapter)) {
             addAdapter(index, adapter)
         }
     }
+}
+
+fun ConcatAdapter.removeAllExcludeAndAddAllIfAbsent(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    removeAllExclude(*adapters)
+    addAllIfAbsent(*adapters)
 }

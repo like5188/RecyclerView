@@ -50,11 +50,12 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-//        initLoad()
-        initLoadMore()
+        initLoad()
+//        initLoadMore()
     }
 
     private fun initLoad() {
+        val headerAdapter = HeaderAdapter()
         val listAdapter = ListAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
@@ -68,6 +69,16 @@ class ConcatActivity : AppCompatActivity() {
                 mUIHelper.collect(
                     result = mViewModel::getData,
                     listAdapter = listAdapter,
+                    emptyAdapter = emptyAdapter,
+                    errorAdapter = errorAdapter,
+                    show = { mProgressDialog.show() },
+                    hide = { mProgressDialog.hide() },
+                )
+            }
+            lifecycleScope.launch {
+                mUIHelper.collect(
+                    result = mViewModel::getHeader,
+                    listAdapter = headerAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
                     show = { mProgressDialog.show() },

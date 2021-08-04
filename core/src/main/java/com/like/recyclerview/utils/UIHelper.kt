@@ -32,15 +32,15 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         result.bind(
             onData = {
                 if (it.isNullOrEmpty()) {
-                    mAdapter.removeAllExcludeAndAdd(emptyAdapter)
+                    mAdapter.removeAllExcludeAndAddAllIfAbsent(emptyAdapter)
                 } else {
-                    mAdapter.removeAllExcludeAndAdd(listAdapter)
+                    mAdapter.removeAllExcludeAndAddAllIfAbsent(listAdapter)
                     listAdapter.clear()
                     listAdapter.addAllToEnd(it)
                 }
             },
             onError = {
-                mAdapter.removeAllExcludeAndAdd(errorAdapter)
+                mAdapter.removeAllExcludeAndAddAllIfAbsent(errorAdapter)
                 errorAdapter?.onError(it)
             },
             show = show,
@@ -67,12 +67,12 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         val flow = result.resultReportFlow.bind(
             onInitialOrRefresh = {
                 if (it.isNullOrEmpty()) {
-                    mAdapter.removeAllExcludeAndAdd(emptyAdapter)
+                    mAdapter.removeAllExcludeAndAddAllIfAbsent(emptyAdapter)
                 } else {
                     if (isLoadAfter) {
-                        mAdapter.removeAllExcludeAndAdd(listAdapter, loadMoreAdapter)
+                        mAdapter.removeAllExcludeAndAddAllIfAbsent(listAdapter, loadMoreAdapter)
                     } else {
-                        mAdapter.removeAllExcludeAndAdd(loadMoreAdapter, listAdapter)
+                        mAdapter.removeAllExcludeAndAddAllIfAbsent(loadMoreAdapter, listAdapter)
                     }
                     listAdapter.clear()
                     listAdapter.addAllToEnd(it)
@@ -86,7 +86,7 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                 }
             },
             onInitialError = {
-                mAdapter.removeAllExcludeAndAdd(errorAdapter)
+                mAdapter.removeAllExcludeAndAddAllIfAbsent(errorAdapter)
                 errorAdapter?.onError(it)
             },
             onLoadMore = {

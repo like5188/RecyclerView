@@ -15,4 +15,10 @@ class ConcatViewModel : ViewModel() {
     suspend fun getData(): List<Item> {
         return loadResult.load()
     }
+
+    private val headerResult = HeaderDataSource()
+
+    suspend fun getHeader(): List<Any> {
+        return headerResult.load()
+    }
 }
