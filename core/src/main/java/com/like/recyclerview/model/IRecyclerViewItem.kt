@@ -1,12 +1,21 @@
 package com.like.recyclerview.model
 
 /*
- * 使用本库时，RecyclerView 中的数据如果实现这个接口，那么就会自动添加：
+ * 使用本库时，RecyclerView 中的数据如果实现这个接口，那么就会自动绑定变量和返回 ItemViewType，如下：
     override fun onBindViewHolder(holder: BindingViewHolder<ItemErrorBinding>, position: Int) {
         holder.binding.setVariable(BR.errorItem, get(position))
     }
 
     override fun getItemViewType(position: Int): Int {
+        return R.layout.item_error
+    }
+ * 如果不实现此接口，那么就需要在 Adapter 中实现：
+    override fun onBindViewHolder(holder: BindingViewHolder<ItemErrorBinding>, position: Int) {
+        super.onBindViewHolder(holder, position)
+        holder.binding.setVariable(BR.errorItem, get(position))
+    }
+
+    override fun getLayoutId(position: Int): Int {
         return R.layout.item_error
     }
  */
