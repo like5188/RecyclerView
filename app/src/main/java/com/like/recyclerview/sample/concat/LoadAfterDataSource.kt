@@ -33,7 +33,7 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item
                         (start until end).map {
                             Item(
                                 id = it,
-                                name = "name $it",
+                                name = "item $it",
                                 des = "des $it"
                             )
                         }
@@ -50,7 +50,7 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Item
                 (start until end).map {
                     Item(
                         id = it,
-                        name = "name $it",
+                        name = "item $it",
                         des = "des $it"
                     )
                 }

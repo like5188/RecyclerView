@@ -15,7 +15,7 @@ class LoadDataSource {
                 (0 until 10).map {
                     Item(
                         id = it,
-                        name = "name $it",
+                        name = "item $it",
                         des = "des $it"
                     )
                 }
