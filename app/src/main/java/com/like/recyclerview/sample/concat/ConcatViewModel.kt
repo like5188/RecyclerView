@@ -5,7 +5,7 @@ import com.like.recyclerview.sample.model.Item
 
 class ConcatViewModel : ViewModel() {
     companion object {
-        const val PAGE_SIZE = 2
+        const val PAGE_SIZE = 20
     }
 
     val loadAfterResult = LoadAfterDataSource(PAGE_SIZE).result()

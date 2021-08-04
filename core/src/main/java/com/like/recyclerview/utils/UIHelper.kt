@@ -31,12 +31,13 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     ) {
         result.bind(
             onData = {
-                mAdapter.removeAllExcludeAndAdd(listAdapter)
-                listAdapter.clear()
-                listAdapter.addAllToEnd(it)
-            },
-            onEmpty = {
-                mAdapter.removeAllExcludeAndAdd(emptyAdapter)
+                if (it.isNullOrEmpty()) {
+                    mAdapter.removeAllExcludeAndAdd(emptyAdapter)
+                } else {
+                    mAdapter.removeAllExcludeAndAdd(listAdapter)
+                    listAdapter.clear()
+                    listAdapter.addAllToEnd(it)
+                }
             },
             onError = {
                 mAdapter.removeAllExcludeAndAdd(errorAdapter)
@@ -63,40 +64,44 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
         onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
     ) = withContext(Dispatchers.Main) {
-        val flow = result.bind(
+        val flow = result.resultReportFlow.bind(
             onInitialOrRefresh = {
-                if (isLoadAfter) {
-                    mAdapter.removeAllExcludeAndAdd(listAdapter, loadMoreAdapter)
+                if (it.isNullOrEmpty()) {
+                    mAdapter.removeAllExcludeAndAdd(emptyAdapter)
                 } else {
-                    mAdapter.removeAllExcludeAndAdd(loadMoreAdapter, listAdapter)
-                }
-                listAdapter.clear()
-                listAdapter.addAllToEnd(it)
-                loadMoreAdapter.onComplete()
-                if (isLoadAfter) {
-                    recyclerView.scrollToTop()
-                } else {
-                    recyclerView.scrollToBottom()
-                }
-            },
-            onLoadMore = {
-                if (isLoadAfter) {
+                    if (isLoadAfter) {
+                        mAdapter.removeAllExcludeAndAdd(listAdapter, loadMoreAdapter)
+                    } else {
+                        mAdapter.removeAllExcludeAndAdd(loadMoreAdapter, listAdapter)
+                    }
+                    listAdapter.clear()
                     listAdapter.addAllToEnd(it)
-                } else {
-                    listAdapter.addAllToStart(it)
-                    recyclerView.keepPosition(it.size, 1)
+                    loadMoreAdapter.onComplete()
+                    if (isLoadAfter) {
+                        recyclerView.scrollToTop()
+                    } else {
+                        recyclerView.scrollToBottom()
+                    }
                 }
-                loadMoreAdapter.onComplete()
-            },
-            onLoadMoreEnd = { loadMoreAdapter.onEnd() },
-            onLoadMoreError = { loadMoreAdapter.onError(it) },
-            onInitialOrRefreshEmpty = {
-                mAdapter.removeAllExcludeAndAdd(emptyAdapter)
             },
             onInitialError = {
                 mAdapter.removeAllExcludeAndAdd(errorAdapter)
                 errorAdapter?.onError(it)
             },
+            onLoadMore = {
+                if (it.isNullOrEmpty()) {
+                    loadMoreAdapter.onEnd()
+                } else {
+                    if (isLoadAfter) {
+                        listAdapter.addAllToEnd(it)
+                    } else {
+                        listAdapter.addAllToStart(it)
+                        recyclerView.keepPosition(it.size, 1)
+                    }
+                    loadMoreAdapter.onComplete()
+                }
+            },
+            onLoadMoreError = { loadMoreAdapter.onError(it) },
             show = show,
             hide = hide,
             onFailed = onFailed,

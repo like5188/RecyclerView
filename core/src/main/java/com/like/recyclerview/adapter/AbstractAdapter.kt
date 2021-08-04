@@ -45,7 +45,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                 }
 
                 override fun onChanged(sender: ObservableArrayList<ValueInList>?) {
-                    Log.d(TAG, "onChanged")
+                    Log.d(TAG, "onChanged ${this@AbstractAdapter}")
                     // java.lang.IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling
                     update {
                         notifyDataSetChanged()
@@ -57,7 +57,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                     positionStart: Int,
                     itemCount: Int,
                 ) {
-                    Log.d(TAG, "onItemRangeRemoved positionStart=$positionStart itemCount=$itemCount")
+                    Log.d(TAG, "onItemRangeRemoved positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
                     update {
                         notifyItemRangeRemoved(positionStart, itemCount)
                         notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
@@ -70,7 +70,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                     toPosition: Int,
                     itemCount: Int,
                 ) {
-                    Log.d(TAG, "onItemRangeMoved fromPosition=$fromPosition toPosition=$toPosition itemCount=$itemCount")
+                    Log.d(TAG, "onItemRangeMoved fromPosition=$fromPosition toPosition=$toPosition itemCount=$itemCount ${this@AbstractAdapter}")
                     update {
                         // 这个回调是在 List 里的连续的元素整个移动的情况下会进行的回调，然而 RecyclerView 的 Adapter 里并没有对应的方法，
                         // 只有单个元素移动时的方法，所以需要在回调方法中做一个判断，如果移动的元素只有一个，就调用 Adapter 对应的方法，
@@ -88,7 +88,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                     positionStart: Int,
                     itemCount: Int,
                 ) {
-                    Log.d(TAG, "onItemRangeInserted positionStart=$positionStart itemCount=$itemCount")
+                    Log.d(TAG, "onItemRangeInserted positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
                     update {
                         notifyItemRangeInserted(positionStart, itemCount)
                         notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
@@ -100,7 +100,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                     positionStart: Int,
                     itemCount: Int,
                 ) {
-                    Log.d(TAG, "onItemRangeChanged positionStart=$positionStart itemCount=$itemCount")
+                    Log.d(TAG, "onItemRangeChanged positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
                     update {
                         notifyItemRangeChanged(positionStart, itemCount)
                     }
