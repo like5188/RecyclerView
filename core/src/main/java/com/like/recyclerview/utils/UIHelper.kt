@@ -36,15 +36,11 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                 listAdapter.addAllToEnd(it)
             },
             onEmpty = {
-                emptyAdapter?.apply {
-                    mAdapter.removeAllExcludeAndAdd(this)
-                }
+                mAdapter.removeAllExcludeAndAdd(emptyAdapter)
             },
             onError = {
-                errorAdapter?.apply {
-                    mAdapter.removeAllExcludeAndAdd(this)
-                    onError(it)
-                }
+                mAdapter.removeAllExcludeAndAdd(errorAdapter)
+                errorAdapter?.onError(it)
             },
             show = show,
             hide = hide,
@@ -76,7 +72,6 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                 }
                 listAdapter.clear()
                 listAdapter.addAllToEnd(it)
-                loadMoreAdapter.reload()// 为了触发加载更多，避免在数据量太少时，不能多次触发加载更多。
                 loadMoreAdapter.onComplete()
                 if (isLoadAfter) {
                     recyclerView.scrollToTop()
@@ -91,21 +86,16 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                     listAdapter.addAllToStart(it)
                     recyclerView.keepPosition(it.size, 1)
                 }
-                loadMoreAdapter.reload()// 为了触发加载更多，避免在数据量太少时，不能多次触发加载更多。
                 loadMoreAdapter.onComplete()
             },
             onLoadMoreEnd = { loadMoreAdapter.onEnd() },
             onLoadMoreError = { loadMoreAdapter.onError(it) },
             onInitialOrRefreshEmpty = {
-                emptyAdapter?.apply {
-                    mAdapter.removeAllExcludeAndAdd(this)
-                }
+                mAdapter.removeAllExcludeAndAdd(emptyAdapter)
             },
             onInitialError = {
-                errorAdapter?.apply {
-                    mAdapter.removeAllExcludeAndAdd(this)
-                    onError(it)
-                }
+                mAdapter.removeAllExcludeAndAdd(errorAdapter)
+                errorAdapter?.onError(it)
             },
             show = show,
             hide = hide,
