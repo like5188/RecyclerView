@@ -1,12 +1,13 @@
 package com.like.recyclerview.sample.concat
 
+import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.model.Header1
 import com.like.recyclerview.sample.model.Header2
 import com.like.recyclerview.sample.model.Item1
 import com.like.recyclerview.sample.model.Item2
 
 object DataFactory {
-    fun createHeader(index: Int): Any {
+    fun createHeader(index: Int): IRecyclerViewItem {
         return if (index % 3 == 0) {
             Header1(
                 name = "Header1 $index",
@@ -18,7 +19,7 @@ object DataFactory {
         }
     }
 
-    fun createItem(index: Int): Any {
+    fun createItem(index: Int): IRecyclerViewItem {
         return if (index % 3 == 0) {
             Item1(
                 id = index,

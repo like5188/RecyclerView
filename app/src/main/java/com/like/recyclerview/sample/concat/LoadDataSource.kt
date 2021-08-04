@@ -1,11 +1,12 @@
 package com.like.recyclerview.sample.concat
 
+import com.like.recyclerview.model.IRecyclerViewItem
 import kotlinx.coroutines.delay
 
 class LoadDataSource {
     private var i = 0
 
-    suspend fun load(): List<Any> {
+    suspend fun load(): List<IRecyclerViewItem> {
         delay(1000)
         return when (i++) {
             0 -> throw RuntimeException("load error")

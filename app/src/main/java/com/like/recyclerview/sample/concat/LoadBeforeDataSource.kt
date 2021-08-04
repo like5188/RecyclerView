@@ -2,13 +2,14 @@ package com.like.recyclerview.sample.concat
 
 import com.like.paging.RequestType
 import com.like.paging.dataSource.byPageNoKeyed.PageNoKeyedPagingDataSource
+import com.like.recyclerview.model.IRecyclerViewItem
 import kotlinx.coroutines.delay
 
-class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Any>?>(pageSize, false) {
+class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(pageSize, false) {
     private var i = 0
     private var j = 0
 
-    override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<Any> {
+    override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<IRecyclerViewItem> {
         delay(1000)
         if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
             i = 0
@@ -20,7 +21,7 @@ class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<Any
         return 10
     }
 
-    private fun getBefore(pageNo: Int, pageSize: Int): List<Any> {
+    private fun getBefore(pageNo: Int, pageSize: Int): List<IRecyclerViewItem> {
         val start = pageNo * pageSize - 1
         val end = start - pageSize + 1
         return when (i++) {
