@@ -1,6 +1,5 @@
 package com.like.recyclerview.sample.concat
 
-import android.util.Log
 import androidx.databinding.ViewDataBinding
 import com.like.recyclerview.adapter.AbstractAdapter
 import com.like.recyclerview.sample.BR
@@ -14,10 +13,7 @@ import com.like.recyclerview.viewholder.BindingViewHolder
 class HeaderAdapter : AbstractAdapter<ViewDataBinding, Any>() {
 
     override fun onBindViewHolder(holder: BindingViewHolder<ViewDataBinding>, position: Int) {
-        Log.v(
-            "HeaderAdapter",
-            "onBindViewHolder position=$position bindingAdapterPosition=${holder.bindingAdapterPosition} absoluteAdapterPosition=${holder.absoluteAdapterPosition}"
-        )
+        super.onBindViewHolder(holder, position)
         val binding = holder.binding
         val data = get(position)
         when (binding) {
@@ -30,7 +26,7 @@ class HeaderAdapter : AbstractAdapter<ViewDataBinding, Any>() {
         }
     }
 
-    override fun getItemViewType(position: Int): Int {
+    override fun getLayoutId(position: Int): Int {
         return when (get(position)) {
             is Header1 -> R.layout.header1
             is Header2 -> R.layout.header2

@@ -10,6 +10,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.listener.OnItemClickListener
 import com.like.recyclerview.listener.OnItemLongClickListener
+import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.utils.AdapterDataManager
 import com.like.recyclerview.utils.IAdapterDataManager
 import com.like.recyclerview.viewholder.BindingViewHolder
@@ -70,7 +71,10 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                     toPosition: Int,
                     itemCount: Int,
                 ) {
-                    Log.d(TAG, "onItemRangeMoved fromPosition=$fromPosition toPosition=$toPosition itemCount=$itemCount ${this@AbstractAdapter}")
+                    Log.d(
+                        TAG,
+                        "onItemRangeMoved fromPosition=$fromPosition toPosition=$toPosition itemCount=$itemCount ${this@AbstractAdapter}"
+                    )
                     update {
                         // 这个回调是在 List 里的连续的元素整个移动的情况下会进行的回调，然而 RecyclerView 的 Adapter 里并没有对应的方法，
                         // 只有单个元素移动时的方法，所以需要在回调方法中做一个判断，如果移动的元素只有一个，就调用 Adapter 对应的方法，
@@ -136,6 +140,28 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
         return mList.size
     }
 
+    final override fun getItemViewType(position: Int): Int {
+        val item = get(position)
+        if (item is IRecyclerViewItem) {
+            return item.layoutId
+        }
+        return getLayoutId(position)
+    }
+
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
+        val item = get(position)
+        if (item is IRecyclerViewItem) {
+            val variableId = item.variableId
+            if (variableId >= 0) {
+                try {
+                    holder.binding.setVariable(variableId, item)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
     }
@@ -163,5 +189,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
     fun clearOnItemLongClickListeners() {
         mOnItemLongClickListeners.clear()
     }
+
+    open fun getLayoutId(position: Int): Int = -1
 
 }

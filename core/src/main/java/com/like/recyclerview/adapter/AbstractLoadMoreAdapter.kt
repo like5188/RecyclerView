@@ -18,6 +18,7 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
     private lateinit var mHolder: BindingViewHolder<VB>
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
+        super.onBindViewHolder(holder, position)
         mHolder = holder
         load()
     }
