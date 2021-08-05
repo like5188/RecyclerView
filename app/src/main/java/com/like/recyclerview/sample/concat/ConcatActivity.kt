@@ -43,7 +43,6 @@ class ConcatActivity : AppCompatActivity() {
     private val mUIHelper by lazy {
         UIHelper(mAdapter)
     }
-    private val isLoadAfter = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +50,9 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-        initLoad()
-//        initLoadMore()
+//        initLoad()
+        initLoadAfter()
+//        initLoadBefore()
     }
 
     private fun initLoad() {
@@ -106,12 +106,80 @@ class ConcatActivity : AppCompatActivity() {
         getData()
     }
 
-    private fun initLoadMore() {
-        val result = if (isLoadAfter) {
-            mViewModel.loadAfterResult
-        } else {
-            mViewModel.loadBeforeResult
+    private fun initLoadAfter() {
+        val result = mViewModel.loadAfterResult
+
+        mBinding.btnRefresh.setOnClickListener {
+            lifecycleScope.launch {
+                result.refresh()
+            }
         }
+
+        val headerAdapter = HeaderAdapter()
+        val itemAdapter = ItemAdapter()
+        val emptyAdapter = EmptyAdapter().apply {
+            addToEnd(EmptyItem())
+        }
+        val errorAdapter = ErrorAdapter().apply {
+            addToEnd(ErrorItem())
+        }
+        val loadMoreAdapter = LoadMoreAdapter {
+            lifecycleScope.launch {
+                result.loadAfter?.invoke()
+            }
+        }.apply {
+            addToEnd(LoadMoreItem())
+        }
+
+        lifecycleScope.launch {
+            mUIHelper.collect(
+                recyclerView = mBinding.rv,
+                isLoadAfter = true,
+                result = result,
+                showEmpty = {
+                    var isEmpty = it.isNullOrEmpty()
+                    if (!isEmpty) {
+                        val headers = it.getOrNull(0)
+                        val items = it.getOrNull(1)
+                        isEmpty = headers.isNullOrEmpty() && items.isNullOrEmpty()
+                    }
+                    isEmpty
+                },
+                showLoadMoreEnd = {
+                    val items = it.getOrNull(1)
+                    items.isNullOrEmpty()
+                },
+                onData = {
+                    mAdapter.add(itemAdapter)
+                    val headers = it.getOrNull(0)
+                    val items = it.getOrNull(1)
+                    if (!headers.isNullOrEmpty()) {
+                        headerAdapter.clear()
+                        headerAdapter.addAllToEnd(headers)
+                    }
+                    if (!items.isNullOrEmpty()) {
+                        itemAdapter.clear()
+                        itemAdapter.addAllToEnd(items)
+                    }
+                },
+                onLoadMore = {
+                    val items = it.getOrNull(1)
+                    if (!items.isNullOrEmpty()) {
+                        itemAdapter.addAllToEnd(items)
+                    }
+                    it.size
+                },
+                loadMoreAdapter = loadMoreAdapter,
+                emptyAdapter = emptyAdapter,
+                errorAdapter = errorAdapter,
+                show = { mProgressDialog.show() },
+                hide = { mProgressDialog.hide() },
+            )
+        }
+    }
+
+    private fun initLoadBefore() {
+        val result = mViewModel.loadBeforeResult
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -128,11 +196,7 @@ class ConcatActivity : AppCompatActivity() {
         }
         val loadMoreAdapter = LoadMoreAdapter {
             lifecycleScope.launch {
-                if (isLoadAfter) {
-                    result.loadAfter?.invoke()
-                } else {
-                    result.loadBefore?.invoke()
-                }
+                result.loadBefore?.invoke()
             }
         }.apply {
             addToEnd(LoadMoreItem())
@@ -141,7 +205,7 @@ class ConcatActivity : AppCompatActivity() {
         lifecycleScope.launch {
             mUIHelper.collect(
                 recyclerView = mBinding.rv,
-                isLoadAfter = isLoadAfter,
+                isLoadAfter = false,
                 result = result,
                 showEmpty = {
                     it.isNullOrEmpty()
@@ -155,11 +219,7 @@ class ConcatActivity : AppCompatActivity() {
                     itemAdapter.addAllToEnd(it)
                 },
                 onLoadMore = {
-                    if (isLoadAfter) {
-                        itemAdapter.addAllToEnd(it)
-                    } else {
-                        itemAdapter.addAllToStart(it)
-                    }
+                    itemAdapter.addAllToStart(it)
                     it.size
                 },
                 loadMoreAdapter = loadMoreAdapter,
