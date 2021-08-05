@@ -9,11 +9,13 @@ class ConcatViewModel : ViewModel() {
     }
 
     val loadAfterResult = LoadAfterDataSource(PAGE_SIZE).result()
+    val LoadAfterWithHeadersResult = LoadAfterWithHeadersDataSource(PAGE_SIZE).result()
     val loadBeforeResult = LoadBeforeDataSource(PAGE_SIZE).result()
 
     private val itemResult = ItemDataSource()
     private val headerResult = HeaderDataSource()
 
-    suspend fun getData() = successIfAllSuccess(headerResult::load, itemResult::load)
+    suspend fun getHeadersAndItems() = successIfAllSuccess(headerResult::load, itemResult::load)
 
+    suspend fun getItems() = itemResult.load()
 }

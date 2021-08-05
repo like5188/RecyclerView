@@ -49,12 +49,43 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-//        initLoad()
-        initLoadAfter()
-//        initLoadBefore()
+//        initItems()
+//        initHeadersAndItems()
+//        initLoadAfter()
+//        initLoadAfterWithHeaders()
+        initLoadBefore()
     }
 
-    private fun initLoad() {
+    private fun initItems() {
+        val listAdapter = ItemAdapter()
+        val emptyAdapter = EmptyAdapter().apply {
+            addToEnd(EmptyItem())
+        }
+        val errorAdapter = ErrorAdapter().apply {
+            addToEnd(ErrorItem())
+        }
+
+        fun getData() {
+            lifecycleScope.launch {
+                mUIHelper.collect(
+                    result = mViewModel::getItems,
+                    listAdapter = listAdapter,
+                    emptyAdapter = emptyAdapter,
+                    errorAdapter = errorAdapter,
+                    show = { mProgressDialog.show() },
+                    hide = { mProgressDialog.hide() },
+                )
+            }
+        }
+
+        mBinding.btnRefresh.setOnClickListener {
+            getData()
+        }
+
+        getData()
+    }
+
+    private fun initHeadersAndItems() {
         val headerAdapter = HeaderAdapter()
         val itemAdapter = ItemAdapter()
         val contentAdapter = ConcatAdapter()
@@ -68,7 +99,7 @@ class ConcatActivity : AppCompatActivity() {
         fun getData() {
             lifecycleScope.launch {
                 mUIHelper.collect(
-                    result = mViewModel::getData,
+                    result = mViewModel::getHeadersAndItems,
                     onData = {
                         var isEmpty = it.isNullOrEmpty()
                         if (!isEmpty) {
@@ -106,6 +137,44 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadAfter() {
         val result = mViewModel.loadAfterResult
+
+        mBinding.btnRefresh.setOnClickListener {
+            lifecycleScope.launch {
+                result.refresh()
+            }
+        }
+
+        val listAdapter = ItemAdapter()
+        val emptyAdapter = EmptyAdapter().apply {
+            addToEnd(EmptyItem())
+        }
+        val errorAdapter = ErrorAdapter().apply {
+            addToEnd(ErrorItem())
+        }
+        val loadMoreAdapter = LoadMoreAdapter {
+            lifecycleScope.launch {
+                result.loadAfter?.invoke()
+            }
+        }.apply {
+            addToEnd(LoadMoreItem())
+        }
+
+        lifecycleScope.launch {
+            mUIHelper.collectForLoadAfter(
+                recyclerView = mBinding.rv,
+                result = result,
+                listAdapter = listAdapter,
+                loadMoreAdapter = loadMoreAdapter,
+                emptyAdapter = emptyAdapter,
+                errorAdapter = errorAdapter,
+                show = { mProgressDialog.show() },
+                hide = { mProgressDialog.hide() },
+            )
+        }
+    }
+
+    private fun initLoadAfterWithHeaders() {
+        val result = mViewModel.LoadAfterWithHeadersResult
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -185,7 +254,7 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        val contentAdapter = ItemAdapter()
+        val listAdapter = ItemAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -204,7 +273,7 @@ class ConcatActivity : AppCompatActivity() {
             mUIHelper.collectForLoadBefore(
                 recyclerView = mBinding.rv,
                 result = result,
-                listAdapter = contentAdapter,
+                listAdapter = listAdapter,
                 loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,

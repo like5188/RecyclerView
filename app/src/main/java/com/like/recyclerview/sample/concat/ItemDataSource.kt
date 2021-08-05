@@ -6,7 +6,7 @@ import kotlinx.coroutines.delay
 class ItemDataSource {
     private var i = 0
 
-    suspend fun load(): List<IRecyclerViewItem> {
+    suspend fun load(): List<IRecyclerViewItem>? {
         delay(1000)
         return when (i++) {
             0 -> throw RuntimeException("load error")
