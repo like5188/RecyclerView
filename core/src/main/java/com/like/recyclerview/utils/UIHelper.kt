@@ -61,53 +61,59 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
         show: (() -> Unit)? = null,
         hide: (() -> Unit)? = null,
-        onFailed: (suspend (RequestType, Throwable) -> Unit)? = null,
-        onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
     ) = withContext(Dispatchers.Main) {
-        val flow = result.resultReportFlow.bind(
-            onInitialOrRefresh = {
-                if (it.isNullOrEmpty()) {
-                    mAdapter.removeAllExcludeAndAddAllIfAbsent(emptyAdapter)
-                } else {
-                    if (isLoadAfter) {
-                        mAdapter.removeAllExcludeAndAddAllIfAbsent(listAdapter, loadMoreAdapter)
-                    } else {
-                        mAdapter.removeAllExcludeAndAddAllIfAbsent(loadMoreAdapter, listAdapter)
+        val flow = result.bind(
+            onData = { requestType, data ->
+                when {
+                    requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+                        if (data.isNullOrEmpty()) {
+                            mAdapter.removeAllExcludeAndAddAllIfAbsent(emptyAdapter)
+                        } else {
+                            if (isLoadAfter) {
+                                mAdapter.removeAllExcludeAndAddAllIfAbsent(listAdapter, loadMoreAdapter)
+                            } else {
+                                mAdapter.removeAllExcludeAndAddAllIfAbsent(loadMoreAdapter, listAdapter)
+                            }
+                            listAdapter.clear()
+                            listAdapter.addAllToEnd(data)
+                            loadMoreAdapter.reload()
+                            loadMoreAdapter.onComplete()
+                            if (isLoadAfter) {
+                                recyclerView.scrollToTop()
+                            } else {
+                                recyclerView.scrollToBottom()
+                            }
+                        }
                     }
-                    listAdapter.clear()
-                    listAdapter.addAllToEnd(it)
-                    loadMoreAdapter.reload()
-                    loadMoreAdapter.onComplete()
-                    if (isLoadAfter) {
-                        recyclerView.scrollToTop()
-                    } else {
-                        recyclerView.scrollToBottom()
+                    requestType is RequestType.After || requestType is RequestType.Before -> {
+                        if (data.isNullOrEmpty()) {
+                            loadMoreAdapter.onEnd()
+                        } else {
+                            if (isLoadAfter) {
+                                listAdapter.addAllToEnd(data)
+                            } else {
+                                listAdapter.addAllToStart(data)
+                                recyclerView.keepPosition(data.size, 1)
+                            }
+                            loadMoreAdapter.reload()
+                            loadMoreAdapter.onComplete()
+                        }
                     }
                 }
             },
-            onInitialError = {
-                mAdapter.removeAllExcludeAndAddAllIfAbsent(errorAdapter)
-                errorAdapter?.onError(it)
-            },
-            onLoadMore = {
-                if (it.isNullOrEmpty()) {
-                    loadMoreAdapter.onEnd()
-                } else {
-                    if (isLoadAfter) {
-                        listAdapter.addAllToEnd(it)
-                    } else {
-                        listAdapter.addAllToStart(it)
-                        recyclerView.keepPosition(it.size, 1)
+            onError = { requestType, throwable ->
+                when {
+                    requestType is RequestType.Initial -> {
+                        mAdapter.removeAllExcludeAndAddAllIfAbsent(errorAdapter)
+                        errorAdapter?.onError(throwable)
                     }
-                    loadMoreAdapter.reload()
-                    loadMoreAdapter.onComplete()
+                    requestType is RequestType.After || requestType is RequestType.Before -> {
+                        loadMoreAdapter.onError(throwable)
+                    }
                 }
             },
-            onLoadMoreError = { loadMoreAdapter.onError(it) },
             show = show,
             hide = hide,
-            onFailed = onFailed,
-            onSuccess = onSuccess,
         )
         launch {
             flow.collect()
