@@ -42,7 +42,7 @@ class MyAddImageViewAdapter(private val activity: FragmentActivity, recyclerView
         val item = get(position)
         when (item) {
             is AddInfo -> {// +号图片
-                val binding = holder.binding as ViewAddImageBinding
+                val binding = holder.binding
                 binding.iv.setImageResource(item.addImageResId)
                 binding.iv.setOnClickListener {
                     PictureSelector.create(activity)
