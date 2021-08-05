@@ -33,3 +33,10 @@ fun RecyclerView.keepPosition(insertedItemCount: Int, headerCount: Int) {
         }
     }
 }
+
+fun RecyclerView.findFirstVisiblePosition(): Int {
+    //获取第一个可见item的position
+    val firstVisibleItem = layoutManager?.getChildAt(0)
+    val firstVisibleItemLayoutParams = firstVisibleItem?.layoutParams as? RecyclerView.LayoutParams
+    return firstVisibleItemLayoutParams?.viewLayoutPosition ?: -1
+}

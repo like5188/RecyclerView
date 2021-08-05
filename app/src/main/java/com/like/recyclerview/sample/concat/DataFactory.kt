@@ -1,10 +1,6 @@
 package com.like.recyclerview.sample.concat
 
 import com.like.recyclerview.model.IRecyclerViewItem
-import com.like.recyclerview.sample.model.Header1
-import com.like.recyclerview.sample.model.Header2
-import com.like.recyclerview.sample.model.Item1
-import com.like.recyclerview.sample.model.Item2
 
 object DataFactory {
     fun createHeader(index: Int): IRecyclerViewItem {

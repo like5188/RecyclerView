@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.model
+package com.like.recyclerview.sample.concat
 
 import android.util.Log
 import android.view.View

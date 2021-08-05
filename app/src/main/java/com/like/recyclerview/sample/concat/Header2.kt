@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.model
+package com.like.recyclerview.sample.concat
 
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.BR
