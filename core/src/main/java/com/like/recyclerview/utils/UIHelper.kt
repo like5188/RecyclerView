@@ -33,14 +33,16 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
         result.bind(
             onData = {
                 if (showEmpty(it)) {
-                    mAdapter.removeAllExcludeAndAddAllIfAbsent(emptyAdapter)
+                    mAdapter.clear()
+                    mAdapter.add(emptyAdapter)
                 } else {
-                    mAdapter.removeAll(emptyAdapter, errorAdapter)
+                    mAdapter.clear()
                     onData(it)
                 }
             },
             onError = {
-                mAdapter.removeAllExcludeAndAddAllIfAbsent(errorAdapter)
+                mAdapter.clear()
+                mAdapter.add(errorAdapter)
                 errorAdapter?.onError(it)
             },
             show = show,
@@ -70,14 +72,15 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                 when {
                     requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
                         if (showEmpty(data)) {
-                            mAdapter.removeAllExcludeAndAddAllIfAbsent(emptyAdapter)
+                            mAdapter.clear()
+                            mAdapter.add(emptyAdapter)
                         } else {
-                            mAdapter.removeAll(emptyAdapter, errorAdapter)
+                            mAdapter.clear()
                             if (isLoadAfter) {
                                 onData(data)
-                                mAdapter.addAllIfAbsent(loadMoreAdapter)
+                                mAdapter.add(loadMoreAdapter)
                             } else {
-                                mAdapter.addAllIfAbsent(loadMoreAdapter)
+                                mAdapter.add(loadMoreAdapter)
                                 onData(data)
                             }
                             loadMoreAdapter.reload()
@@ -106,7 +109,8 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
             onError = { requestType, throwable ->
                 when {
                     requestType is RequestType.Initial -> {
-                        mAdapter.removeAllExcludeAndAddAllIfAbsent(errorAdapter)
+                        mAdapter.clear()
+                        mAdapter.add(errorAdapter)
                         errorAdapter?.onError(throwable)
                     }
                     requestType is RequestType.After || requestType is RequestType.Before -> {

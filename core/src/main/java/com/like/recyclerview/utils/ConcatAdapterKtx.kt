@@ -19,54 +19,24 @@ fun ConcatAdapter.contains(adapter: RecyclerView.Adapter<out RecyclerView.ViewHo
     return false
 }
 
-/**
- * 移除所有指定的 adapter。如果指定的 adapter 为 null，则不做任何操作。
- */
+fun ConcatAdapter.add(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    adapter ?: return
+    addAdapter(adapter)
+}
+
+fun ConcatAdapter.addAll(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    adapters.forEach {
+        add(it)
+    }
+}
+
+fun ConcatAdapter.remove(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    adapter ?: return
+    removeAdapter(adapter)
+}
+
 fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
-    val nonNullAdapters = adapters.filterNotNull().toTypedArray()
-    if (nonNullAdapters.isEmpty()) {
-        return
+    adapters.forEach {
+        remove(it)
     }
-    this.adapters.forEach {
-        if (nonNullAdapters.contains(it)) {
-            this.removeAdapter(it)
-        }
-    }
-}
-
-/**
- * 移除所有，除了指定的 adapter
- */
-fun ConcatAdapter.removeAllExclude(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
-    val nonNullAdapters = adapters.filterNotNull().toTypedArray()
-    if (nonNullAdapters.isEmpty()) {
-        clear()
-    } else {
-        this.adapters.forEach {
-            if (!nonNullAdapters.contains(it)) {
-                this.removeAdapter(it)
-            }
-        }
-    }
-}
-
-/**
- * 如果指定的 adapter 为 null，则不做任何操作。
- * 如果指定的 adapter 不存在于 ConcatAdapter 中，则按顺序添加到其中。
- */
-fun ConcatAdapter.addAllIfAbsent(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
-    val nonNullAdapters = adapters.filterNotNull().toTypedArray()
-    if (nonNullAdapters.isEmpty()) {
-        return
-    }
-    nonNullAdapters.forEachIndexed { index, adapter ->
-        if (!contains(adapter)) {
-            addAdapter(index, adapter)
-        }
-    }
-}
-
-fun ConcatAdapter.removeAllExcludeAndAddAllIfAbsent(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
-    removeAllExclude(*adapters)
-    addAllIfAbsent(*adapters)
 }

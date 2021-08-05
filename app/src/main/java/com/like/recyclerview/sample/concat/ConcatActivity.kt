@@ -19,7 +19,8 @@ import com.like.recyclerview.ui.model.EmptyItem
 import com.like.recyclerview.ui.model.ErrorItem
 import com.like.recyclerview.ui.model.LoadMoreItem
 import com.like.recyclerview.utils.UIHelper
-import com.like.recyclerview.utils.addAllIfAbsent
+import com.like.recyclerview.utils.add
+import com.like.recyclerview.utils.addAll
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -42,7 +43,7 @@ class ConcatActivity : AppCompatActivity() {
     private val mUIHelper by lazy {
         UIHelper(mAdapter)
     }
-    private val isLoadAfter = true
+    private val isLoadAfter = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +73,7 @@ class ConcatActivity : AppCompatActivity() {
                         it.headers.isNullOrEmpty() && it.items.isNullOrEmpty()
                     },
                     onData = {
-                        mAdapter.addAllIfAbsent(headerAdapter, itemAdapter)
+                        mAdapter.addAll(headerAdapter, itemAdapter)
                         val headers = it.headers
                         val items = it.items
                         if (!headers.isNullOrEmpty()) {
@@ -143,7 +144,7 @@ class ConcatActivity : AppCompatActivity() {
                     it.isNullOrEmpty()
                 },
                 onData = {
-                    mAdapter.addAllIfAbsent(itemAdapter)
+                    mAdapter.add(itemAdapter)
                     itemAdapter.clear()
                     itemAdapter.addAllToEnd(it)
                 },
