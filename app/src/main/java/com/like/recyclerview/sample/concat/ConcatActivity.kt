@@ -20,7 +20,6 @@ import com.like.recyclerview.ui.model.ErrorItem
 import com.like.recyclerview.ui.model.LoadMoreItem
 import com.like.recyclerview.utils.UIHelper
 import com.like.recyclerview.utils.add
-import com.like.recyclerview.utils.addAll
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -51,13 +50,14 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.adapter = mAdapter
 
 //        initLoad()
-//        initLoadAfter()
-        initLoadBefore()
+        initLoadAfter()
+//        initLoadBefore()
     }
 
     private fun initLoad() {
         val headerAdapter = HeaderAdapter()
         val itemAdapter = ItemAdapter()
+        val contentAdapter = ConcatAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -70,27 +70,25 @@ class ConcatActivity : AppCompatActivity() {
                 mUIHelper.collect(
                     result = mViewModel::getData,
                     onData = {
-                        mAdapter.addAll(headerAdapter, itemAdapter)
-                        val headers = it.getOrNull(0)
-                        val items = it.getOrNull(1)
-                        if (!headers.isNullOrEmpty()) {
-                            headerAdapter.clear()
-                            headerAdapter.addAllToEnd(headers)
-                        }
-                        if (!items.isNullOrEmpty()) {
-                            itemAdapter.clear()
-                            itemAdapter.addAllToEnd(items)
-                        }
-                    },
-                    showEmpty = {
                         var isEmpty = it.isNullOrEmpty()
                         if (!isEmpty) {
                             val headers = it.getOrNull(0)
                             val items = it.getOrNull(1)
+                            if (!headers.isNullOrEmpty()) {
+                                contentAdapter.add(headerAdapter)
+                                headerAdapter.clear()
+                                headerAdapter.addAllToEnd(headers)
+                            }
+                            if (!items.isNullOrEmpty()) {
+                                contentAdapter.add(itemAdapter)
+                                itemAdapter.clear()
+                                itemAdapter.addAllToEnd(items)
+                            }
                             isEmpty = headers.isNullOrEmpty() && items.isNullOrEmpty()
                         }
                         isEmpty
                     },
+                    contentAdapter = contentAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
                     show = { mProgressDialog.show() },
@@ -117,6 +115,7 @@ class ConcatActivity : AppCompatActivity() {
 
         val headerAdapter = HeaderAdapter()
         val itemAdapter = ItemAdapter()
+        val contentAdapter = ConcatAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -136,17 +135,28 @@ class ConcatActivity : AppCompatActivity() {
                 recyclerView = mBinding.rv,
                 result = result,
                 onData = {
-                    val headers = it.getOrNull(0)
-                    val items = it.getOrNull(1)
-                    if (!headers.isNullOrEmpty()) {
-                        mAdapter.add(headerAdapter)
-                        headerAdapter.clear()
-                        headerAdapter.addAllToEnd(headers)
-                    }
-                    if (!items.isNullOrEmpty()) {
-                        mAdapter.add(itemAdapter)
-                        itemAdapter.clear()
-                        itemAdapter.addAllToEnd(items)
+                    if (it.isNullOrEmpty()) {
+                        0
+                    } else {
+                        val headers = it.getOrNull(0)
+                        val items = it.getOrNull(1)
+                        if (!headers.isNullOrEmpty()) {
+                            contentAdapter.add(headerAdapter)
+                            headerAdapter.clear()
+                            headerAdapter.addAllToEnd(headers)
+                        }
+                        if (!items.isNullOrEmpty()) {
+                            contentAdapter.add(itemAdapter)
+                            itemAdapter.clear()
+                            itemAdapter.addAllToEnd(items)
+                        }
+                        if (headers.isNullOrEmpty() && items.isNullOrEmpty()) {
+                            0
+                        } else if (!items.isNullOrEmpty()) {
+                            2
+                        } else {
+                            1
+                        }
                     }
                 },
                 onLoadMore = {
@@ -154,21 +164,9 @@ class ConcatActivity : AppCompatActivity() {
                     if (!items.isNullOrEmpty()) {
                         itemAdapter.addAllToEnd(items)
                     }
-                    it.size
-                },
-                showEmpty = {
-                    var isEmpty = it.isNullOrEmpty()
-                    if (!isEmpty) {
-                        val headers = it.getOrNull(0)
-                        val items = it.getOrNull(1)
-                        isEmpty = headers.isNullOrEmpty() && items.isNullOrEmpty()
-                    }
-                    isEmpty
-                },
-                showLoadMoreEnd = {
-                    val items = it.getOrNull(1)
                     items.isNullOrEmpty()
                 },
+                contentAdapter = contentAdapter,
                 loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,
@@ -187,7 +185,7 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        val itemAdapter = ItemAdapter()
+        val contentAdapter = ItemAdapter()
         val emptyAdapter = EmptyAdapter().apply {
             addToEnd(EmptyItem())
         }
@@ -206,7 +204,7 @@ class ConcatActivity : AppCompatActivity() {
             mUIHelper.collectForLoadBefore(
                 recyclerView = mBinding.rv,
                 result = result,
-                listAdapter = itemAdapter,
+                contentAdapter = contentAdapter,
                 loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,
