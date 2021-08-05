@@ -20,6 +20,13 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
 
     /**
      * 不分页
+     *
+     * @param result            获取列表数据的代码块
+     * @param listAdapter       列表
+     * @param emptyAdapter      空视图
+     * @param errorAdapter      错误视图
+     * @param show              显示进度条
+     * @param hide              隐藏进度条
      */
     suspend fun <ValueInList> collect(
         result: (suspend () -> List<ValueInList>?),
@@ -54,8 +61,14 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     /**
      * 不分页
      *
-     * @param onData        用于处理初始化或者刷新数据的回调。
+     * @param result            获取数据的代码块
+     * @param onData            用于处理初始化或者刷新数据的回调。
      * 返回值表示是否显示空视图。
+     * @param contentAdapter    内容，可以包括列表、header等。
+     * @param emptyAdapter      空视图
+     * @param errorAdapter      错误视图
+     * @param show              显示进度条
+     * @param hide              隐藏进度条
      */
     suspend fun <ResultType> collect(
         result: (suspend () -> ResultType),
@@ -88,6 +101,14 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
 
     /**
      * 往后分页
+     *
+     * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+     * @param listAdapter       列表。
+     * @param loadMoreAdapter   加载更多视图
+     * @param emptyAdapter      空视图
+     * @param errorAdapter      错误视图
+     * @param show              初始化或者刷新开始时显示进度条
+     * @param hide              初始化或者刷新成功或者失败时隐藏进度条
      */
     suspend fun <ValueInList> collectForLoadAfter(
         recyclerView: RecyclerView,
@@ -153,10 +174,17 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     /**
      * 往后分页
      *
-     * @param onData        用于处理初始化或者刷新数据的回调。
+     * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+     * @param onData            用于处理初始化或者刷新数据的回调。
      * 返回值：0：显示空视图；1：不显示空视图，没有更多数据需要加载；2：不显示空视图，有更多数据需要加载；
-     * @param onLoadMore    用于处理加载更多数据的回调。
+     * @param onLoadMore        用于处理加载更多数据的回调。
      * 返回值表示是否还有更多数据需要加载。
+     * @param contentAdapter    内容，可以包括列表、header等。
+     * @param loadMoreAdapter   加载更多视图
+     * @param emptyAdapter      空视图
+     * @param errorAdapter      错误视图
+     * @param show              初始化或者刷新开始时显示进度条
+     * @param hide              初始化或者刷新成功或者失败时隐藏进度条
      */
     suspend fun <ResultType> collectForLoadAfter(
         recyclerView: RecyclerView,
@@ -229,6 +257,14 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
 
     /**
      * 往前分页
+     *
+     * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+     * @param listAdapter       列表。
+     * @param loadMoreAdapter   加载更多视图
+     * @param emptyAdapter      空视图
+     * @param errorAdapter      错误视图
+     * @param show              初始化或者刷新开始时显示进度条
+     * @param hide              初始化或者刷新成功或者失败时隐藏进度条
      */
     suspend fun <ValueInList> collectForLoadBefore(
         recyclerView: RecyclerView,
