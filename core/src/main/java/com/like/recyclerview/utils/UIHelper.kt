@@ -21,9 +21,10 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     /**
      * 不分页
      */
-    suspend fun <ValueInList> collect(
-        result: (suspend () -> List<ValueInList>?),
-        listAdapter: AbstractAdapter<*, ValueInList>,
+    suspend fun <ResultType> collect(
+        result: (suspend () -> ResultType),
+        showEmpty: (ResultType) -> Boolean,
+        onData: suspend (ResultType) -> Unit,
         emptyAdapter: AbstractAdapter<*, *>? = null,
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
         show: (() -> Unit)? = null,
@@ -31,12 +32,11 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     ) {
         result.bind(
             onData = {
-                if (it.isNullOrEmpty()) {
+                if (showEmpty(it)) {
                     mAdapter.removeAllExcludeAndAddAllIfAbsent(emptyAdapter)
                 } else {
-                    mAdapter.removeAllExcludeAndAddAllIfAbsent(listAdapter)
-                    listAdapter.clear()
-                    listAdapter.addAllToEnd(it)
+                    mAdapter.removeAll(emptyAdapter, errorAdapter)
+                    onData(it)
                 }
             },
             onError = {
@@ -51,11 +51,14 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     /**
      * 分页
      */
-    suspend fun <ValueInList> collect(
+    suspend fun <ResultType> collect(
         recyclerView: RecyclerView,
         isLoadAfter: Boolean,
-        result: Result<List<ValueInList>?>,
-        listAdapter: AbstractAdapter<*, ValueInList>,
+        result: Result<ResultType>,
+        showEmpty: (ResultType) -> Boolean,
+        showLoadMoreEnd: (ResultType) -> Boolean,
+        onData: suspend (ResultType) -> Unit,
+        onLoadMore: suspend (ResultType) -> Int,
         loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
         emptyAdapter: AbstractAdapter<*, *>? = null,
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
@@ -66,16 +69,17 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
             onData = { requestType, data ->
                 when {
                     requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                        if (data.isNullOrEmpty()) {
+                        if (showEmpty(data)) {
                             mAdapter.removeAllExcludeAndAddAllIfAbsent(emptyAdapter)
                         } else {
+                            mAdapter.removeAll(emptyAdapter, errorAdapter)
                             if (isLoadAfter) {
-                                mAdapter.removeAllExcludeAndAddAllIfAbsent(listAdapter, loadMoreAdapter)
+                                onData(data)
+                                mAdapter.addAllIfAbsent(loadMoreAdapter)
                             } else {
-                                mAdapter.removeAllExcludeAndAddAllIfAbsent(loadMoreAdapter, listAdapter)
+                                mAdapter.addAllIfAbsent(loadMoreAdapter)
+                                onData(data)
                             }
-                            listAdapter.clear()
-                            listAdapter.addAllToEnd(data)
                             loadMoreAdapter.reload()
                             loadMoreAdapter.onComplete()
                             if (isLoadAfter) {
@@ -86,14 +90,12 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                         }
                     }
                     requestType is RequestType.After || requestType is RequestType.Before -> {
-                        if (data.isNullOrEmpty()) {
+                        if (showLoadMoreEnd(data)) {
                             loadMoreAdapter.onEnd()
                         } else {
-                            if (isLoadAfter) {
-                                listAdapter.addAllToEnd(data)
-                            } else {
-                                listAdapter.addAllToStart(data)
-                                recyclerView.keepPosition(data.size, 1)
+                            val insertedItemCount = onLoadMore(data)
+                            if (!isLoadAfter) {
+                                recyclerView.keepPosition(insertedItemCount, 1)
                             }
                             loadMoreAdapter.reload()
                             loadMoreAdapter.onComplete()

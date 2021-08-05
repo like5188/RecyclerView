@@ -3,7 +3,7 @@ package com.like.recyclerview.sample.concat
 import com.like.recyclerview.model.IRecyclerViewItem
 import kotlinx.coroutines.delay
 
-class LoadDataSource {
+class ItemDataSource {
     private var i = 0
 
     suspend fun load(): List<IRecyclerViewItem> {

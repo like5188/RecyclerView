@@ -7,7 +7,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
-import com.hjq.toast.ToastUtils
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
@@ -20,6 +19,7 @@ import com.like.recyclerview.ui.model.EmptyItem
 import com.like.recyclerview.ui.model.ErrorItem
 import com.like.recyclerview.ui.model.LoadMoreItem
 import com.like.recyclerview.utils.UIHelper
+import com.like.recyclerview.utils.addAllIfAbsent
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -67,18 +67,23 @@ class ConcatActivity : AppCompatActivity() {
         fun getData() {
             lifecycleScope.launch {
                 mUIHelper.collect(
-                    result = mViewModel::getItems,
-                    listAdapter = itemAdapter,
-                    emptyAdapter = emptyAdapter,
-                    errorAdapter = errorAdapter,
-                    show = { mProgressDialog.show() },
-                    hide = { mProgressDialog.hide() },
-                )
-            }
-            lifecycleScope.launch {
-                mUIHelper.collect(
-                    result = mViewModel::getHeaders,
-                    listAdapter = headerAdapter,
+                    result = mViewModel::getData,
+                    showEmpty = {
+                        it.headers.isNullOrEmpty() && it.items.isNullOrEmpty()
+                    },
+                    onData = {
+                        mAdapter.addAllIfAbsent(headerAdapter, itemAdapter)
+                        val headers = it.headers
+                        val items = it.items
+                        if (!headers.isNullOrEmpty()) {
+                            headerAdapter.clear()
+                            headerAdapter.addAllToEnd(headers)
+                        }
+                        if (!items.isNullOrEmpty()) {
+                            itemAdapter.clear()
+                            itemAdapter.addAllToEnd(items)
+                        }
+                    },
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
                     show = { mProgressDialog.show() },
@@ -131,18 +136,30 @@ class ConcatActivity : AppCompatActivity() {
                 recyclerView = mBinding.rv,
                 isLoadAfter = isLoadAfter,
                 result = result,
-                listAdapter = itemAdapter,
+                showEmpty = {
+                    it.isNullOrEmpty()
+                },
+                showLoadMoreEnd = {
+                    it.isNullOrEmpty()
+                },
+                onData = {
+                    mAdapter.addAllIfAbsent(itemAdapter)
+                    itemAdapter.clear()
+                    itemAdapter.addAllToEnd(it)
+                },
+                onLoadMore = {
+                    if (isLoadAfter) {
+                        itemAdapter.addAllToEnd(it)
+                    } else {
+                        itemAdapter.addAllToStart(it)
+                    }
+                    it.size
+                },
                 loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,
                 show = { mProgressDialog.show() },
                 hide = { mProgressDialog.hide() },
-                onFailed = { requestType, throwable ->
-                    ToastUtils.show("onFailed ${throwable.message}")
-                },
-                onSuccess = { requestType, list ->
-                    ToastUtils.show("onSuccess")
-                },
             )
         }
     }
