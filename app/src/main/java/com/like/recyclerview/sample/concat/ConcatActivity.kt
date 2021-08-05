@@ -51,8 +51,8 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-//        initLoad()
-        initLoadMore()
+        initLoad()
+//        initLoadMore()
     }
 
     private fun initLoad() {
@@ -70,12 +70,18 @@ class ConcatActivity : AppCompatActivity() {
                 mUIHelper.collect(
                     result = mViewModel::getData,
                     showEmpty = {
-                        it.headers.isNullOrEmpty() && it.items.isNullOrEmpty()
+                        var isEmpty = it.isNullOrEmpty()
+                        if (!isEmpty) {
+                            val headers = it.getOrNull(0)
+                            val items = it.getOrNull(1)
+                            isEmpty = headers.isNullOrEmpty() && items.isNullOrEmpty()
+                        }
+                        isEmpty
                     },
                     onData = {
                         mAdapter.addAll(headerAdapter, itemAdapter)
-                        val headers = it.headers
-                        val items = it.items
+                        val headers = it.getOrNull(0)
+                        val items = it.getOrNull(1)
                         if (!headers.isNullOrEmpty()) {
                             headerAdapter.clear()
                             headerAdapter.addAllToEnd(headers)

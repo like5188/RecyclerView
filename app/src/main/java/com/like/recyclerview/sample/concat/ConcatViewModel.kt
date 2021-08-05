@@ -1,7 +1,7 @@
 package com.like.recyclerview.sample.concat
 
 import androidx.lifecycle.ViewModel
-import com.like.recyclerview.sample.model.Data
+import com.like.common.util.successIfAllSuccess
 
 class ConcatViewModel : ViewModel() {
     companion object {
@@ -14,11 +14,6 @@ class ConcatViewModel : ViewModel() {
     private val itemResult = ItemDataSource()
     private val headerResult = HeaderDataSource()
 
-    suspend fun getData(): Data {
-        return Data().apply {
-            headers = headerResult.load()
-            items = itemResult.load()
-        }
-    }
+    suspend fun getData() = successIfAllSuccess(headerResult::load, itemResult::load)
 
 }
