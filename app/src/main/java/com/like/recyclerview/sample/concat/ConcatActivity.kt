@@ -204,7 +204,7 @@ class ConcatActivity : AppCompatActivity() {
             mUIHelper.collectForLoadBefore(
                 recyclerView = mBinding.rv,
                 result = result,
-                contentAdapter = contentAdapter,
+                listAdapter = contentAdapter,
                 loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,
