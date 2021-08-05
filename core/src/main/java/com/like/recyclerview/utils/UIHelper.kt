@@ -23,8 +23,8 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
      */
     suspend fun <ResultType> collect(
         result: (suspend () -> ResultType),
-        showEmpty: (ResultType) -> Boolean,
         onData: suspend (ResultType) -> Unit,
+        showEmpty: (ResultType) -> Boolean,
         emptyAdapter: AbstractAdapter<*, *>? = null,
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
         show: (() -> Unit)? = null,
@@ -51,16 +51,15 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
     }
 
     /**
-     * 分页
+     * 往后分页
      */
-    suspend fun <ResultType> collect(
+    suspend fun <ResultType> collectForLoadAfter(
         recyclerView: RecyclerView,
-        isLoadAfter: Boolean,
         result: Result<ResultType>,
+        onData: suspend (ResultType) -> Unit,
+        onLoadMore: suspend (ResultType) -> Unit,
         showEmpty: (ResultType) -> Boolean,
         showLoadMoreEnd: (ResultType) -> Boolean,
-        onData: suspend (ResultType) -> Unit,
-        onLoadMore: suspend (ResultType) -> Int,
         loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
         emptyAdapter: AbstractAdapter<*, *>? = null,
         errorAdapter: AbstractErrorAdapter<*, *>? = null,
@@ -76,30 +75,22 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
                             mAdapter.add(emptyAdapter)
                         } else {
                             mAdapter.clear()
-                            if (isLoadAfter) {
+                            if (!showLoadMoreEnd(data)) {
                                 onData(data)
                                 mAdapter.add(loadMoreAdapter)
+                                loadMoreAdapter.reload()
+                                loadMoreAdapter.onComplete()
                             } else {
-                                mAdapter.add(loadMoreAdapter)
                                 onData(data)
                             }
-                            loadMoreAdapter.reload()
-                            loadMoreAdapter.onComplete()
-                            if (isLoadAfter) {
-                                recyclerView.scrollToTop()
-                            } else {
-                                recyclerView.scrollToBottom()
-                            }
+                            recyclerView.scrollToTop()
                         }
                     }
                     requestType is RequestType.After || requestType is RequestType.Before -> {
                         if (showLoadMoreEnd(data)) {
                             loadMoreAdapter.onEnd()
                         } else {
-                            val insertedItemCount = onLoadMore(data)
-                            if (!isLoadAfter) {
-                                recyclerView.keepPosition(insertedItemCount, 1)
-                            }
+                            onLoadMore(data)
                             loadMoreAdapter.reload()
                             loadMoreAdapter.onComplete()
                         }
@@ -128,4 +119,70 @@ class UIHelper(private val mAdapter: ConcatAdapter) {
             result.initial()
         }
     }
+
+    /**
+     * 往前分页
+     */
+    suspend fun <ValueInList> collectForLoadBefore(
+        recyclerView: RecyclerView,
+        result: Result<List<ValueInList>?>,
+        listAdapter: AbstractAdapter<*, ValueInList>,
+        loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
+        emptyAdapter: AbstractAdapter<*, *>? = null,
+        errorAdapter: AbstractErrorAdapter<*, *>? = null,
+        show: (() -> Unit)? = null,
+        hide: (() -> Unit)? = null,
+    ) = withContext(Dispatchers.Main) {
+        val flow = result.bind(
+            onData = { requestType, data ->
+                when {
+                    requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+                        if (data.isNullOrEmpty()) {
+                            mAdapter.clear()
+                            mAdapter.add(emptyAdapter)
+                        } else {
+                            mAdapter.clear()
+                            mAdapter.addAll(loadMoreAdapter, listAdapter)
+                            listAdapter.clear()
+                            listAdapter.addAllToEnd(data)
+                            loadMoreAdapter.reload()
+                            loadMoreAdapter.onComplete()
+                            recyclerView.scrollToBottom()
+                        }
+                    }
+                    requestType is RequestType.After || requestType is RequestType.Before -> {
+                        if (data.isNullOrEmpty()) {
+                            loadMoreAdapter.onEnd()
+                        } else {
+                            listAdapter.addAllToStart(data)
+                            recyclerView.keepPosition(data.size, 1)
+                            loadMoreAdapter.reload()
+                            loadMoreAdapter.onComplete()
+                        }
+                    }
+                }
+            },
+            onError = { requestType, throwable ->
+                when {
+                    requestType is RequestType.Initial -> {
+                        mAdapter.clear()
+                        mAdapter.add(errorAdapter)
+                        errorAdapter?.onError(throwable)
+                    }
+                    requestType is RequestType.After || requestType is RequestType.Before -> {
+                        loadMoreAdapter.onError(throwable)
+                    }
+                }
+            },
+            show = show,
+            hide = hide,
+        )
+        launch {
+            flow.collect()
+        }
+        launch {
+            result.initial()
+        }
+    }
+
 }
