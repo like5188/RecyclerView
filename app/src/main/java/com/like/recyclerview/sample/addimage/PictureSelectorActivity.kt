@@ -21,18 +21,18 @@ class PictureSelectorActivity : AppCompatActivity() {
 
     private val mAdapterManager: AdapterManager<AddImageViewInfo> by lazy {
         AdapterManager(
-            this,
-            myItemAdapter,
-            myPlusAdapter,
-            {
+            activity = this,
+            itemAdapter = myItemAdapter,
+            plusAdapter = myPlusAdapter,
+            getLocalMedias = {
                 myItemAdapter.mList.map {
                     it.localMedia
                 }
             },
-            {
+            itemCreator = {
                 AddImageViewInfo(it, "des")
             },
-            {
+            onPlusItemClicked = {
                 myItemAdapter.showDeleteButton.set(false)
             }
         )

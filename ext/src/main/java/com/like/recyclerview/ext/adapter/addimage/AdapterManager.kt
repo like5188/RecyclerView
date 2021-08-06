@@ -8,6 +8,10 @@ import com.luck.picture.lib.entity.LocalMedia
 
 /**
  * [ItemAdapter]、[PlusAdapter]交互逻辑封装
+ *
+ * @param getLocalMedias    获取当前已经添加了的所有 [LocalMedia]
+ * @param itemCreator       根据 [LocalMedia] 创建 item
+ * @param onPlusItemClicked +号被点击回调
  */
 class AdapterManager<ValueInList>(
     activity: AppCompatActivity,
