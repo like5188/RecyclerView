@@ -42,7 +42,7 @@ open class AbstractAddImageViewAdapter<VB : ViewDataBinding, ValueInList>(
                 if (isPlus(target)) {// +号图片不让替换位置
                     return false
                 }
-                moveItem(viewHolder.adapterPosition, target.adapterPosition)
+                moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
                 return true
             }
 
