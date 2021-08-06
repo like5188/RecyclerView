@@ -6,11 +6,12 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.like.recyclerview.adapter.AbstractAdapter
 
 /**
  * 支持拖拽 item 的 [ItemTouchHelper.Callback]。
  */
-class ItemTouchHelperCallback(private val adapter: ItemAdapter<*, *>) : ItemTouchHelper.Callback() {
+class ItemTouchHelperCallback(private val adapter: AbstractAdapter<*, *>) : ItemTouchHelper.Callback() {
     companion object {
         private val TAG = "ItemTouchHelperCallback"
     }
