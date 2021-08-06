@@ -14,7 +14,7 @@ class AdapterManager<ValueInList>(
     itemAdapter: ItemAdapter<*, ValueInList>,
     plusAdapter: PlusAdapter<*, *>,
     getLocalMedias: () -> List<LocalMedia>,
-    transformer: (LocalMedia) -> ValueInList,
+    itemCreator: (LocalMedia) -> ValueInList,
     onPlusItemClicked: () -> Unit
 ) {
     private val mAdapter: ConcatAdapter by lazy {
@@ -23,7 +23,7 @@ class AdapterManager<ValueInList>(
 
     init {
         itemAdapter.activity = activity
-        itemAdapter.transformer = transformer
+        itemAdapter.itemCreator = itemCreator
         itemAdapter.getLocalMedias = getLocalMedias
         itemAdapter.notifyRemovePlus = { mAdapter.remove(plusAdapter) }
         itemAdapter.notifyAddPlus = { mAdapter.add(plusAdapter) }

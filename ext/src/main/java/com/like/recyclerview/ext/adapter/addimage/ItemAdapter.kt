@@ -16,7 +16,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     private val maxImageCount: Int = 9
 ) : AbstractAdapter<VB, ValueInList>() {
     lateinit var activity: AppCompatActivity
-    lateinit var transformer: (LocalMedia) -> ValueInList
+    lateinit var itemCreator: (LocalMedia) -> ValueInList
     lateinit var getLocalMedias: () -> List<LocalMedia>
     lateinit var notifyRemovePlus: () -> Unit
     lateinit var notifyAddPlus: () -> Unit
@@ -47,7 +47,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
         val localMedias = getLocalMedias()
         // 去掉已经添加过的
         val items = list.filter { !localMedias.contains(it) }.map {
-            transformer(it)
+            itemCreator(it)
         }
         val curCount = mList.size
         when {
