@@ -6,6 +6,9 @@ import com.like.recyclerview.utils.add
 import com.like.recyclerview.utils.remove
 import com.luck.picture.lib.entity.LocalMedia
 
+/**
+ * [ItemAdapter]、[PlusAdapter]交互逻辑封装
+ */
 class AdapterManager<ValueInList>(
     activity: AppCompatActivity,
     itemAdapter: ItemAdapter<*, ValueInList>,
