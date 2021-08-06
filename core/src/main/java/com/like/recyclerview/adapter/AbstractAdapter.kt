@@ -28,15 +28,63 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
         private const val TAG = "AbstractAdapter"
     }
 
-    protected lateinit var recyclerView: RecyclerView
     private val mOnItemClickListeners = mutableListOf<OnItemClickListener<VB>>()
     private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener<VB>>()
 
-    init {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
+        return BindingViewHolder(DataBindingUtil.inflate<VB>(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
+            // 为list添加Item的点击事件监听
+            if (mOnItemClickListeners.isNotEmpty()) {
+                itemView.setOnClickListener {
+                    mOnItemClickListeners.forEach {
+                        it.onItemClick(this)
+                    }
+                }
+            }
+            // 为list添加Item的长按事件监听
+            if (mOnItemLongClickListeners.isNotEmpty()) {
+                itemView.setOnLongClickListener {
+                    mOnItemLongClickListeners.forEach {
+                        it.onItemLongClick(this)
+                    }
+                    true
+                }
+            }
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return mList.size
+    }
+
+    final override fun getItemViewType(position: Int): Int {
+        val item = get(position)
+        if (item is IRecyclerViewItem) {
+            return item.layoutId
+        }
+        return getLayoutId(position)
+    }
+
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
+        val item = get(position)
+        if (item is IRecyclerViewItem) {
+            val variableId = item.variableId
+            if (variableId >= 0) {
+                try {
+                    holder.binding.setVariable(variableId, item)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
         mList.addOnListChangedCallback(
             object : ObservableList.OnListChangedCallback<ObservableArrayList<ValueInList>>() {
                 private fun update(block: () -> Unit) {
-                    if (::recyclerView.isInitialized && recyclerView.isComputingLayout) {
+                    if (recyclerView.isComputingLayout) {
                         recyclerView.post {
                             block()
                         }
@@ -112,58 +160,6 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
 
             }
         )
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
-        return BindingViewHolder(DataBindingUtil.inflate<VB>(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
-            // 为list添加Item的点击事件监听
-            if (mOnItemClickListeners.isNotEmpty()) {
-                itemView.setOnClickListener {
-                    mOnItemClickListeners.forEach {
-                        it.onItemClick(this)
-                    }
-                }
-            }
-            // 为list添加Item的长按事件监听
-            if (mOnItemLongClickListeners.isNotEmpty()) {
-                itemView.setOnLongClickListener {
-                    mOnItemLongClickListeners.forEach {
-                        it.onItemLongClick(this)
-                    }
-                    true
-                }
-            }
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return mList.size
-    }
-
-    final override fun getItemViewType(position: Int): Int {
-        val item = get(position)
-        if (item is IRecyclerViewItem) {
-            return item.layoutId
-        }
-        return getLayoutId(position)
-    }
-
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
-        val item = get(position)
-        if (item is IRecyclerViewItem) {
-            val variableId = item.variableId
-            if (variableId >= 0) {
-                try {
-                    holder.binding.setVariable(variableId, item)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        this.recyclerView = recyclerView
     }
 
     fun addOnItemClickListener(listener: OnItemClickListener<VB>) {
