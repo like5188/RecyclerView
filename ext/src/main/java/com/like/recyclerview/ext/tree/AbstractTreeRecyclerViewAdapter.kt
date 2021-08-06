@@ -1,9 +1,8 @@
-package com.like.recyclerview.ext.adapter
+package com.like.recyclerview.ext.tree
 
 import android.widget.CheckBox
 import androidx.databinding.ViewDataBinding
 import com.like.recyclerview.adapter.AbstractAdapter
-import com.like.recyclerview.ext.model.BaseTreeNode
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 /**

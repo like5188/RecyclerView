@@ -1,13 +1,13 @@
-package com.like.recyclerview.ext.adapter.addimage
+package com.like.recyclerview.ext.addimage
 
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.CoilEngine
 import com.like.recyclerview.adapter.AbstractAdapter
 import com.like.recyclerview.ext.R
-import com.like.recyclerview.ext.decoration.DragDecoration
 import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.PictureSelector
 import com.luck.picture.lib.entity.LocalMedia
@@ -20,8 +20,8 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     lateinit var getLocalMedias: () -> List<LocalMedia>
     lateinit var notifyRemovePlus: () -> Unit
     lateinit var notifyAddPlus: () -> Unit
-    private val mDragDecoration by lazy {
-        DragDecoration(this)
+    private val mItemTouchHelper by lazy {
+        ItemTouchHelper(ItemTouchHelperCallback())
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
@@ -40,7 +40,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        mDragDecoration.attachToRecyclerView(recyclerView)
+        mItemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     fun addLocalMedias(list: List<LocalMedia>) {

@@ -2,7 +2,7 @@ package com.like.recyclerview.sample.addimage
 
 import androidx.databinding.ObservableBoolean
 import coil.load
-import com.like.recyclerview.ext.adapter.addimage.ItemAdapter
+import com.like.recyclerview.ext.addimage.ItemAdapter
 import com.like.recyclerview.sample.databinding.ViewImageBinding
 import com.like.recyclerview.viewholder.BindingViewHolder
 import java.io.File

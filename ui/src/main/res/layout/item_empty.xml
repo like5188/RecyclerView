@@ -6,7 +6,7 @@
 
         <variable
                 name="emptyItem"
-                type="com.like.recyclerview.ui.model.EmptyItem" />
+                type="com.like.recyclerview.ui.empty.EmptyItem" />
     </data>
 
     <LinearLayout

@@ -1,4 +1,4 @@
-package com.like.recyclerview.ui.model
+package com.like.recyclerview.ui.loadmore
 
 import androidx.annotation.ColorRes
 import androidx.databinding.ObservableInt

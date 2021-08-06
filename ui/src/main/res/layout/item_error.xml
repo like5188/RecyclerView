@@ -6,7 +6,7 @@
 
         <variable
             name="errorItem"
-            type="com.like.recyclerview.ui.model.ErrorItem" />
+            type="com.like.recyclerview.ui.error.ErrorItem" />
     </data>
 
     <LinearLayout

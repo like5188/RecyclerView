@@ -1,4 +1,4 @@
-package com.like.recyclerview.ext.adapter.addimage
+package com.like.recyclerview.ext.addimage
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ConcatAdapter

@@ -1,4 +1,4 @@
-package com.like.recyclerview.ext.decoration
+package com.like.recyclerview.ext.addimage
 
 import android.view.animation.ScaleAnimation
 import androidx.recyclerview.widget.GridLayoutManager
@@ -8,20 +8,23 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.like.recyclerview.adapter.AbstractAdapter
 
 /**
- * 支持拖拽 item。
- * 使用方式：attachToRecyclerView(recyclerView)
+ * 支持拖拽 item 的 [ItemTouchHelper.Callback]。
  */
-class DragDecoration(adapter: AbstractAdapter<*, *>) : ItemTouchHelper(object : ItemTouchHelper.Callback() {
+class ItemTouchHelperCallback : ItemTouchHelper.Callback() {
+
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         val dragFlags = when (recyclerView.layoutManager) {
-            is GridLayoutManager, is StaggeredGridLayoutManager -> UP or DOWN or LEFT or RIGHT
-            else -> UP or DOWN
+            is GridLayoutManager, is StaggeredGridLayoutManager -> ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+            else -> ItemTouchHelper.UP or ItemTouchHelper.DOWN
         }
         return makeMovementFlags(dragFlags, 0)
     }
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-        adapter.moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+        val adapter = recyclerView.adapter
+        if (adapter is AbstractAdapter<*, *>) {
+            adapter.moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+        }
         return true
     }
 
@@ -52,10 +55,12 @@ class DragDecoration(adapter: AbstractAdapter<*, *>) : ItemTouchHelper(object : 
                 scaleAnimation.fillAfter = true
                 startAnimation(scaleAnimation)
             }
-            // 刷新position，避免拖拽导致的位置错乱。
-            // 因为mAdapterDataManager.moveItem()方法没有更新位置，放到了这里更新位置（如果在onMove()的时候更新的话，会导致拖拽bug）。
-            adapter.notifyDataSetChanged()
+            val adapter = recyclerView.adapter
+            if (adapter is AbstractAdapter<*, *>) {
+                // 刷新position，避免拖拽导致的位置错乱。
+                // 因为mAdapterDataManager.moveItem()方法没有更新位置，放到了这里更新位置（如果在onMove()的时候更新的话，会导致拖拽bug）。
+                adapter.notifyDataSetChanged()
+            }
         }
     }
-
-})
+}

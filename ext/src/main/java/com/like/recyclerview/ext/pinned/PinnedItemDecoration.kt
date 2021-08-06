@@ -1,4 +1,4 @@
-package com.like.recyclerview.ext.decoration
+package com.like.recyclerview.ext.pinned
 
 import android.graphics.Canvas
 import android.view.LayoutInflater
@@ -10,7 +10,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.adapter.AbstractAdapter
-import com.like.recyclerview.ext.model.IPinnedItem
 import com.like.recyclerview.utils.findFirstVisiblePosition
 
 /**

@@ -3,7 +3,7 @@ package com.like.recyclerview.sample.addimage
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import com.like.recyclerview.ext.adapter.addimage.AdapterManager
+import com.like.recyclerview.ext.addimage.AdapterManager
 import com.like.recyclerview.layoutmanager.WrapGridLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPictureSelectorBinding

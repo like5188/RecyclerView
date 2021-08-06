@@ -1,7 +1,7 @@
 package com.like.recyclerview.sample.addimage
 
 import androidx.annotation.DrawableRes
-import com.like.recyclerview.ext.adapter.addimage.PlusAdapter
+import com.like.recyclerview.ext.addimage.PlusAdapter
 import com.like.recyclerview.sample.databinding.ViewAddImageBinding
 import com.like.recyclerview.viewholder.BindingViewHolder
 

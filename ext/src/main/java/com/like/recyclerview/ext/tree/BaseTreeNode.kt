@@ -1,4 +1,4 @@
-package com.like.recyclerview.ext.model
+package com.like.recyclerview.ext.tree
 
 import androidx.databinding.ObservableBoolean
 import com.like.recyclerview.model.IRecyclerViewItem

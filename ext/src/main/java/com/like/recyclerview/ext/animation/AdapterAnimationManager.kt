@@ -1,4 +1,4 @@
-package com.like.recyclerview.ext.utils
+package com.like.recyclerview.ext.animation
 
 import android.animation.Animator
 import android.view.View

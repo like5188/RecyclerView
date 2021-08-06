@@ -1,8 +1,7 @@
-package com.like.recyclerview.ui.adapter
+package com.like.recyclerview.ui.loadmore
 
 import com.like.recyclerview.adapter.AbstractLoadMoreAdapter
 import com.like.recyclerview.ui.databinding.ItemLoadMoreBinding
-import com.like.recyclerview.ui.model.LoadMoreItem
 
 class LoadMoreAdapter(onLoad: () -> Unit) : AbstractLoadMoreAdapter<ItemLoadMoreBinding, LoadMoreItem>(onLoad) {
 

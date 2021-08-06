@@ -1,8 +1,7 @@
-package com.like.recyclerview.ui.adapter
+package com.like.recyclerview.ui.error
 
 import com.like.recyclerview.adapter.AbstractErrorAdapter
 import com.like.recyclerview.ui.databinding.ItemErrorBinding
-import com.like.recyclerview.ui.model.ErrorItem
 
 class ErrorAdapter : AbstractErrorAdapter<ItemErrorBinding, ErrorItem>() {
 

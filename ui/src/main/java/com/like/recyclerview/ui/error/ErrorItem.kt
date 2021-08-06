@@ -1,4 +1,4 @@
-package com.like.recyclerview.ui.model
+package com.like.recyclerview.ui.error
 
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
