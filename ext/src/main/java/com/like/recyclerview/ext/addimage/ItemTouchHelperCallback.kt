@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.like.recyclerview.adapter.AbstractAdapter
+import java.util.*
 
 /**
  * 支持拖拽 item 的 [ItemTouchHelper.Callback]。
@@ -26,8 +27,11 @@ class ItemTouchHelperCallback(private val adapter: AbstractAdapter<*, *>) : Item
     }
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-        Log.e(TAG, "onMove ${viewHolder.bindingAdapterPosition} ${target.bindingAdapterPosition}")
-        adapter.moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+        val fromPosition = viewHolder.bindingAdapterPosition
+        val toPosition = target.bindingAdapterPosition
+        Log.e(TAG, "onMove fromPosition=$fromPosition toPosition=$toPosition")
+        Collections.swap(adapter.mList, fromPosition, toPosition)
+        adapter.notifyItemMoved(fromPosition, toPosition)
         return true
     }
 
