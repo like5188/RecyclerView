@@ -12,9 +12,7 @@ import com.like.recyclerview.adapter.AbstractAdapter
  * 可拖拽交换位置的 adapter
  */
 open class DragAdapter<VB : ViewDataBinding, ValueInList> : AbstractAdapter<VB, ValueInList>() {
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
+    private val mItemTouchHelper: ItemTouchHelper by lazy {
         ItemTouchHelper(object : ItemTouchHelper.Callback() {
             override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
                 val dragFlags = when (recyclerView.layoutManager) {
@@ -62,7 +60,12 @@ open class DragAdapter<VB : ViewDataBinding, ValueInList> : AbstractAdapter<VB, 
                     notifyDataSetChanged()
                 }
             }
-        }).attachToRecyclerView(recyclerView)
+        })
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        mItemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
 }
