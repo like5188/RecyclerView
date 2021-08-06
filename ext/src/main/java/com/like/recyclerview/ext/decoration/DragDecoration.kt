@@ -28,7 +28,6 @@ class DragDecoration(adapter: AbstractAdapter<*, *>) : ItemTouchHelper(object : 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
     }
 
-
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         super.onSelectedChanged(viewHolder, actionState)
         // 当长按选中item的时候（拖拽开始的时候）调用
@@ -58,4 +57,5 @@ class DragDecoration(adapter: AbstractAdapter<*, *>) : ItemTouchHelper(object : 
             adapter.notifyDataSetChanged()
         }
     }
+
 })
