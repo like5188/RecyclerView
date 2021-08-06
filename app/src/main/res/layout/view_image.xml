@@ -6,7 +6,7 @@
         <import type="android.view.View" />
 
         <variable
-            name="deleteButtonShown"
+            name="showDeleteButton"
             type="androidx.databinding.ObservableBoolean" />
     </data>
 
@@ -43,7 +43,7 @@
             android:padding="10dp"
             android:scaleType="fitCenter"
             android:src="@drawable/icon_back"
-            android:visibility="@{deleteButtonShown?View.VISIBLE:View.GONE}" />
+            android:visibility="@{showDeleteButton?View.VISIBLE:View.GONE}" />
     </RelativeLayout>
 
 </layout>

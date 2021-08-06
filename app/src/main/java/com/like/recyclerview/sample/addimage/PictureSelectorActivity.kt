@@ -3,6 +3,7 @@ package com.like.recyclerview.sample.addimage
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.like.recyclerview.ext.adapter.addimage.AdapterManager
 import com.like.recyclerview.layoutmanager.WrapGridLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPictureSelectorBinding
@@ -15,8 +16,26 @@ class PictureSelectorActivity : AppCompatActivity() {
     private val mBinding by lazy {
         DataBindingUtil.setContentView<ActivityPictureSelectorBinding>(this, R.layout.activity_picture_selector)
     }
-    private val mAdapterManager: AdapterManager by lazy {
-        AdapterManager(this)
+    private val myItemAdapter = MyItemAdapter()
+    private val myPlusAdapter = MyPlusAdapter(R.drawable.icon_take_photo)
+
+    private val mAdapterManager: AdapterManager<AddImageViewInfo> by lazy {
+        AdapterManager(
+            this,
+            myItemAdapter,
+            myPlusAdapter,
+            {
+                myItemAdapter.mList.map {
+                    it.localMedia
+                }
+            },
+            {
+                AddImageViewInfo(it, "des")
+            },
+            {
+                myItemAdapter.showDeleteButton.set(false)
+            }
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

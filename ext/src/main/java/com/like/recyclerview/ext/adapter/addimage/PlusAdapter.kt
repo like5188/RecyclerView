@@ -1,11 +1,10 @@
-package com.like.recyclerview.sample.addimage
+package com.like.recyclerview.ext.adapter.addimage
 
 import android.util.Log
-import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.ViewDataBinding
 import com.like.common.util.CoilEngine
 import com.like.recyclerview.adapter.AbstractAdapter
-import com.like.recyclerview.sample.databinding.ViewAddImageBinding
 import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.PictureSelector
 import com.luck.picture.lib.config.PictureConfig
@@ -13,21 +12,19 @@ import com.luck.picture.lib.config.PictureMimeType
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.listener.OnResultCallbackListener
 
-abstract class AbstractPlusAdapter(
-    private val activity: AppCompatActivity,
-    @DrawableRes addImageResId: Int
-) : AbstractAdapter<ViewAddImageBinding, AddInfo>() {
-
-    init {
-        addToEnd(AddInfo(addImageResId))
+open class PlusAdapter<VB : ViewDataBinding, ValueInList>: AbstractAdapter<VB, ValueInList>() {
+    companion object {
+        private val TAG = "AbstractPlusAdapter"
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<ViewAddImageBinding>, position: Int) {
+    lateinit var activity: AppCompatActivity
+    lateinit var getLocalMedias: () -> List<LocalMedia>
+    lateinit var addItems: (List<LocalMedia>) -> Unit
+    lateinit var onPlusItemClicked: () -> Unit
+
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         super.onBindViewHolder(holder, position)
-        val item = get(position) ?: return
-        val binding = holder.binding
-        binding.iv.setImageResource(item.addImageResId)
-        binding.iv.setOnClickListener {
+        holder.binding.root.setOnClickListener {
             val localMedias = getLocalMedias()
             PictureSelector.create(activity)
                 .openGallery(PictureMimeType.ofImage())
@@ -53,14 +50,14 @@ abstract class AbstractPlusAdapter(
                         // 5.media.getAndroidQToPath();为Android Q版本特有返回的字段，此字段有值就用来做上传使用
                         // 如果同时开启裁剪和压缩，则取压缩路径为准因为是先裁剪后压缩
                         for (media in result) {
-                            Log.i(PictureSelectorActivity.TAG, "是否压缩:" + media.isCompressed)
-                            Log.i(PictureSelectorActivity.TAG, "压缩:" + media.compressPath)
-                            Log.i(PictureSelectorActivity.TAG, "原图:" + media.path)
-                            Log.i(PictureSelectorActivity.TAG, "是否裁剪:" + media.isCut)
-                            Log.i(PictureSelectorActivity.TAG, "裁剪:" + media.cutPath)
-                            Log.i(PictureSelectorActivity.TAG, "是否开启原图:" + media.isOriginal)
-                            Log.i(PictureSelectorActivity.TAG, "原图路径:" + media.originalPath)
-                            Log.i(PictureSelectorActivity.TAG, "Android Q 特有Path:" + media.androidQToPath)
+                            Log.i(TAG, "是否压缩:" + media.isCompressed)
+                            Log.i(TAG, "压缩:" + media.compressPath)
+                            Log.i(TAG, "原图:" + media.path)
+                            Log.i(TAG, "是否裁剪:" + media.isCut)
+                            Log.i(TAG, "裁剪:" + media.cutPath)
+                            Log.i(TAG, "是否开启原图:" + media.isOriginal)
+                            Log.i(TAG, "原图路径:" + media.originalPath)
+                            Log.i(TAG, "Android Q 特有Path:" + media.androidQToPath)
                         }
                         addItems(result)
                     }
@@ -68,11 +65,8 @@ abstract class AbstractPlusAdapter(
                     override fun onCancel() {
                     }
                 })
-            onAddClicked()
+            onPlusItemClicked()
         }
     }
 
-    abstract fun getLocalMedias(): List<LocalMedia>
-    abstract fun addItems(list: List<LocalMedia>)
-    abstract fun onAddClicked()
 }
