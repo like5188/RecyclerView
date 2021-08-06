@@ -54,7 +54,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
             curCount + items.size < maxImageCount -> {
                 addAllToEnd(items)
             }
-            curCount + items.size == maxImageCount -> {
+            curCount + items.size == maxImageCount -> {// 移除+号
                 notifyRemovePlus()
                 addAllToEnd(items)
             }
@@ -67,10 +67,10 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     fun removeItem(item: ValueInList) {
         val curCount = mList.size
         when {
-            curCount < maxImageCount -> {// 不添加+号图片
+            curCount < maxImageCount -> {
                 remove(item)
             }
-            curCount == maxImageCount -> {// 添加+号图片
+            curCount == maxImageCount -> {// 添加+号
                 remove(item)
                 notifyAddPlus()
             }
