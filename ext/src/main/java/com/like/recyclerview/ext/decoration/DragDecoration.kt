@@ -9,7 +9,7 @@ import com.like.recyclerview.adapter.AbstractAdapter
 
 /**
  * 支持拖拽 item。
- * 所有方式：attachToRecyclerView(recyclerView)
+ * 使用方式：attachToRecyclerView(recyclerView)
  */
 class DragDecoration(adapter: AbstractAdapter<*, *>) : ItemTouchHelper(object : ItemTouchHelper.Callback() {
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
