@@ -1,34 +1,37 @@
 package com.like.recyclerview.ext.addimage
 
+import android.util.Log
 import android.view.animation.ScaleAnimation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.like.recyclerview.adapter.AbstractAdapter
 
 /**
  * 支持拖拽 item 的 [ItemTouchHelper.Callback]。
  */
-class ItemTouchHelperCallback : ItemTouchHelper.Callback() {
+class ItemTouchHelperCallback(private val adapter: ItemAdapter<*, *>) : ItemTouchHelper.Callback() {
+    companion object {
+        private val TAG = "ItemTouchHelperCallback"
+    }
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         val dragFlags = when (recyclerView.layoutManager) {
             is GridLayoutManager, is StaggeredGridLayoutManager -> ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
             else -> ItemTouchHelper.UP or ItemTouchHelper.DOWN
         }
+        Log.e(TAG, "getMovementFlags")
         return makeMovementFlags(dragFlags, 0)
     }
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-        val adapter = recyclerView.adapter
-        if (adapter is AbstractAdapter<*, *>) {
-            adapter.moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
-        }
+        Log.e(TAG, "onMove ${viewHolder.bindingAdapterPosition} ${target.bindingAdapterPosition}")
+        adapter.moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
         return true
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        Log.e(TAG, "onSwiped")
     }
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
@@ -43,6 +46,7 @@ class ItemTouchHelperCallback : ItemTouchHelper.Callback() {
                 startAnimation(scaleAnimation)
             }
         }
+        Log.e(TAG, "onSelectedChanged actionState=$actionState")
     }
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
@@ -55,12 +59,10 @@ class ItemTouchHelperCallback : ItemTouchHelper.Callback() {
                 scaleAnimation.fillAfter = true
                 startAnimation(scaleAnimation)
             }
-            val adapter = recyclerView.adapter
-            if (adapter is AbstractAdapter<*, *>) {
-                // 刷新position，避免拖拽导致的位置错乱。
-                // 因为mAdapterDataManager.moveItem()方法没有更新位置，放到了这里更新位置（如果在onMove()的时候更新的话，会导致拖拽bug）。
-                adapter.notifyDataSetChanged()
-            }
+            // 刷新position，避免拖拽导致的位置错乱。
+            // 因为mAdapterDataManager.moveItem()方法没有更新位置，放到了这里更新位置（如果在onMove()的时候更新的话，会导致拖拽bug）。
+            adapter.notifyDataSetChanged()
         }
+        Log.e(TAG, "clearView")
     }
 }

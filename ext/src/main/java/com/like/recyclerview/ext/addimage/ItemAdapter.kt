@@ -21,7 +21,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     lateinit var notifyRemovePlus: () -> Unit
     lateinit var notifyAddPlus: () -> Unit
     private val mItemTouchHelper by lazy {
-        ItemTouchHelper(ItemTouchHelperCallback())
+        ItemTouchHelper(ItemTouchHelperCallback(this))
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
