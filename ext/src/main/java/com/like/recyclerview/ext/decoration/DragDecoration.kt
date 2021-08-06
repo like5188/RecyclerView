@@ -58,6 +58,4 @@ class DragDecoration(adapter: AbstractAdapter<*, *>) : ItemTouchHelper(object : 
             adapter.notifyDataSetChanged()
         }
     }
-}) {
-
-}
+})
