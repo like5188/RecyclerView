@@ -2,6 +2,7 @@ package com.like.recyclerview.sample.addimage
 
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.appcompat.app.AppCompatActivity
 import com.like.common.util.CoilEngine
 import com.like.recyclerview.adapter.AbstractAdapter
 import com.like.recyclerview.sample.databinding.ViewAddImageBinding
@@ -13,7 +14,7 @@ import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.listener.OnResultCallbackListener
 
 abstract class AbstractPlusAdapter(
-    private val activity: PictureSelectorActivity,
+    private val activity: AppCompatActivity,
     @DrawableRes addImageResId: Int
 ) : AbstractAdapter<ViewAddImageBinding, AddInfo>() {
 

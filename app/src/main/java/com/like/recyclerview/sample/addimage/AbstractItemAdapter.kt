@@ -1,6 +1,7 @@
 package com.like.recyclerview.sample.addimage
 
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ObservableBoolean
 import coil.load
 import com.like.common.util.CoilEngine
@@ -13,7 +14,7 @@ import com.luck.picture.lib.entity.LocalMedia
 import java.io.File
 
 abstract class AbstractItemAdapter(
-    private val activity: PictureSelectorActivity,
+    private val activity: AppCompatActivity,
 ) : DragAdapter<ViewImageBinding, AddImageViewInfo>() {
     private val maxImageCount = 9
     val showDeleteButton: ObservableBoolean = ObservableBoolean()
