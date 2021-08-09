@@ -46,6 +46,13 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
         return mList.addAll(position, list)
     }
 
+    /**
+     * List 的 removeAll()方法是没有对应的回调方法的，也就是说调用 List 的removeAll()方法批量删除一些元素，
+     * 是不会自动反应在 Adapter 上的。通过仔细观察就能发现，ObservableList 和 Adapter 的 notify 相关的方法，
+     * 都是对连续的元素生效，像removeAll()这种，其参数 List 的元素在数据源 List 里面有可能是分散的，
+     * 所以不会回调OnListChangedCallback接口里的任何方法。但是我认为，其实可以回调该接口里的onChanged()方法，
+     * 直接通知 Adapter 整体刷新就好。所以我现在对removeAll()方法的处理，就是用 for 循环挨个元素remove：
+     */
     override fun removeAll(list: List<ValueInList>): Boolean {
         if (list.isEmpty()) return false
         list.reversed().forEach {
