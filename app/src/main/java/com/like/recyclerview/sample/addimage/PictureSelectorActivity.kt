@@ -18,6 +18,7 @@ class PictureSelectorActivity : AppCompatActivity() {
     }
     private val myItemAdapter = MyItemAdapter()
     private val myPlusAdapter = MyPlusAdapter(R.drawable.icon_take_photo)
+    private var i = 0
 
     private val mAdapterManager: AdapterManager<AddImageViewInfo> by lazy {
         AdapterManager(
@@ -30,7 +31,7 @@ class PictureSelectorActivity : AppCompatActivity() {
                 }
             },
             itemCreator = {
-                AddImageViewInfo(it, "des")
+                AddImageViewInfo(it, "des ${i++}")
             },
             onPlusItemClicked = {
                 myItemAdapter.showDeleteButton.set(false)

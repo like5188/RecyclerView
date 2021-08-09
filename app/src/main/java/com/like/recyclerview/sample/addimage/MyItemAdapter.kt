@@ -12,7 +12,7 @@ class MyItemAdapter : ItemAdapter<ViewImageBinding, AddImageViewInfo>( 9) {
 
     override fun onBindViewHolder(holder: BindingViewHolder<ViewImageBinding>, position: Int) {
         super.onBindViewHolder(holder, position)
-        val item = get(holder.bindingAdapterPosition) ?: return
+        val item = get(position) ?: return
         val binding = holder.binding
         binding.iv.load(File(item.compressImagePath))
         binding.tv.text = item.des

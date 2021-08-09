@@ -32,6 +32,7 @@ class ItemTouchHelperCallback(private val adapter: AbstractAdapter<*, *>) : Item
         Log.e(TAG, "onMove fromPosition=$fromPosition toPosition=$toPosition")
         Collections.swap(adapter.mList, fromPosition, toPosition)
         adapter.notifyItemMoved(fromPosition, toPosition)
+        adapter.notifyItemRangeChanged(fromPosition, toPosition - fromPosition)
         return true
     }
 

@@ -43,6 +43,7 @@ class NotifyOnListChangedCallback(
         Log.d(TAG, "onItemRangeInserted positionStart=$positionStart itemCount=$itemCount adapter=$adapter")
         update {
             adapter.notifyItemRangeInserted(positionStart, itemCount)
+            adapter.notifyItemRangeChanged(positionStart, adapter.itemCount - positionStart)
         }
     }
 
@@ -57,6 +58,7 @@ class NotifyOnListChangedCallback(
             // 如果超过一个，就直接调用notifyDataSetChanged()方法即可。
             if (itemCount == 1) {
                 adapter.notifyItemMoved(fromPosition, toPosition)
+                adapter.notifyItemRangeChanged(fromPosition, toPosition - fromPosition)
             } else {
                 adapter.notifyDataSetChanged()
             }
@@ -67,6 +69,7 @@ class NotifyOnListChangedCallback(
         Log.d(TAG, "onItemRangeRemoved positionStart=$positionStart itemCount=$itemCount adapter=$adapter")
         update {
             adapter.notifyItemRangeRemoved(positionStart, itemCount)
+            adapter.notifyItemRangeChanged(positionStart, adapter.itemCount - positionStart)
         }
     }
 }
