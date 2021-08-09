@@ -10,10 +10,13 @@ import java.io.File
 class MyItemAdapter : ItemAdapter<ViewImageBinding, AddImageViewInfo>( 9) {
     val showDeleteButton: ObservableBoolean = ObservableBoolean()
 
-    override fun onBindViewHolder(holder: BindingViewHolder<ViewImageBinding>) {
-        super.onBindViewHolder(holder)
-        val item = get(holder.bindingAdapterPosition) ?: return
-        val binding = holder.binding
+    override fun onBindViewHolder(
+        holder: BindingViewHolder<ViewImageBinding>,
+        binding: ViewImageBinding,
+        position: Int,
+        item: AddImageViewInfo
+    ) {
+        super.onBindViewHolder(holder, binding, position, item)
         binding.iv.load(File(item.compressImagePath))
         binding.tv.text = item.des
         binding.root.setOnLongClickListener {

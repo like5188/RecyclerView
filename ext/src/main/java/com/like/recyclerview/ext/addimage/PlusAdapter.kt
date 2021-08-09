@@ -22,8 +22,8 @@ open class PlusAdapter<VB : ViewDataBinding, ValueInList>: AbstractAdapter<VB, V
     lateinit var addItems: (List<LocalMedia>) -> Unit
     lateinit var onPlusItemClicked: () -> Unit
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>) {
-        super.onBindViewHolder(holder)
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
+        super.onBindViewHolder(holder, binding, position, item)
         holder.binding.root.setOnClickListener {
             val localMedias = getLocalMedias()
             PictureSelector.create(activity)

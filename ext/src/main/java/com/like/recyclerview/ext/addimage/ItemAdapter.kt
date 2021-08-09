@@ -1,13 +1,15 @@
 package com.like.recyclerview.ext.addimage
 
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.like.common.util.CoilEngine
 import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.ext.R
 import com.like.recyclerview.viewholder.BindingViewHolder
+import com.luck.picture.lib.PictureSelector
 import com.luck.picture.lib.entity.LocalMedia
 
 open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
@@ -22,18 +24,17 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
         ItemTouchHelper(ItemTouchHelperCallback(this))
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>) {
-        super.onBindViewHolder(holder)
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
+        super.onBindViewHolder(holder, binding, position, item)
         holder.binding.root.setOnClickListener {
-            Log.d("tag", "bindingAdapterPosition=${holder.bindingAdapterPosition}")
-//            val localMedias = getLocalMedias()
-//            // 预览图片 可自定长按保存路径
-//            // 注意 .themeStyle(R.style.theme)；里面的参数不可删，否则闪退...
-//            PictureSelector.create(activity)
-//                .themeStyle(R.style.picture_default_style)
-//                .isNotPreviewDownload(true)
-//                .imageEngine(CoilEngine.create()) // 请参考Demo GlideEngine.java
-//                .openExternalPreview(holder.bindingAdapterPosition, localMedias)
+            val localMedias = getLocalMedias()
+            // 预览图片 可自定长按保存路径
+            // 注意 .themeStyle(R.style.theme)；里面的参数不可删，否则闪退...
+            PictureSelector.create(activity)
+                .themeStyle(R.style.picture_default_style)
+                .isNotPreviewDownload(true)
+                .imageEngine(CoilEngine.create()) // 请参考Demo GlideEngine.java
+                .openExternalPreview(position, localMedias)
         }
     }
 

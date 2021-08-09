@@ -17,8 +17,8 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
     private var isRunning = AtomicBoolean(true)
     private lateinit var mHolder: BindingViewHolder<VB>
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>) {
-        super.onBindViewHolder(holder)
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
+        super.onBindViewHolder(holder, binding, position, item)
         mHolder = holder
         load()
     }

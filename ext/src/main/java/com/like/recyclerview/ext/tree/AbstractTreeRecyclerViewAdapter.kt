@@ -22,7 +22,7 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : AbstractA
         val item = get(position)
         if (item is BaseTreeNode) {
             if (item.isExpanded) {
-                val children = mList.filter { it is BaseTreeNode && it.isChild(item) }
+                val children = mList.filter { it.isChild(item) }
                 removeAll(children)
                 onContract(item, position, binding)
                 item.isExpanded = !item.isExpanded
@@ -40,13 +40,9 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : AbstractA
         }
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>) {
-        super.onBindViewHolder(holder)
-        val checkBox = getCheckBox(holder.binding)
-        val item = get(holder.bindingAdapterPosition)
-        if (checkBox == null || item == null) {
-            return
-        }
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: BaseTreeNode) {
+        super.onBindViewHolder(holder, binding, position, item)
+        val checkBox = getCheckBox(holder.binding) ?: return
         // 这里不能用setOnCheckedChangeListener监听，会循环触发
         checkBox.setOnClickListener {
             clickCheckBox(checkBox, item)
@@ -59,11 +55,9 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : AbstractA
     fun clickCheckBox(checkBox: CheckBox, item: BaseTreeNode) {
         item.isChecked.set(checkBox.isChecked)
         // 改变孩子的checkBox状态
-        val children = mList.filter { it is BaseTreeNode && it.isChild(item) }
+        val children = mList.filter { it.isChild(item) }
         children.forEach {
-            if (it is BaseTreeNode) {
-                it.isChecked.set(checkBox.isChecked)
-            }
+            it.isChecked.set(checkBox.isChecked)
         }
         // 改变父亲的checkBox状态
         val parents = item.getParents()
@@ -75,7 +69,7 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : AbstractA
             // 取消选中孩子，并不一定要取消选中父亲，因为父亲有可能有其它选中的孩子
             parents.forEach { parent ->
                 val checkedChildren = mList
-                    .filter { it is BaseTreeNode && it.isChild(parent) && it.isChecked.get() }
+                    .filter { it.isChild(parent) && it.isChecked.get() }
                 if (checkedChildren.isEmpty()) {
                     parent.isChecked.set(checkBox.isChecked)
                 }
@@ -87,7 +81,7 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : AbstractA
      * 获取已经选中的节点
      */
     fun getCheckedNodes() = mList
-        .filter { it is BaseTreeNode && it.isChecked.get() }
+        .filter { it.isChecked.get() }
         .map { it as BaseTreeNode }
 
     /**

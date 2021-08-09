@@ -53,7 +53,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
     }
 
     final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
-        val item = get(holder.bindingAdapterPosition)
+        val item = get(holder.bindingAdapterPosition) ?: return
         if (item is IRecyclerViewItem) {
             val variableId = item.variableId
             if (variableId >= 0) {
@@ -64,11 +64,11 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                 }
             }
         }
-        onBindViewHolder(holder)
+        onBindViewHolder(holder, holder.binding, holder.bindingAdapterPosition, item)
     }
 
     open fun getLayoutId(position: Int): Int = -1
 
-    open fun onBindViewHolder(holder: BindingViewHolder<VB>) {}
+    open fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {}
 
 }
