@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.view.View
 import android.view.animation.Interpolator
 import android.view.animation.LinearInterpolator
-import androidx.core.view.ViewCompat
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 /**
@@ -66,16 +65,18 @@ class AdapterAnimationManager(private val animators: (View) -> Array<Animator>) 
     }
 
     private fun clear(v: View) {
-        ViewCompat.setAlpha(v, 1f)
-        ViewCompat.setScaleY(v, 1f)
-        ViewCompat.setScaleX(v, 1f)
-        ViewCompat.setTranslationY(v, 0f)
-        ViewCompat.setTranslationX(v, 0f)
-        ViewCompat.setRotation(v, 0f)
-        ViewCompat.setRotationY(v, 0f)
-        ViewCompat.setRotationX(v, 0f)
-        ViewCompat.setPivotY(v, (v.measuredHeight / 2).toFloat())
-        ViewCompat.setPivotX(v, (v.measuredWidth / 2).toFloat())
-        ViewCompat.animate(v).setInterpolator(null).startDelay = 0
+        v.apply {
+            alpha = 1f
+            scaleY = 1f
+            scaleX = 1f
+            translationY = 0f
+            translationX = 0f
+            rotation = 0f
+            rotationY = 0f
+            rotationX = 0f
+            pivotY = v.measuredHeight / 2f
+            pivotX = v.measuredWidth / 2f
+            animate().setInterpolator(null).startDelay = 0
+        }
     }
 }
