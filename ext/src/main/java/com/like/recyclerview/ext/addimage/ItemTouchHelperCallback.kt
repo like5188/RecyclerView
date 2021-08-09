@@ -64,9 +64,6 @@ class ItemTouchHelperCallback(private val adapter: AbstractAdapter<*, *>) : Item
                 scaleAnimation.fillAfter = true
                 startAnimation(scaleAnimation)
             }
-            // 刷新position，避免拖拽导致的位置错乱。
-            // 因为mAdapterDataManager.moveItem()方法没有更新位置，放到了这里更新位置（如果在onMove()的时候更新的话，会导致拖拽bug）。
-            adapter.notifyDataSetChanged()
         }
         Log.e(TAG, "clearView")
     }
