@@ -20,6 +20,8 @@ import com.like.recyclerview.viewholder.BindingViewHolder
  *
  * 2、item带透明渐显动画
  * arrayOf(ObjectAnimator.ofFloat(view, "alpha", mFrom, 1f))
+ *
+ * 参考：https://github.com/wasabeef/recyclerview-animators
  */
 class AdapterAnimationManager(private val animators: (View) -> Array<Animator>) {
     private var mDuration = 300L
