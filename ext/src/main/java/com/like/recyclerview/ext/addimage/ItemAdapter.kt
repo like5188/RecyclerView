@@ -33,7 +33,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
             PictureSelector.create(activity)
                 .themeStyle(R.style.picture_default_style)
                 .isNotPreviewDownload(true)
-                .imageEngine(CoilEngine.create()) // 请参考Demo GlideEngine.java
+                .imageEngine(CoilEngine.instance) // 请参考Demo GlideEngine.java
                 .openExternalPreview(position, localMedias)
         }
     }

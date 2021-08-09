@@ -29,7 +29,7 @@ open class PlusAdapter<VB : ViewDataBinding, ValueInList>: AbstractAdapter<VB, V
             PictureSelector.create(activity)
                 .openGallery(PictureMimeType.ofImage())
                 .maxSelectNum(9)
-                .imageEngine(CoilEngine.create())
+                .imageEngine(CoilEngine.instance)
                 .selectionData(localMedias)
                 .imageSpanCount(3)// 每行显示个数 int
                 .selectionMode(PictureConfig.MULTIPLE)// 多选 or 单选 PictureConfig.MULTIPLE or PictureConfig.SINGLE
