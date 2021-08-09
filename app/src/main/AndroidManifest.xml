@@ -25,7 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.like.recyclerview.sample.paging.PagingActivity" />
         <activity android:name="com.like.recyclerview.sample.tree.TreeActivity" />
         <activity android:name=".addimage.PictureSelectorActivity" />
         <activity android:name=".concat.ConcatActivity" />

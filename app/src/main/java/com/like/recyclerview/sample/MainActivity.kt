@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.hjq.toast.ToastUtils
 import com.like.recyclerview.sample.addimage.PictureSelectorActivity
 import com.like.recyclerview.sample.concat.ConcatActivity
+import com.like.recyclerview.sample.tree.TreeActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,10 +17,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun startPagingActivity(view: View) {
-    }
-
     fun startTreeActivity(view: View) {
+        startActivity(Intent(this, TreeActivity::class.java))
     }
 
     fun startPictureSelectorActivity(view: View) {
