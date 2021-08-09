@@ -22,8 +22,11 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
     : RecyclerView.Adapter<BindingViewHolder<VB>>(),
     IListenerManager<VB> by ListenerManager(),
     IAdapterDataManager<ValueInList> by AdapterDataManager() {
+    init {
+        setAdapter(this)
+    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
         return BindingViewHolder(DataBindingUtil.inflate<VB>(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
             // 为list添加Item的点击事件监听
             itemView.setOnClickListener {
@@ -37,7 +40,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
         }
     }
 
-    override fun getItemCount(): Int {
+    final override fun getItemCount(): Int {
         return mList.size
     }
 
@@ -49,7 +52,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
         return getLayoutId(position)
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
+    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         val item = get(holder.bindingAdapterPosition)
         if (item is IRecyclerViewItem) {
             val variableId = item.variableId
@@ -61,13 +64,11 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                 }
             }
         }
-    }
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        setAdapter(this)
+        onBindViewHolder(holder)
     }
 
     open fun getLayoutId(position: Int): Int = -1
+
+    open fun onBindViewHolder(holder: BindingViewHolder<VB>) {}
 
 }

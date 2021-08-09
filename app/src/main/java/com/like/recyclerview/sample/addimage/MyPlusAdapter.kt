@@ -13,9 +13,9 @@ class MyPlusAdapter(
         addToEnd(AddInfo(addImageResId))
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<ViewAddImageBinding>, position: Int) {
-        super.onBindViewHolder(holder, position)
-        val item = get(position) ?: return
+    override fun onBindViewHolder(holder: BindingViewHolder<ViewAddImageBinding>) {
+        super.onBindViewHolder(holder)
+        val item = get(holder.bindingAdapterPosition) ?: return
         val binding = holder.binding
         binding.iv.setImageResource(item.addImageResId)
     }

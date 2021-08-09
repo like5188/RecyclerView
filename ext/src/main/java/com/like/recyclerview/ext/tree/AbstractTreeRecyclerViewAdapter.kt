@@ -40,10 +40,10 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : AbstractA
         }
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
-        super.onBindViewHolder(holder, position)
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>) {
+        super.onBindViewHolder(holder)
         val checkBox = getCheckBox(holder.binding)
-        val item = get(position)
+        val item = get(holder.bindingAdapterPosition)
         if (checkBox == null || item == null) {
             return
         }

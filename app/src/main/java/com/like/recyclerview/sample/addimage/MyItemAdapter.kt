@@ -10,9 +10,9 @@ import java.io.File
 class MyItemAdapter : ItemAdapter<ViewImageBinding, AddImageViewInfo>( 9) {
     val showDeleteButton: ObservableBoolean = ObservableBoolean()
 
-    override fun onBindViewHolder(holder: BindingViewHolder<ViewImageBinding>, position: Int) {
-        super.onBindViewHolder(holder, position)
-        val item = get(position) ?: return
+    override fun onBindViewHolder(holder: BindingViewHolder<ViewImageBinding>) {
+        super.onBindViewHolder(holder)
+        val item = get(holder.bindingAdapterPosition) ?: return
         val binding = holder.binding
         binding.iv.load(File(item.compressImagePath))
         binding.tv.text = item.des
@@ -24,7 +24,7 @@ class MyItemAdapter : ItemAdapter<ViewImageBinding, AddImageViewInfo>( 9) {
             true
         }
         binding.ivDelete.setOnClickListener {
-            removeItem(item)
+            removeItem(holder.bindingAdapterPosition)
         }
         binding.showDeleteButton = showDeleteButton
     }

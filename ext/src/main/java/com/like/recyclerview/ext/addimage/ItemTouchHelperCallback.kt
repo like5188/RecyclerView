@@ -1,6 +1,5 @@
 package com.like.recyclerview.ext.addimage
 
-import android.util.Log
 import android.view.animation.ScaleAnimation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -12,29 +11,23 @@ import com.like.recyclerview.adapter.AbstractAdapter
  * 支持拖拽 item 的 [ItemTouchHelper.Callback]。
  */
 class ItemTouchHelperCallback(private val adapter: AbstractAdapter<*, *>) : ItemTouchHelper.Callback() {
-    companion object {
-        private const val TAG = "ItemTouchHelperCallback"
-    }
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         val dragFlags = when (recyclerView.layoutManager) {
             is GridLayoutManager, is StaggeredGridLayoutManager -> ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
             else -> ItemTouchHelper.UP or ItemTouchHelper.DOWN
         }
-        Log.e(TAG, "getMovementFlags")
         return makeMovementFlags(dragFlags, 0)
     }
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         val fromPosition = viewHolder.absoluteAdapterPosition
         val toPosition = target.absoluteAdapterPosition
-        Log.e(TAG, "onMove fromPosition=$fromPosition toPosition=$toPosition")
         adapter.moveItem(fromPosition, toPosition)
         return true
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        Log.e(TAG, "onSwiped")
     }
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
@@ -49,7 +42,6 @@ class ItemTouchHelperCallback(private val adapter: AbstractAdapter<*, *>) : Item
                 startAnimation(scaleAnimation)
             }
         }
-        Log.e(TAG, "onSelectedChanged actionState=$actionState")
     }
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
@@ -63,6 +55,5 @@ class ItemTouchHelperCallback(private val adapter: AbstractAdapter<*, *>) : Item
                 startAnimation(scaleAnimation)
             }
         }
-        Log.e(TAG, "clearView")
     }
 }
