@@ -6,7 +6,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.model.IRecyclerViewItem
-import com.like.recyclerview.utils.*
+import com.like.recyclerview.utils.AdapterDataManager
+import com.like.recyclerview.utils.IAdapterDataManager
+import com.like.recyclerview.utils.IListenerManager
+import com.like.recyclerview.utils.ListenerManager
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 /**
@@ -19,9 +22,6 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
     : RecyclerView.Adapter<BindingViewHolder<VB>>(),
     IListenerManager<VB> by ListenerManager(),
     IAdapterDataManager<ValueInList> by AdapterDataManager() {
-    companion object {
-        private const val TAG = "AbstractAdapter"
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
         return BindingViewHolder(DataBindingUtil.inflate<VB>(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
@@ -50,7 +50,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
-        val item = get(position)
+        val item = get(holder.bindingAdapterPosition)
         if (item is IRecyclerViewItem) {
             val variableId = item.variableId
             if (variableId >= 0) {
@@ -65,7 +65,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        mList.addOnListChangedCallback(NotifyOnListChangedCallback(recyclerView, this))
+        setAdapter(this)
     }
 
     open fun getLayoutId(position: Int): Int = -1

@@ -1,12 +1,18 @@
 package com.like.recyclerview.utils
 
-import androidx.databinding.ObservableArrayList
+import com.like.recyclerview.adapter.AbstractAdapter
+import java.util.*
 
 /**
- * Adapter中的数据管理。包括Header、Footer、Item的增删改查、交换位置。
+ * Adapter中的数据管理及界面更新。包括Header、Footer、Item的增删改查、交换位置。
  */
 internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList> {
-    override val mList: ObservableArrayList<ValueInList> = ObservableArrayList<ValueInList>()
+    private var mAdapter: AbstractAdapter<*, ValueInList>? = null
+    override val mList = mutableListOf<ValueInList>()
+
+    override fun setAdapter(adapter: AbstractAdapter<*, ValueInList>) {
+        mAdapter = adapter
+    }
 
     override fun get(position: Int): ValueInList? {
         if (position < 0 || position > mList.size) return null
@@ -15,6 +21,7 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
 
     override fun update(position: Int, newData: ValueInList) {
         mList[position] = newData
+        mAdapter?.notifyItemChanged(position)
     }
 
     override fun addToStart(data: ValueInList) {
@@ -29,6 +36,7 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
         data ?: return
         if (position < 0 || position > mList.size) return
         mList.add(position, data)
+        mAdapter?.notifyItemInserted(position)
     }
 
     override fun addAllToStart(list: List<ValueInList>): Boolean {
@@ -42,7 +50,11 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
     override fun addAll(position: Int, list: List<ValueInList>): Boolean {
         if (list.isEmpty()) return false
         if (position < 0 || position > mList.size) return false
-        return mList.addAll(position, list)
+        val result = mList.addAll(position, list)
+        if (result) {
+            mAdapter?.notifyItemRangeInserted(position, list.size)
+        }
+        return result
     }
 
     /**
@@ -70,11 +82,21 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
 
     override fun remove(position: Int): ValueInList? {
         if (position < 0 || position >= mList.size) return null
-        return mList.removeAt(position)
+        val result = mList.removeAt(position)
+        if (result != null) {
+            mAdapter?.notifyItemRemoved(position)
+        }
+        return result
     }
 
     override fun clear() {
         mList.clear()
+        mAdapter?.notifyDataSetChanged()
     }
 
+    override fun moveItem(fromPosition: Int, toPosition: Int) {
+        if (fromPosition == toPosition) return
+        Collections.swap(mList, fromPosition, toPosition)
+        mAdapter?.notifyItemMoved(fromPosition, toPosition)
+    }
 }
