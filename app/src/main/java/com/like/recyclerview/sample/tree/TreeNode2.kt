@@ -7,5 +7,5 @@ import com.like.recyclerview.sample.R
 
 class TreeNode2(@DrawableRes val icon: Int, val name: String, var count: Int) : BaseTreeNode() {
     override var layoutId: Int = R.layout.tree_item2
-    override fun variableId(): Int = BR.treeNode2
+    override val variableId: Int = BR.treeNode2
 }
