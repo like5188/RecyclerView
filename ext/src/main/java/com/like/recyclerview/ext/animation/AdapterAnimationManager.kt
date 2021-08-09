@@ -22,7 +22,7 @@ import com.like.recyclerview.viewholder.BindingViewHolder
  * 2、item带透明渐显动画
  * arrayOf(ObjectAnimator.ofFloat(view, "alpha", mFrom, 1f))
  */
-internal class AdapterAnimationManager(private val animators: (View) -> Array<Animator>) {
+class AdapterAnimationManager(private val animators: (View) -> Array<Animator>) {
     private var mDuration = 300L
     private var mInterpolator: Interpolator = LinearInterpolator()
     private var mLastPosition = -1
@@ -32,15 +32,15 @@ internal class AdapterAnimationManager(private val animators: (View) -> Array<An
      */
     private var isFirstOnly = true
 
-    fun onBindViewHolder(holder: BindingViewHolder<*>, position: Int) {
-        val bindingAdapterPosition = holder.bindingAdapterPosition
-        if (!isFirstOnly || bindingAdapterPosition > mLastPosition) {
+    fun onBindViewHolder(holder: BindingViewHolder<*>) {
+        val position = holder.bindingAdapterPosition
+        if (!isFirstOnly || position > mLastPosition) {
             val animators = animators(holder.itemView)
             animators.forEach {
                 it.interpolator = mInterpolator
                 it.setDuration(mDuration).start()
             }
-            mLastPosition = bindingAdapterPosition
+            mLastPosition = position
         } else {
             clear(holder.itemView)
         }
