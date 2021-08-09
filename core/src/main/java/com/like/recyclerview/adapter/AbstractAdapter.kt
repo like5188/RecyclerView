@@ -5,12 +5,8 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
-import com.like.recyclerview.listener.OnItemClickListener
-import com.like.recyclerview.listener.OnItemLongClickListener
 import com.like.recyclerview.model.IRecyclerViewItem
-import com.like.recyclerview.utils.AdapterDataManager
-import com.like.recyclerview.utils.IAdapterDataManager
-import com.like.recyclerview.utils.NotifyOnListChangedCallback
+import com.like.recyclerview.utils.*
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 /**
@@ -21,32 +17,22 @@ import com.like.recyclerview.viewholder.BindingViewHolder
  */
 abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
     : RecyclerView.Adapter<BindingViewHolder<VB>>(),
+    IListenerManager<VB> by ListenerManager(),
     IAdapterDataManager<ValueInList> by AdapterDataManager() {
     companion object {
         private const val TAG = "AbstractAdapter"
     }
 
-    private val mOnItemClickListeners = mutableListOf<OnItemClickListener<VB>>()
-    private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener<VB>>()
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
         return BindingViewHolder(DataBindingUtil.inflate<VB>(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
             // 为list添加Item的点击事件监听
-            if (mOnItemClickListeners.isNotEmpty()) {
-                itemView.setOnClickListener {
-                    mOnItemClickListeners.forEach {
-                        it.onItemClick(this)
-                    }
-                }
+            itemView.setOnClickListener {
+                onItemClick(this)
             }
             // 为list添加Item的长按事件监听
-            if (mOnItemLongClickListeners.isNotEmpty()) {
-                itemView.setOnLongClickListener {
-                    mOnItemLongClickListeners.forEach {
-                        it.onItemLongClick(this)
-                    }
-                    true
-                }
+            itemView.setOnLongClickListener {
+                onItemLongClick(this)
+                true
             }
         }
     }
@@ -64,7 +50,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
-        val item = get(position)
+        val item = get(holder.bindingAdapterPosition)
         if (item is IRecyclerViewItem) {
             val variableId = item.variableId
             if (variableId >= 0) {
@@ -79,31 +65,7 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        mList.addOnListChangedCallback(NotifyOnListChangedCallback(recyclerView))
-    }
-
-    fun addOnItemClickListener(listener: OnItemClickListener<VB>) {
-        mOnItemClickListeners.add(listener)
-    }
-
-    fun addOnItemLongClickListener(listener: OnItemLongClickListener<VB>) {
-        mOnItemLongClickListeners.add(listener)
-    }
-
-    fun removeOnItemClickListener(listener: OnItemClickListener<VB>) {
-        mOnItemClickListeners.remove(listener)
-    }
-
-    fun removeOnItemLongClickListener(listener: OnItemLongClickListener<VB>) {
-        mOnItemLongClickListeners.remove(listener)
-    }
-
-    fun clearOnItemClickListeners() {
-        mOnItemClickListeners.clear()
-    }
-
-    fun clearOnItemLongClickListeners() {
-        mOnItemLongClickListeners.clear()
+        mList.addOnListChangedCallback(NotifyOnListChangedCallback(recyclerView, this))
     }
 
     open fun getLayoutId(position: Int): Int = -1

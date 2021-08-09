@@ -1,7 +1,6 @@
 package com.like.recyclerview.utils
 
 import androidx.databinding.ObservableArrayList
-import java.util.*
 
 /**
  * Adapter中的数据管理。包括Header、Footer、Item的增删改查、交换位置。
@@ -76,20 +75,6 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
 
     override fun clear() {
         mList.clear()
-    }
-
-    override fun moveItem(fromPosition: Int, toPosition: Int) {
-        if (fromPosition == toPosition) return
-        if (fromPosition < toPosition) {
-            // 循环交换位置是为了避免数据错乱。这里不用notifyItemRangeChanged()，因为这个会导致拖拽的bug。
-            for (i in fromPosition until toPosition) {
-                Collections.swap(mList, i, i + 1)
-            }
-        } else {
-            for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(mList, i, i - 1)
-            }
-        }
     }
 
 }
