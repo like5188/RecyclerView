@@ -101,14 +101,25 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                     }
                 }
 
-                override fun onItemRangeRemoved(
+                override fun onItemRangeChanged(
                     sender: ObservableArrayList<ValueInList>?,
                     positionStart: Int,
                     itemCount: Int,
                 ) {
-                    Log.d(TAG, "onItemRangeRemoved positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
+                    Log.d(TAG, "onItemRangeChanged positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
                     update {
-                        notifyItemRangeRemoved(positionStart, itemCount)
+                        notifyItemRangeChanged(positionStart, itemCount)
+                    }
+                }
+
+                override fun onItemRangeInserted(
+                    sender: ObservableArrayList<ValueInList>?,
+                    positionStart: Int,
+                    itemCount: Int,
+                ) {
+                    Log.d(TAG, "onItemRangeInserted positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
+                    update {
+                        notifyItemRangeInserted(positionStart, itemCount)
                         notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
                     }
                 }
@@ -135,26 +146,15 @@ abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
                     }
                 }
 
-                override fun onItemRangeInserted(
+                override fun onItemRangeRemoved(
                     sender: ObservableArrayList<ValueInList>?,
                     positionStart: Int,
                     itemCount: Int,
                 ) {
-                    Log.d(TAG, "onItemRangeInserted positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
+                    Log.d(TAG, "onItemRangeRemoved positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
                     update {
-                        notifyItemRangeInserted(positionStart, itemCount)
+                        notifyItemRangeRemoved(positionStart, itemCount)
                         notifyItemRangeChanged(positionStart, getItemCount() - positionStart)
-                    }
-                }
-
-                override fun onItemRangeChanged(
-                    sender: ObservableArrayList<ValueInList>?,
-                    positionStart: Int,
-                    itemCount: Int,
-                ) {
-                    Log.d(TAG, "onItemRangeChanged positionStart=$positionStart itemCount=$itemCount ${this@AbstractAdapter}")
-                    update {
-                        notifyItemRangeChanged(positionStart, itemCount)
                     }
                 }
 
