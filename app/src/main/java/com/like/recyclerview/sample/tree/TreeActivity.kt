@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
+import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
@@ -33,7 +34,9 @@ class TreeActivity : AppCompatActivity() {
     private val mUIHelper by lazy {
         UIHelper(mAdapter)
     }
-
+    private val mProgressDialog by lazy {
+        ProgressDialog(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +86,8 @@ class TreeActivity : AppCompatActivity() {
                 listAdapter = listAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,
+                show = { mProgressDialog.show() },
+                hide = { mProgressDialog.hide() },
             )
         }
     }
