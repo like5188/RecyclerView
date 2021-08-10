@@ -15,6 +15,7 @@ import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.UIHelper
 import com.like.recyclerview.utils.add
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -58,7 +59,7 @@ class ConcatActivity : AppCompatActivity() {
 
         fun getData() {
             lifecycleScope.launch {
-                mUIHelper.collect(
+                mUIHelper.bind(
                     result = mViewModel::getItems,
                     listAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
@@ -85,7 +86,7 @@ class ConcatActivity : AppCompatActivity() {
 
         fun getData() {
             lifecycleScope.launch {
-                mUIHelper.collect(
+                mUIHelper.bind(
                     result = mViewModel::getHeadersAndItems,
                     onData = {
                         var isEmpty = it.isNullOrEmpty()
@@ -140,17 +141,21 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
+        val flow = mUIHelper.bindLoadAfter(
+            recyclerView = mBinding.rv,
+            result = result,
+            listAdapter = listAdapter,
+            loadMoreAdapter = loadMoreAdapter,
+            emptyAdapter = emptyAdapter,
+            errorAdapter = errorAdapter,
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+        )
         lifecycleScope.launch {
-            mUIHelper.collectForLoadAfter(
-                recyclerView = mBinding.rv,
-                result = result,
-                listAdapter = listAdapter,
-                loadMoreAdapter = loadMoreAdapter,
-                emptyAdapter = emptyAdapter,
-                errorAdapter = errorAdapter,
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-            )
+            flow.collect()
+        }
+        lifecycleScope.launch {
+            result.initial()
         }
     }
 
@@ -174,49 +179,53 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launch {
-            mUIHelper.collectForLoadAfter(
-                recyclerView = mBinding.rv,
-                result = result,
-                onData = {
-                    if (it.isNullOrEmpty()) {
-                        0
-                    } else {
-                        val headers = it.getOrNull(0)
-                        val items = it.getOrNull(1)
-                        if (!headers.isNullOrEmpty()) {
-                            contentAdapter.add(headerAdapter)
-                            headerAdapter.clear()
-                            headerAdapter.addAllToEnd(headers)
-                        }
-                        if (!items.isNullOrEmpty()) {
-                            contentAdapter.add(itemAdapter)
-                            itemAdapter.clear()
-                            itemAdapter.addAllToEnd(items)
-                        }
-                        if (headers.isNullOrEmpty() && items.isNullOrEmpty()) {
-                            0
-                        } else if (!items.isNullOrEmpty()) {
-                            2
-                        } else {
-                            1
-                        }
-                    }
-                },
-                onLoadMore = {
+        val flow = mUIHelper.bindLoadAfter(
+            recyclerView = mBinding.rv,
+            result = result,
+            onData = {
+                if (it.isNullOrEmpty()) {
+                    0
+                } else {
+                    val headers = it.getOrNull(0)
                     val items = it.getOrNull(1)
+                    if (!headers.isNullOrEmpty()) {
+                        contentAdapter.add(headerAdapter)
+                        headerAdapter.clear()
+                        headerAdapter.addAllToEnd(headers)
+                    }
                     if (!items.isNullOrEmpty()) {
+                        contentAdapter.add(itemAdapter)
+                        itemAdapter.clear()
                         itemAdapter.addAllToEnd(items)
                     }
-                    items.isNullOrEmpty()
-                },
-                contentAdapter = contentAdapter,
-                loadMoreAdapter = loadMoreAdapter,
-                emptyAdapter = emptyAdapter,
-                errorAdapter = errorAdapter,
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-            )
+                    if (headers.isNullOrEmpty() && items.isNullOrEmpty()) {
+                        0
+                    } else if (!items.isNullOrEmpty()) {
+                        2
+                    } else {
+                        1
+                    }
+                }
+            },
+            onLoadMore = {
+                val items = it.getOrNull(1)
+                if (!items.isNullOrEmpty()) {
+                    itemAdapter.addAllToEnd(items)
+                }
+                items.isNullOrEmpty()
+            },
+            contentAdapter = contentAdapter,
+            loadMoreAdapter = loadMoreAdapter,
+            emptyAdapter = emptyAdapter,
+            errorAdapter = errorAdapter,
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+        )
+        lifecycleScope.launch {
+            flow.collect()
+        }
+        lifecycleScope.launch {
+            result.initial()
         }
     }
 
@@ -238,17 +247,21 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
+        val flow = mUIHelper.bindLoadBefore(
+            recyclerView = mBinding.rv,
+            result = result,
+            listAdapter = listAdapter,
+            loadMoreAdapter = loadMoreAdapter,
+            emptyAdapter = emptyAdapter,
+            errorAdapter = errorAdapter,
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+        )
         lifecycleScope.launch {
-            mUIHelper.collectForLoadBefore(
-                recyclerView = mBinding.rv,
-                result = result,
-                listAdapter = listAdapter,
-                loadMoreAdapter = loadMoreAdapter,
-                emptyAdapter = emptyAdapter,
-                errorAdapter = errorAdapter,
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-            )
+            flow.collect()
+        }
+        lifecycleScope.launch {
+            result.initial()
         }
     }
 

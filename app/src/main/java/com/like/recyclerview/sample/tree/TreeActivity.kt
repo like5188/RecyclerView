@@ -71,7 +71,7 @@ class TreeActivity : AppCompatActivity() {
 
         fun getData() {
             lifecycleScope.launch {
-                mUIHelper.collect(
+                mUIHelper.bind(
                     result = mViewModel::getItems,
                     listAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
