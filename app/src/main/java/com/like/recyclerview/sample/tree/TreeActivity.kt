@@ -6,14 +6,18 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
-import com.like.recyclerview.ext.tree.AbstractTreeRecyclerViewAdapter
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
-import com.like.recyclerview.ui.util.bindData
+import com.like.recyclerview.ui.empty.EmptyAdapter
+import com.like.recyclerview.ui.empty.EmptyItem
+import com.like.recyclerview.ui.error.ErrorAdapter
+import com.like.recyclerview.ui.error.ErrorItem
+import com.like.recyclerview.utils.UIHelper
 import kotlinx.coroutines.launch
 
 class TreeActivity : AppCompatActivity() {
@@ -23,8 +27,11 @@ class TreeActivity : AppCompatActivity() {
     private val mViewModel by lazy {
         ViewModelProvider(this).get(TreeViewModel::class.java)
     }
-    private val mAdapter: AbstractTreeRecyclerViewAdapter<ViewDataBinding> by lazy {
-        TreeRecyclerViewAdapter()
+    private val mAdapter by lazy {
+        ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
+    }
+    private val mUIHelper by lazy {
+        UIHelper(mAdapter)
     }
 
 
@@ -33,9 +40,18 @@ class TreeActivity : AppCompatActivity() {
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.adapter = mAdapter
         mBinding.rv.itemAnimator = null
-        mBinding.rv.addItemDecoration(PinnedItemDecoration().apply {
+
+        val listAdapter = TreeRecyclerViewAdapter()
+        val emptyAdapter = EmptyAdapter().apply {
+            addToEnd(EmptyItem())
+        }
+        val errorAdapter = ErrorAdapter().apply {
+            addToEnd(ErrorItem())
+        }
+
+        mBinding.rv.addItemDecoration(PinnedItemDecoration(listAdapter).apply {
             setOnPinnedHeaderRenderListener(object :
-                PinnedItemDecoration.OnPinnedHeaderRenderListener {
+                PinnedItemDecoration.OnPinnedItemRenderListener {
                 override fun onRender(
                     viewDataBinding: ViewDataBinding,
                     layoutId: Int,
@@ -44,14 +60,14 @@ class TreeActivity : AppCompatActivity() {
                 ) {
                     if (item is TreeNode0 && viewDataBinding is TreeItem0Binding) {
                         viewDataBinding.root.setOnClickListener {
-                            mAdapter.clickItem(
+                            listAdapter.clickItem(
                                 viewDataBinding,
                                 itemPosition,
                                 item
                             )
                         }
                         viewDataBinding.cb.setOnClickListener {
-                            mAdapter.clickCheckBox(
+                            listAdapter.clickCheckBox(
                                 viewDataBinding.cb,
                                 item
                             )
@@ -62,7 +78,12 @@ class TreeActivity : AppCompatActivity() {
         })
 
         lifecycleScope.launch {
-            mAdapter.bindData({ mViewModel.treeNotPagingDataSource.load() })
+            mUIHelper.collect(
+                result = mViewModel::getItems,
+                listAdapter = listAdapter,
+                emptyAdapter = emptyAdapter,
+                errorAdapter = errorAdapter,
+            )
         }
     }
 }

@@ -10,32 +10,33 @@ import com.like.recyclerview.viewholder.BindingViewHolder
  */
 abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : AbstractAdapter<VB, BaseTreeNode>() {
     init {
-        addOnItemClickListener { clickItem(it) }
+        addOnItemClickListener {
+            val binding = it.binding
+            val position = it.bindingAdapterPosition
+            val item = get(position)
+            clickItem(binding, position, item)
+        }
     }
 
     /**
      * 展开或者收缩item，用于粘性标签点击时调用
      */
-    fun clickItem(holder: BindingViewHolder<VB>) {
-        val binding = holder.binding
-        val position = holder.bindingAdapterPosition
-        val item = get(position)
-        if (item is BaseTreeNode) {
-            if (item.isExpanded) {
-                val children = mList.filter { it.isChild(item) }
-                removeAll(children)
-                onContract(item, position, binding)
-                item.isExpanded = !item.isExpanded
-            } else {
-                val children = onExpand(item, position, binding)
-                if (children.isNotEmpty()) {
-                    children.forEach {
-                        it.parent = item
-                        it.isChecked.set(item.isChecked.get())
-                    }
-                    addAll(position + 1, children)
-                    item.isExpanded = !item.isExpanded
+    fun clickItem(binding: ViewDataBinding, position: Int, item: BaseTreeNode?) {
+        item ?: return
+        if (item.isExpanded) {
+            val children = mList.filter { it.isChild(item) }
+            removeAll(children)
+            onContract(item, position, binding)
+            item.isExpanded = !item.isExpanded
+        } else {
+            val children = onExpand(item, position, binding)
+            if (children.isNotEmpty()) {
+                children.forEach {
+                    it.parent = item
+                    it.isChecked.set(item.isChecked.get())
                 }
+                addAll(position + 1, children)
+                item.isExpanded = !item.isExpanded
             }
         }
     }

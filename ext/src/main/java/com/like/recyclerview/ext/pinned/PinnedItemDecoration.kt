@@ -20,35 +20,24 @@ import com.like.recyclerview.utils.findFirstVisiblePosition
 <androidx.recyclerview.widget.RecyclerView />
 </FrameLayout>
  */
-class PinnedItemDecoration : RecyclerView.ItemDecoration() {
-    companion object {
-        private val TAG = PinnedItemDecoration::class.java.simpleName
-    }
-
-    private lateinit var mAdapter: AbstractAdapter<*, *>
+class PinnedItemDecoration(private val mAdapter: AbstractAdapter<*, *>) : RecyclerView.ItemDecoration() {
     private var mCurPinnedItem: PinnedItem? = null
     private var mRecyclerViewParent: ViewGroup? = null
-    private var mOnPinnedHeaderRenderListener: OnPinnedHeaderRenderListener? = null
+    private var mOnPinnedItemRenderListener: OnPinnedItemRenderListener? = null
 
     private fun init(recyclerView: RecyclerView) {
-        if (recyclerView.adapter !is AbstractAdapter<*, *>) {
-            throw Throwable("RecyclerView的Adapter只能是 com.like.recyclerview.adapter.BaseAdapter")
-        }
         if (recyclerView.parent !is FrameLayout && recyclerView.parent !is RelativeLayout) {
             throw Throwable("RecyclerView的parent只能是FrameLayout或者RelativeLayout")
         }
         mRecyclerViewParent = recyclerView.parent as ViewGroup
-        mAdapter = recyclerView.adapter as AbstractAdapter<*, *>
     }
 
-    fun setOnPinnedHeaderRenderListener(listener: OnPinnedHeaderRenderListener) {
-        mOnPinnedHeaderRenderListener = listener
+    fun setOnPinnedHeaderRenderListener(listener: OnPinnedItemRenderListener) {
+        mOnPinnedItemRenderListener = listener
     }
 
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
-        if (!::mAdapter.isInitialized) {
-            init(parent)
-        }
+        init(parent)
 
         val prePinnedItem = findPrePinnedPositionAndLayoutIdFromFirstVisibleItem(parent)
         if (prePinnedItem == null) {// 说明前面已经没有PinnedView了
@@ -92,7 +81,7 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
                 }
 
                 it.executePendingBindings()// 解决闪烁问题
-                mOnPinnedHeaderRenderListener?.onRender(it, this.layoutId, this.data, this.position)
+                mOnPinnedItemRenderListener?.onRender(it, this.layoutId, this.data, this.position)
             }
         }
     }
@@ -199,7 +188,7 @@ class PinnedItemDecoration : RecyclerView.ItemDecoration() {
             )
     }
 
-    interface OnPinnedHeaderRenderListener {
+    interface OnPinnedItemRenderListener {
         /**
          * pinnedView渲染，数据改变或者布局改变时回调
          *
