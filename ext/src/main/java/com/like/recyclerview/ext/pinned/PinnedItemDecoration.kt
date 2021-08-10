@@ -1,6 +1,7 @@
 package com.like.recyclerview.ext.pinned
 
 import android.graphics.Canvas
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,9 +27,13 @@ class PinnedItemDecoration(private val mAdapter: AbstractAdapter<*, *>) : Recycl
     private var mOnPinnedItemRenderListener: OnPinnedItemRenderListener? = null
 
     private fun init(recyclerView: RecyclerView) {
+        if (mRecyclerViewParent != null) {
+            return
+        }
         if (recyclerView.parent !is FrameLayout && recyclerView.parent !is RelativeLayout) {
             throw Throwable("RecyclerView的parent只能是FrameLayout或者RelativeLayout")
         }
+        Log.e("tag", "init")
         mRecyclerViewParent = recyclerView.parent as ViewGroup
     }
 
@@ -96,8 +101,7 @@ class PinnedItemDecoration(private val mAdapter: AbstractAdapter<*, *>) : Recycl
 //        Log.d(TAG, "mCurPinnedItem=$mCurPinnedItem")
 //        Log.v(TAG, "nextPinnedItem=$nextPinnedItem")
         if (nextPinnedItem != null) {
-            val nextPinnedView =
-                recyclerView.layoutManager?.findViewByPosition(nextPinnedItem.position)
+            val nextPinnedView = recyclerView.layoutManager?.findViewByPosition(nextPinnedItem.position)
 //            Log.e(TAG, "nextPinnedView=$nextPinnedView")
             if (nextPinnedView != null && nextPinnedView.top in top..bottom) {
                 top = nextPinnedView.top - curPinnedView.height
