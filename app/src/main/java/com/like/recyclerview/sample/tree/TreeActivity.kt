@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.ConcatAdapter
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
-import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
@@ -33,9 +32,6 @@ class TreeActivity : AppCompatActivity() {
     }
     private val mUIHelper by lazy {
         UIHelper(mAdapter)
-    }
-    private val mProgressDialog by lazy {
-        ProgressDialog(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,15 +76,23 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        lifecycleScope.launch {
-            mUIHelper.collect(
-                result = mViewModel::getItems,
-                listAdapter = listAdapter,
-                emptyAdapter = emptyAdapter,
-                errorAdapter = errorAdapter,
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-            )
+        fun getData() {
+            lifecycleScope.launch {
+                mUIHelper.collect(
+                    result = mViewModel::getItems,
+                    listAdapter = listAdapter,
+                    emptyAdapter = emptyAdapter,
+                    errorAdapter = errorAdapter,
+                    show = { mBinding.swipeRefreshLayout.isRefreshing = true },
+                    hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
+                )
+            }
         }
+
+        mBinding.swipeRefreshLayout.setOnRefreshListener {
+            getData()
+        }
+
+        getData()
     }
 }
