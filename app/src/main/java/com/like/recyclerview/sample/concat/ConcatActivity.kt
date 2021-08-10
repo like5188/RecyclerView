@@ -12,12 +12,7 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
-import com.like.recyclerview.ui.empty.EmptyAdapter
-import com.like.recyclerview.ui.error.ErrorAdapter
-import com.like.recyclerview.ui.loadmore.LoadMoreAdapter
-import com.like.recyclerview.ui.empty.EmptyItem
-import com.like.recyclerview.ui.error.ErrorItem
-import com.like.recyclerview.ui.loadmore.LoadMoreItem
+import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.UIHelper
 import com.like.recyclerview.utils.add
 import kotlinx.coroutines.launch
@@ -58,12 +53,8 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initItems() {
         val listAdapter = ItemAdapter()
-        val emptyAdapter = EmptyAdapter().apply {
-            addToEnd(EmptyItem())
-        }
-        val errorAdapter = ErrorAdapter().apply {
-            addToEnd(ErrorItem())
-        }
+        val emptyAdapter = AdapterFactory.createEmptyAdapter()
+        val errorAdapter = AdapterFactory.createErrorAdapter()
 
         fun getData() {
             lifecycleScope.launch {
@@ -89,12 +80,8 @@ class ConcatActivity : AppCompatActivity() {
         val headerAdapter = HeaderAdapter()
         val itemAdapter = ItemAdapter()
         val contentAdapter = ConcatAdapter()
-        val emptyAdapter = EmptyAdapter().apply {
-            addToEnd(EmptyItem())
-        }
-        val errorAdapter = ErrorAdapter().apply {
-            addToEnd(ErrorItem())
-        }
+        val emptyAdapter = AdapterFactory.createEmptyAdapter()
+        val errorAdapter = AdapterFactory.createErrorAdapter()
 
         fun getData() {
             lifecycleScope.launch {
@@ -145,18 +132,12 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         val listAdapter = ItemAdapter()
-        val emptyAdapter = EmptyAdapter().apply {
-            addToEnd(EmptyItem())
-        }
-        val errorAdapter = ErrorAdapter().apply {
-            addToEnd(ErrorItem())
-        }
-        val loadMoreAdapter = LoadMoreAdapter {
+        val emptyAdapter = AdapterFactory.createEmptyAdapter()
+        val errorAdapter = AdapterFactory.createErrorAdapter()
+        val loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
             lifecycleScope.launch {
                 result.loadAfter?.invoke()
             }
-        }.apply {
-            addToEnd(LoadMoreItem())
         }
 
         lifecycleScope.launch {
@@ -185,18 +166,12 @@ class ConcatActivity : AppCompatActivity() {
         val headerAdapter = HeaderAdapter()
         val itemAdapter = ItemAdapter()
         val contentAdapter = ConcatAdapter()
-        val emptyAdapter = EmptyAdapter().apply {
-            addToEnd(EmptyItem())
-        }
-        val errorAdapter = ErrorAdapter().apply {
-            addToEnd(ErrorItem())
-        }
-        val loadMoreAdapter = LoadMoreAdapter {
+        val emptyAdapter = AdapterFactory.createEmptyAdapter()
+        val errorAdapter = AdapterFactory.createErrorAdapter()
+        val loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
             lifecycleScope.launch {
                 result.loadAfter?.invoke()
             }
-        }.apply {
-            addToEnd(LoadMoreItem())
         }
 
         lifecycleScope.launch {
@@ -255,18 +230,12 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         val listAdapter = ItemAdapter()
-        val emptyAdapter = EmptyAdapter().apply {
-            addToEnd(EmptyItem())
-        }
-        val errorAdapter = ErrorAdapter().apply {
-            addToEnd(ErrorItem())
-        }
-        val loadMoreAdapter = LoadMoreAdapter {
+        val emptyAdapter = AdapterFactory.createEmptyAdapter()
+        val errorAdapter = AdapterFactory.createErrorAdapter()
+        val loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
             lifecycleScope.launch {
                 result.loadBefore?.invoke()
             }
-        }.apply {
-            addToEnd(LoadMoreItem())
         }
 
         lifecycleScope.launch {

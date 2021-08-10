@@ -13,10 +13,7 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
-import com.like.recyclerview.ui.empty.EmptyAdapter
-import com.like.recyclerview.ui.empty.EmptyItem
-import com.like.recyclerview.ui.error.ErrorAdapter
-import com.like.recyclerview.ui.error.ErrorItem
+import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.UIHelper
 import kotlinx.coroutines.launch
 
@@ -41,12 +38,8 @@ class TreeActivity : AppCompatActivity() {
         mBinding.rv.itemAnimator = null
 
         val listAdapter = TreeRecyclerViewAdapter()
-        val emptyAdapter = EmptyAdapter().apply {
-            addToEnd(EmptyItem())
-        }
-        val errorAdapter = ErrorAdapter().apply {
-            addToEnd(ErrorItem())
-        }
+        val emptyAdapter = AdapterFactory.createEmptyAdapter()
+        val errorAdapter = AdapterFactory.createErrorAdapter()
 
         mBinding.rv.addItemDecoration(PinnedItemDecoration(listAdapter).apply {
             setOnPinnedHeaderRenderListener(object :
