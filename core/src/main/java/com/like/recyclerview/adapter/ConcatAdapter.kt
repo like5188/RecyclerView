@@ -20,6 +20,8 @@ import com.like.recyclerview.utils.*
  * @param errorAdapter      错误视图
  * @param show              显示进度条
  * @param hide              隐藏进度条
+ * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
+ * @param onError           请求失败时回调，在这里进行额外错误处理。
  */
 suspend fun <ValueInList> ConcatAdapter.bind(
     result: (suspend () -> List<ValueInList>?),
@@ -28,6 +30,8 @@ suspend fun <ValueInList> ConcatAdapter.bind(
     errorAdapter: AbstractErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
+    onSuccess: (suspend (List<ValueInList>?) -> Unit)? = null,
+    onError: (suspend (Throwable) -> Unit)? = null,
 ) {
     result.bind(
         onSuccess = {
@@ -40,11 +44,13 @@ suspend fun <ValueInList> ConcatAdapter.bind(
                 listAdapter.clear()
                 listAdapter.addAllToEnd(it)
             }
+            onSuccess?.invoke(it)
         },
         onError = {
             clear()
             add(errorAdapter)
             errorAdapter?.onError(it)
+            onError?.invoke(it)
         },
         show = show,
         hide = hide,
@@ -62,6 +68,8 @@ suspend fun <ValueInList> ConcatAdapter.bind(
  * @param errorAdapter      错误视图
  * @param show              显示进度条
  * @param hide              隐藏进度条
+ * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
+ * @param onError           请求失败时回调，在这里进行额外错误处理。
  */
 suspend fun <ResultType> ConcatAdapter.bind(
     result: (suspend () -> ResultType),
@@ -71,6 +79,8 @@ suspend fun <ResultType> ConcatAdapter.bind(
     errorAdapter: AbstractErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
+    onSuccess: (suspend (ResultType) -> Unit)? = null,
+    onError: (suspend (Throwable) -> Unit)? = null,
 ) {
     result.bind(
         onSuccess = {
@@ -81,11 +91,13 @@ suspend fun <ResultType> ConcatAdapter.bind(
                 clear()
                 add(contentAdapter)
             }
+            onSuccess?.invoke(it)
         },
         onError = {
             clear()
             add(errorAdapter)
             errorAdapter?.onError(it)
+            onError?.invoke(it)
         },
         show = show,
         hide = hide,
@@ -102,6 +114,8 @@ suspend fun <ResultType> ConcatAdapter.bind(
  * @param errorAdapter      错误视图
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
+ * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
+ * @param onError           请求失败时回调，在这里进行额外错误处理。
  */
 fun <ValueInList> ConcatAdapter.bindLoadAfter(
     recyclerView: RecyclerView,
@@ -112,6 +126,8 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
     errorAdapter: AbstractErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
+    onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
+    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
 ) = result.bind(
     onSuccess = { requestType, data ->
         when {
@@ -139,6 +155,7 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
                 }
             }
         }
+        onSuccess?.invoke(requestType, data)
     },
     onError = { requestType, throwable ->
         when {
@@ -151,6 +168,7 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
                 loadMoreAdapter.onError(throwable)
             }
         }
+        onError?.invoke(requestType, throwable)
     },
     show = show,
     hide = hide,
@@ -170,6 +188,8 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
  * @param errorAdapter      错误视图
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
+ * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
+ * @param onError           请求失败时回调，在这里进行额外错误处理。
  */
 fun <ResultType> ConcatAdapter.bindLoadAfter(
     recyclerView: RecyclerView,
@@ -182,6 +202,8 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
     errorAdapter: AbstractErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
 ) = result.bind(
     onSuccess = { requestType, data ->
         when {
@@ -215,6 +237,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
                 }
             }
         }
+        onSuccess?.invoke(requestType, data)
     },
     onError = { requestType, throwable ->
         when {
@@ -227,6 +250,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
                 loadMoreAdapter.onError(throwable)
             }
         }
+        onError?.invoke(requestType, throwable)
     },
     show = show,
     hide = hide,
@@ -242,6 +266,8 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
  * @param errorAdapter      错误视图
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
+ * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
+ * @param onError           请求失败时回调，在这里进行额外错误处理。
  */
 fun <ValueInList> ConcatAdapter.bindLoadBefore(
     recyclerView: RecyclerView,
@@ -252,6 +278,8 @@ fun <ValueInList> ConcatAdapter.bindLoadBefore(
     errorAdapter: AbstractErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
+    onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
+    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
 ) = result.bind(
     onSuccess = { requestType, data ->
         when {
@@ -280,6 +308,7 @@ fun <ValueInList> ConcatAdapter.bindLoadBefore(
                 }
             }
         }
+        onSuccess?.invoke(requestType, data)
     },
     onError = { requestType, throwable ->
         when {
@@ -292,6 +321,7 @@ fun <ValueInList> ConcatAdapter.bindLoadBefore(
                 loadMoreAdapter.onError(throwable)
             }
         }
+        onError?.invoke(requestType, throwable)
     },
     show = show,
     hide = hide,
