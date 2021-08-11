@@ -30,7 +30,7 @@ suspend fun <ValueInList> ConcatAdapter.bind(
     hide: (() -> Unit)? = null,
 ) {
     result.bind(
-        onData = {
+        onSuccess = {
             if (it.isNullOrEmpty()) {
                 clear()
                 add(emptyAdapter)
@@ -73,7 +73,7 @@ suspend fun <ResultType> ConcatAdapter.bind(
     hide: (() -> Unit)? = null,
 ) {
     result.bind(
-        onData = {
+        onSuccess = {
             if (onData(it)) {
                 clear()
                 add(emptyAdapter)
@@ -113,7 +113,7 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
 ) = result.bind(
-    onData = { requestType, data ->
+    onSuccess = { requestType, data ->
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
                 if (data.isNullOrEmpty()) {
@@ -183,7 +183,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
 ) = result.bind(
-    onData = { requestType, data ->
+    onSuccess = { requestType, data ->
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
                 when (onData(data)) {
@@ -253,7 +253,7 @@ fun <ValueInList> ConcatAdapter.bindLoadBefore(
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
 ) = result.bind(
-    onData = { requestType, data ->
+    onSuccess = { requestType, data ->
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
                 if (data.isNullOrEmpty()) {
