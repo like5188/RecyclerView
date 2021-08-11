@@ -4,8 +4,11 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.like.paging.RequestType
 import com.like.paging.Result
-import com.like.paging.util.bind
+import com.like.paging.ResultReport
+import com.like.paging.bind
 import com.like.recyclerview.utils.*
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 
 /*
  * 绑定分页或者不分页数据到 ConcatAdapter。
@@ -23,6 +26,7 @@ import com.like.recyclerview.utils.*
  * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
  * @param onError           请求失败时回调，在这里进行额外错误处理。
  */
+@OptIn(FlowPreview::class)
 suspend fun <ValueInList> ConcatAdapter.bind(
     result: (suspend () -> List<ValueInList>?),
     listAdapter: AbstractAdapter<*, ValueInList>,
@@ -32,29 +36,26 @@ suspend fun <ValueInList> ConcatAdapter.bind(
     hide: (() -> Unit)? = null,
     onSuccess: (suspend (List<ValueInList>?) -> Unit)? = null,
     onError: (suspend (Throwable) -> Unit)? = null,
-) {
-    result.bind(
-        onSuccess = {
-            if (it.isNullOrEmpty()) {
-                clear()
-                add(emptyAdapter)
-            } else {
-                clear()
-                add(listAdapter)
-                listAdapter.clear()
-                listAdapter.addAllToEnd(it)
-            }
-            onSuccess?.invoke(it)
-        },
-        onError = {
-            clear()
-            add(errorAdapter)
-            errorAdapter?.onError(it)
-            onError?.invoke(it)
-        },
-        show = show,
-        hide = hide,
-    )
+): Flow<List<ValueInList>?> = result.asFlow().onStart {
+    show?.invoke()
+}.onEach {
+    if (it.isNullOrEmpty()) {
+        clear()
+        add(emptyAdapter)
+    } else {
+        clear()
+        add(listAdapter)
+        listAdapter.clear()
+        listAdapter.addAllToEnd(it)
+    }
+    onSuccess?.invoke(it)
+}.onCompletion {
+    hide?.invoke()
+}.catch {
+    clear()
+    add(errorAdapter)
+    errorAdapter?.onError(it)
+    onError?.invoke(it)
 }
 
 /**
@@ -70,6 +71,7 @@ suspend fun <ValueInList> ConcatAdapter.bind(
  * 返回值表示是否显示空视图
  * @param onError                   请求失败时回调，在这里进行额外错误处理。
  */
+@OptIn(FlowPreview::class)
 suspend fun <ResultType> ConcatAdapter.bind(
     result: (suspend () -> ResultType),
     contentAdapter: RecyclerView.Adapter<*>,
@@ -79,26 +81,23 @@ suspend fun <ResultType> ConcatAdapter.bind(
     hide: (() -> Unit)? = null,
     onSuccess: suspend (ResultType) -> Boolean,
     onError: (suspend (Throwable) -> Unit)? = null,
-) {
-    result.bind(
-        onSuccess = {
-            if (onSuccess(it)) {
-                clear()
-                add(emptyAdapter)
-            } else {
-                clear()
-                add(contentAdapter)
-            }
-        },
-        onError = {
-            clear()
-            add(errorAdapter)
-            errorAdapter?.onError(it)
-            onError?.invoke(it)
-        },
-        show = show,
-        hide = hide,
-    )
+): Flow<ResultType> = result.asFlow().onStart {
+    show?.invoke()
+}.onEach {
+    if (onSuccess(it)) {
+        clear()
+        add(emptyAdapter)
+    } else {
+        clear()
+        add(contentAdapter)
+    }
+}.onCompletion {
+    hide?.invoke()
+}.catch {
+    clear()
+    add(errorAdapter)
+    errorAdapter?.onError(it)
+    onError?.invoke(it)
 }
 
 /**
@@ -125,7 +124,7 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
     hide: (() -> Unit)? = null,
     onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-) = result.bind(
+): Flow<ResultReport<List<ValueInList>?>> = result.bind(
     onSuccess = { requestType, data ->
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
@@ -201,7 +200,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
     hide: (() -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-) = result.bind(
+): Flow<ResultReport<ResultType>> = result.bind(
     onSuccess = { requestType, data ->
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
@@ -277,7 +276,7 @@ fun <ValueInList> ConcatAdapter.bindLoadBefore(
     hide: (() -> Unit)? = null,
     onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-) = result.bind(
+): Flow<ResultReport<List<ValueInList>?>> = result.bind(
     onSuccess = { requestType, data ->
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
