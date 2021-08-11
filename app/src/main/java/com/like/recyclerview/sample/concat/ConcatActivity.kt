@@ -7,13 +7,15 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
+import com.like.recyclerview.adapter.bind
+import com.like.recyclerview.adapter.bindLoadAfter
+import com.like.recyclerview.adapter.bindLoadBefore
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
-import com.like.recyclerview.utils.UIHelper
 import com.like.recyclerview.utils.add
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -34,9 +36,6 @@ class ConcatActivity : AppCompatActivity() {
     }
     private val mAdapter by lazy {
         ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    }
-    private val mUIHelper by lazy {
-        UIHelper(mAdapter)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +58,7 @@ class ConcatActivity : AppCompatActivity() {
 
         fun getData() {
             lifecycleScope.launch {
-                mUIHelper.bind(
+                mAdapter.bind(
                     result = mViewModel::getItems,
                     listAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
@@ -86,7 +85,7 @@ class ConcatActivity : AppCompatActivity() {
 
         fun getData() {
             lifecycleScope.launch {
-                mUIHelper.bind(
+                mAdapter.bind(
                     result = mViewModel::getHeadersAndItems,
                     onData = {
                         var isEmpty = it.isNullOrEmpty()
@@ -142,7 +141,7 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            mUIHelper.bindLoadAfter(
+            mAdapter.bindLoadAfter(
                 recyclerView = mBinding.rv,
                 result = result,
                 listAdapter = listAdapter,
@@ -179,7 +178,7 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            mUIHelper.bindLoadAfter(
+            mAdapter.bindLoadAfter(
                 recyclerView = mBinding.rv,
                 result = result,
                 onData = {
@@ -246,7 +245,7 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            mUIHelper.bindLoadBefore(
+            mAdapter.bindLoadBefore(
                 recyclerView = mBinding.rv,
                 result = result,
                 listAdapter = listAdapter,

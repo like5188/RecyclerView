@@ -7,6 +7,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
+import com.like.recyclerview.adapter.bind
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
@@ -14,7 +15,6 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
 import com.like.recyclerview.ui.util.AdapterFactory
-import com.like.recyclerview.utils.UIHelper
 import kotlinx.coroutines.launch
 
 class TreeActivity : AppCompatActivity() {
@@ -26,9 +26,6 @@ class TreeActivity : AppCompatActivity() {
     }
     private val mAdapter by lazy {
         ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    }
-    private val mUIHelper by lazy {
-        UIHelper(mAdapter)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +68,7 @@ class TreeActivity : AppCompatActivity() {
 
         fun getData() {
             lifecycleScope.launch {
-                mUIHelper.bind(
+                mAdapter.bind(
                     result = mViewModel::getItems,
                     listAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
