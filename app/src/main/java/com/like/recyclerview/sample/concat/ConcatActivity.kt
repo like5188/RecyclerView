@@ -87,7 +87,7 @@ class ConcatActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 mAdapter.bind(
                     result = mViewModel::getHeadersAndItems,
-                    onData = {
+                    onSuccess = {
                         var isEmpty = it.isNullOrEmpty()
                         if (!isEmpty) {
                             val headers = it.getOrNull(0)
@@ -181,7 +181,7 @@ class ConcatActivity : AppCompatActivity() {
             mAdapter.bindLoadAfter(
                 recyclerView = mBinding.rv,
                 result = result,
-                onData = {
+                onInitialOrRefreshSuccess = {
                     if (it.isNullOrEmpty()) {
                         0
                     } else {
@@ -206,7 +206,7 @@ class ConcatActivity : AppCompatActivity() {
                         }
                     }
                 },
-                onLoadMore = {
+                onLoadMoreSuccess = {
                     val items = it.getOrNull(1)
                     if (!items.isNullOrEmpty()) {
                         itemAdapter.addAllToEnd(items)

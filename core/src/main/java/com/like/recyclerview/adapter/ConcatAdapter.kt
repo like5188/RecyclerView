@@ -60,38 +60,35 @@ suspend fun <ValueInList> ConcatAdapter.bind(
 /**
  * 不分页
  *
- * @param result            获取数据的代码块
- * @param onData            用于处理初始化或者刷新数据的回调。
- * 返回值表示是否显示空视图。
- * @param contentAdapter    内容，可以包括列表、header等。
- * @param emptyAdapter      空视图
- * @param errorAdapter      错误视图
- * @param show              显示进度条
- * @param hide              隐藏进度条
- * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
- * @param onError           请求失败时回调，在这里进行额外错误处理。
+ * @param result                    获取数据的代码块
+ * @param contentAdapter            内容，可以包括列表、header等。
+ * @param emptyAdapter              空视图
+ * @param errorAdapter              错误视图
+ * @param show                      显示进度条
+ * @param hide                      隐藏进度条
+ * @param onSuccess                 请求成功时回调，在这里进行额外数据处理。
+ * 返回值表示是否显示空视图
+ * @param onError                   请求失败时回调，在这里进行额外错误处理。
  */
 suspend fun <ResultType> ConcatAdapter.bind(
     result: (suspend () -> ResultType),
-    onData: suspend (ResultType) -> Boolean,
     contentAdapter: RecyclerView.Adapter<*>,
     emptyAdapter: AbstractAdapter<*, *>? = null,
     errorAdapter: AbstractErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onSuccess: (suspend (ResultType) -> Unit)? = null,
+    onSuccess: suspend (ResultType) -> Boolean,
     onError: (suspend (Throwable) -> Unit)? = null,
 ) {
     result.bind(
         onSuccess = {
-            if (onData(it)) {
+            if (onSuccess(it)) {
                 clear()
                 add(emptyAdapter)
             } else {
                 clear()
                 add(contentAdapter)
             }
-            onSuccess?.invoke(it)
         },
         onError = {
             clear()
@@ -177,25 +174,25 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
 /**
  * 往后分页
  *
- * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
- * @param onData            用于处理初始化或者刷新数据的回调。
+ * @param result                    使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+ * @param onInitialOrRefreshSuccess 初始化或者刷新成功时回调。
  * 返回值：0：显示空视图；1：不显示空视图，没有更多数据需要加载；2：不显示空视图，有更多数据需要加载；
- * @param onLoadMore        用于处理加载更多数据的回调。
+ * @param onLoadMoreSuccess         处理加载更多成功时回调。
  * 返回值表示是否还有更多数据需要加载。
- * @param contentAdapter    内容，可以包括列表、header等。
- * @param loadMoreAdapter   加载更多视图
- * @param emptyAdapter      空视图
- * @param errorAdapter      错误视图
- * @param show              初始化或者刷新开始时显示进度条
- * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
- * @param onError           请求失败时回调，在这里进行额外错误处理。
+ * @param contentAdapter            内容，可以包括列表、header等。
+ * @param loadMoreAdapter           加载更多视图
+ * @param emptyAdapter              空视图
+ * @param errorAdapter              错误视图
+ * @param show                      初始化或者刷新开始时显示进度条
+ * @param hide                      初始化或者刷新成功或者失败时隐藏进度条
+ * @param onSuccess                 请求成功时回调，在这里进行额外数据处理。
+ * @param onError                   请求失败时回调，在这里进行额外错误处理。
  */
 fun <ResultType> ConcatAdapter.bindLoadAfter(
     recyclerView: RecyclerView,
     result: Result<ResultType>,
-    onData: (ResultType) -> Int,
-    onLoadMore: (ResultType) -> Boolean,
+    onInitialOrRefreshSuccess: (ResultType) -> Int,
+    onLoadMoreSuccess: (ResultType) -> Boolean,
     contentAdapter: RecyclerView.Adapter<*>,
     loadMoreAdapter: AbstractLoadMoreAdapter<*, *>,
     emptyAdapter: AbstractAdapter<*, *>? = null,
@@ -208,7 +205,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
     onSuccess = { requestType, data ->
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                when (onData(data)) {
+                when (onInitialOrRefreshSuccess(data)) {
                     0 -> {// 显示空视图
                         clear()
                         add(emptyAdapter)
@@ -229,7 +226,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
                 }
             }
             requestType is RequestType.After || requestType is RequestType.Before -> {
-                if (onLoadMore(data)) {
+                if (onLoadMoreSuccess(data)) {
                     loadMoreAdapter.onEnd()
                 } else {
                     loadMoreAdapter.reload()
