@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
  */
-abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val onLoad: () -> Unit) :
-    AbstractErrorAdapter<VB, ValueInList>() {
+open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val onLoad: () -> Unit) :
+    BaseErrorAdapter<VB, ValueInList>() {
     companion object {
         private const val TAG = "AbstractLoadMoreAdapter"
     }
@@ -65,6 +65,7 @@ abstract class AbstractLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(privat
      * 此方法中添加了出错重试点击监听。
      */
     override fun onError(throwable: Throwable) {
+        super.onError(throwable)
         if (::mHolder.isInitialized) {
             mHolder.binding.root.setOnClickListener {
                 onComplete()

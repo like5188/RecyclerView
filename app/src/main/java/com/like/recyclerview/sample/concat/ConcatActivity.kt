@@ -56,24 +56,25 @@ class ConcatActivity : AppCompatActivity() {
         val emptyAdapter = AdapterFactory.createEmptyAdapter()
         val errorAdapter = AdapterFactory.createErrorAdapter()
 
-        fun getData() {
+        fun getData(isRefresh: Boolean) {
             lifecycleScope.launch {
                 mAdapter.bind(
                     result = mViewModel::getItems,
                     listAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
+                    isRefresh = isRefresh,
                     show = { mProgressDialog.show() },
                     hide = { mProgressDialog.hide() },
-                )
+                ).collect()
             }
         }
 
         mBinding.btnRefresh.setOnClickListener {
-            getData()
+            getData(true)
         }
 
-        getData()
+        getData(false)
     }
 
     private fun initHeadersAndItems() {
@@ -83,7 +84,7 @@ class ConcatActivity : AppCompatActivity() {
         val emptyAdapter = AdapterFactory.createEmptyAdapter()
         val errorAdapter = AdapterFactory.createErrorAdapter()
 
-        fun getData() {
+        fun getData(isRefresh: Boolean) {
             lifecycleScope.launch {
                 mAdapter.bind(
                     result = mViewModel::getHeadersAndItems,
@@ -109,17 +110,18 @@ class ConcatActivity : AppCompatActivity() {
                     contentAdapter = contentAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
+                    isRefresh = isRefresh,
                     show = { mProgressDialog.show() },
                     hide = { mProgressDialog.hide() },
-                )
+                ).collect()
             }
         }
 
         mBinding.btnRefresh.setOnClickListener {
-            getData()
+            getData(true)
         }
 
-        getData()
+        getData(false)
     }
 
     private fun initLoadAfter() {

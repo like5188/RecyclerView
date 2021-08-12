@@ -6,7 +6,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.CoilEngine
-import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.ext.R
 import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.PictureSelector
@@ -14,7 +14,7 @@ import com.luck.picture.lib.entity.LocalMedia
 
 open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     private val maxImageCount: Int = 9
-) : AbstractAdapter<VB, ValueInList>() {
+) : BaseAdapter<VB, ValueInList>() {
     lateinit var activity: AppCompatActivity
     lateinit var itemCreator: (LocalMedia) -> ValueInList
     lateinit var getLocalMedias: () -> List<LocalMedia>

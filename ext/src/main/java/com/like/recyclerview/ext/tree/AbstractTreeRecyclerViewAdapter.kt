@@ -2,13 +2,13 @@ package com.like.recyclerview.ext.tree
 
 import android.widget.CheckBox
 import androidx.databinding.ViewDataBinding
-import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 /**
  * 树形结构的adapter，不使用分页
  */
-abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : AbstractAdapter<VB, BaseTreeNode>() {
+abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : BaseAdapter<VB, BaseTreeNode>() {
     init {
         addOnItemClickListener {
             val binding = it.binding

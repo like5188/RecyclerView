@@ -10,7 +10,7 @@ import android.widget.RelativeLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
-import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.utils.findFirstVisiblePosition
 
 /**
@@ -21,7 +21,7 @@ import com.like.recyclerview.utils.findFirstVisiblePosition
 <androidx.recyclerview.widget.RecyclerView />
 </FrameLayout>
  */
-class PinnedItemDecoration(private val mAdapter: AbstractAdapter<*, *>) : RecyclerView.ItemDecoration() {
+class PinnedItemDecoration(private val mAdapter: BaseAdapter<*, *>) : RecyclerView.ItemDecoration() {
     private var mCurPinnedItem: PinnedItem? = null
     private var mRecyclerViewParent: ViewGroup? = null
     private var mOnPinnedItemRenderListener: OnPinnedItemRenderListener? = null

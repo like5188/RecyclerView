@@ -5,12 +5,12 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.adapter.BaseAdapter
 
 /**
  * 支持拖拽 item 的 [ItemTouchHelper.Callback]。
  */
-class ItemTouchHelperCallback(private val adapter: AbstractAdapter<*, *>) : ItemTouchHelper.Callback() {
+class ItemTouchHelperCallback(private val adapter: BaseAdapter<*, *>) : ItemTouchHelper.Callback() {
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         val dragFlags = when (recyclerView.layoutManager) {

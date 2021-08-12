@@ -18,7 +18,7 @@ import com.like.recyclerview.viewholder.BindingViewHolder
  * 2：数据处理；
  * 3：界面更新；
  */
-abstract class AbstractAdapter<VB : ViewDataBinding, ValueInList>
+open class BaseAdapter<VB : ViewDataBinding, ValueInList>
     : RecyclerView.Adapter<BindingViewHolder<VB>>(),
     IListenerManager<VB> by ListenerManager(),
     IAdapterDataManager<ValueInList> by AdapterDataManager() {

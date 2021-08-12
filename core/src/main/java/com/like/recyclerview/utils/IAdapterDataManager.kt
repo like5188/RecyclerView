@@ -1,10 +1,10 @@
 package com.like.recyclerview.utils
 
-import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.adapter.BaseAdapter
 
 internal interface IAdapterDataManager<ValueInList> {
     val mList: List<ValueInList>
-    fun setAdapter(adapter: AbstractAdapter<*, ValueInList>)
+    fun setAdapter(adapter: BaseAdapter<*, ValueInList>)
     fun get(position: Int): ValueInList?
     fun update(position: Int, newData: ValueInList)
     fun addToStart(data: ValueInList)

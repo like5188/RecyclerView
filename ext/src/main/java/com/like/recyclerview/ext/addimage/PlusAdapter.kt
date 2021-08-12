@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
 import com.like.common.util.CoilEngine
-import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.PictureSelector
 import com.luck.picture.lib.config.PictureConfig
@@ -12,7 +12,7 @@ import com.luck.picture.lib.config.PictureMimeType
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.listener.OnResultCallbackListener
 
-open class PlusAdapter<VB : ViewDataBinding, ValueInList>: AbstractAdapter<VB, ValueInList>() {
+open class PlusAdapter<VB : ViewDataBinding, ValueInList>: BaseAdapter<VB, ValueInList>() {
     companion object {
         private val TAG = "AbstractPlusAdapter"
     }

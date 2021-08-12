@@ -1,16 +1,16 @@
 package com.like.recyclerview.utils
 
-import com.like.recyclerview.adapter.AbstractAdapter
+import com.like.recyclerview.adapter.BaseAdapter
 import java.util.*
 
 /**
  * Adapter中的数据管理及界面更新。包括Header、Footer、Item的增删改查、交换位置。
  */
 internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList> {
-    private var mAdapter: AbstractAdapter<*, ValueInList>? = null
+    private var mAdapter: BaseAdapter<*, ValueInList>? = null
     override val mList = mutableListOf<ValueInList>()
 
-    override fun setAdapter(adapter: AbstractAdapter<*, ValueInList>) {
+    override fun setAdapter(adapter: BaseAdapter<*, ValueInList>) {
         mAdapter = adapter
     }
 

@@ -15,6 +15,7 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
 import com.like.recyclerview.ui.util.AdapterFactory
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class TreeActivity : AppCompatActivity() {
@@ -66,23 +67,24 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        fun getData() {
+        fun getData(isRefresh: Boolean) {
             lifecycleScope.launch {
                 mAdapter.bind(
                     result = mViewModel::getItems,
                     listAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
+                    isRefresh = isRefresh,
                     show = { mBinding.swipeRefreshLayout.isRefreshing = true },
                     hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
-                )
+                ).collect()
             }
         }
 
         mBinding.swipeRefreshLayout.setOnRefreshListener {
-            getData()
+            getData(true)
         }
 
-        getData()
+        getData(false)
     }
 }
