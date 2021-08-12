@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.*
  * @param listAdapter       列表
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
+ * @param isRefresh         是否是刷新操作。false：初始化操作；true：刷新操作
  * @param show              显示进度条
  * @param hide              隐藏进度条
  * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
@@ -32,6 +33,7 @@ suspend fun <ValueInList> ConcatAdapter.bind(
     listAdapter: AbstractAdapter<*, ValueInList>,
     emptyAdapter: AbstractAdapter<*, *>? = null,
     errorAdapter: AbstractErrorAdapter<*, *>? = null,
+    isRefresh: Boolean = false,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
     onSuccess: (suspend (List<ValueInList>?) -> Unit)? = null,
@@ -52,9 +54,11 @@ suspend fun <ValueInList> ConcatAdapter.bind(
 }.onCompletion {
     hide?.invoke()
 }.catch {
-    clear()
-    add(errorAdapter)
-    errorAdapter?.onError(it)
+    if (!isRefresh) {// 初始化时才显示错误视图
+        clear()
+        add(errorAdapter)
+        errorAdapter?.onError(it)
+    }
     onError?.invoke(it)
 }
 
@@ -65,6 +69,7 @@ suspend fun <ValueInList> ConcatAdapter.bind(
  * @param contentAdapter            内容，可以包括列表、header等。
  * @param emptyAdapter              空视图
  * @param errorAdapter              错误视图
+ * @param isRefresh                 是否是刷新操作。false：初始化操作；true：刷新操作
  * @param show                      显示进度条
  * @param hide                      隐藏进度条
  * @param onSuccess                 请求成功时回调，在这里进行额外数据处理。
@@ -77,6 +82,7 @@ suspend fun <ResultType> ConcatAdapter.bind(
     contentAdapter: RecyclerView.Adapter<*>,
     emptyAdapter: AbstractAdapter<*, *>? = null,
     errorAdapter: AbstractErrorAdapter<*, *>? = null,
+    isRefresh: Boolean = false,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
     onSuccess: suspend (ResultType) -> Boolean,
@@ -94,9 +100,11 @@ suspend fun <ResultType> ConcatAdapter.bind(
 }.onCompletion {
     hide?.invoke()
 }.catch {
-    clear()
-    add(errorAdapter)
-    errorAdapter?.onError(it)
+    if (!isRefresh) {// 初始化时才显示错误视图
+        clear()
+        add(errorAdapter)
+        errorAdapter?.onError(it)
+    }
     onError?.invoke(it)
 }
 
