@@ -7,6 +7,7 @@ import com.like.paging.Result
 import com.like.paging.ResultReport
 import com.like.paging.bind
 import com.like.recyclerview.utils.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 
@@ -15,7 +16,7 @@ import kotlinx.coroutines.flow.*
  */
 
 /**
- * 不分页
+ * 不分页（线程安全）
  *
  * @param result            获取列表数据的代码块
  * @param listAdapter       列表
@@ -38,32 +39,33 @@ suspend fun <ValueInList> ConcatAdapter.bind(
     hide: (() -> Unit)? = null,
     onSuccess: (suspend (List<ValueInList>?) -> Unit)? = null,
     onError: (suspend (Throwable) -> Unit)? = null,
-): Flow<List<ValueInList>?> = result.asFlow().onStart {
-    show?.invoke()
-}.onEach {
-    if (it.isNullOrEmpty()) {
-        clear()
-        add(emptyAdapter)
-    } else {
-        clear()
-        add(listAdapter)
-        listAdapter.clear()
-        listAdapter.addAllToEnd(it)
-    }
-    onSuccess?.invoke(it)
-}.onCompletion {
-    hide?.invoke()
-}.catch {
-    if (!isRefresh) {// 初始化时才显示错误视图
-        clear()
-        add(errorAdapter)
-        errorAdapter?.onError(it)
-    }
-    onError?.invoke(it)
-}
+): Flow<List<ValueInList>?> = result.asFlow().flowOn(Dispatchers.IO)
+    .onStart {
+        show?.invoke()
+    }.onEach {
+        if (it.isNullOrEmpty()) {
+            clear()
+            add(emptyAdapter)
+        } else {
+            clear()
+            add(listAdapter)
+            listAdapter.clear()
+            listAdapter.addAllToEnd(it)
+        }
+        onSuccess?.invoke(it)
+    }.onCompletion {
+        hide?.invoke()
+    }.catch {
+        if (!isRefresh) {// 初始化时才显示错误视图
+            clear()
+            add(errorAdapter)
+            errorAdapter?.onError(it)
+        }
+        onError?.invoke(it)
+    }.flowOn(Dispatchers.Main)
 
 /**
- * 不分页
+ * 不分页（线程安全）
  *
  * @param result                    获取数据的代码块
  * @param contentAdapter            内容，可以包括列表、header等。
@@ -87,29 +89,30 @@ suspend fun <ResultType> ConcatAdapter.bind(
     hide: (() -> Unit)? = null,
     onSuccess: suspend (ResultType) -> Boolean,
     onError: (suspend (Throwable) -> Unit)? = null,
-): Flow<ResultType> = result.asFlow().onStart {
-    show?.invoke()
-}.onEach {
-    if (onSuccess(it)) {
-        clear()
-        add(emptyAdapter)
-    } else {
-        clear()
-        add(contentAdapter)
-    }
-}.onCompletion {
-    hide?.invoke()
-}.catch {
-    if (!isRefresh) {// 初始化时才显示错误视图
-        clear()
-        add(errorAdapter)
-        errorAdapter?.onError(it)
-    }
-    onError?.invoke(it)
-}
+): Flow<ResultType> = result.asFlow().flowOn(Dispatchers.IO)
+    .onStart {
+        show?.invoke()
+    }.onEach {
+        if (onSuccess(it)) {
+            clear()
+            add(emptyAdapter)
+        } else {
+            clear()
+            add(contentAdapter)
+        }
+    }.onCompletion {
+        hide?.invoke()
+    }.catch {
+        if (!isRefresh) {// 初始化时才显示错误视图
+            clear()
+            add(errorAdapter)
+            errorAdapter?.onError(it)
+        }
+        onError?.invoke(it)
+    }.flowOn(Dispatchers.Main)
 
 /**
- * 往后分页
+ * 往后分页（线程安全）
  *
  * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
  * @param listAdapter       列表。
@@ -179,7 +182,7 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
 )
 
 /**
- * 往后分页
+ * 往后分页（线程安全）
  *
  * @param result                    使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
  * @param onInitialOrRefreshSuccess 初始化或者刷新成功时回调。
@@ -261,7 +264,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
 )
 
 /**
- * 往前分页
+ * 往前分页（线程安全）
  *
  * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
  * @param listAdapter       列表。
