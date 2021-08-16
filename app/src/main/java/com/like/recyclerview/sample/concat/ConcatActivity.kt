@@ -17,6 +17,7 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.add
+import com.like.recyclerview.utils.clear
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -189,6 +190,7 @@ class ConcatActivity : AppCompatActivity() {
                     } else {
                         val headers = it.getOrNull(0)
                         val items = it.getOrNull(1)
+                        contentAdapter.clear()
                         if (!headers.isNullOrEmpty()) {
                             contentAdapter.add(headerAdapter)
                             headerAdapter.clear()
