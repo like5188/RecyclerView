@@ -36,8 +36,6 @@ class TreeActivity : AppCompatActivity() {
         mBinding.rv.itemAnimator = null
 
         val listAdapter = TreeRecyclerViewAdapter()
-        val emptyAdapter = AdapterFactory.createEmptyAdapter()
-        val errorAdapter = AdapterFactory.createErrorAdapter()
 
         mBinding.rv.addItemDecoration(PinnedItemDecoration(listAdapter).apply {
             setOnPinnedHeaderRenderListener(object :
@@ -67,16 +65,18 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
+        val flow = mAdapter.bind(
+            result = mViewModel::getItems,
+            itemAdapter = listAdapter,
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mBinding.swipeRefreshLayout.isRefreshing = true },
+            hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
+        )
+
         fun getData() {
             lifecycleScope.launch {
-                mAdapter.bind(
-                    result = mViewModel::getItems,
-                    itemAdapter = listAdapter,
-                    emptyAdapter = emptyAdapter,
-                    errorAdapter = errorAdapter,
-                    show = { mBinding.swipeRefreshLayout.isRefreshing = true },
-                    hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
-                ).collect()
+                flow.collect()
             }
         }
 

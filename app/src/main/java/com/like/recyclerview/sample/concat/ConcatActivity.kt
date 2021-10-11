@@ -53,20 +53,18 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initItems() {
-        val listAdapter = ItemAdapter()
-        val emptyAdapter = AdapterFactory.createEmptyAdapter()
-        val errorAdapter = AdapterFactory.createErrorAdapter()
+        val flow = mAdapter.bind(
+            result = mViewModel::getItems,
+            itemAdapter = ItemAdapter(),
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+        )
 
         fun getData() {
             lifecycleScope.launch {
-                mAdapter.bind(
-                    result = mViewModel::getItems,
-                    itemAdapter = listAdapter,
-                    emptyAdapter = emptyAdapter,
-                    errorAdapter = errorAdapter,
-                    show = { mProgressDialog.show() },
-                    hide = { mProgressDialog.hide() },
-                ).collect()
+                flow.collect()
             }
         }
 
@@ -78,16 +76,12 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initHeadersAndItems() {
-        val headerAdapter = HeaderAdapter()
-        val itemAdapter = ItemAdapter()
-        val emptyAdapter = AdapterFactory.createEmptyAdapter()
-        val errorAdapter = AdapterFactory.createErrorAdapter()
         val flow = mAdapter.bind(
             result = mViewModel::getHeadersAndItems,
-            itemAdapter = itemAdapter,
-            headerAdapter = headerAdapter,
-            emptyAdapter = emptyAdapter,
-            errorAdapter = errorAdapter,
+            headerAdapter = HeaderAdapter(),
+            itemAdapter = ItemAdapter(),
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
         )
