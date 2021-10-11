@@ -39,9 +39,9 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
     onSuccess: suspend (ResultType) -> List<List<ValueInList>?>? = {
-        if (headerAdapter == null) {
+        if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
             listOf(emptyList(), it as? List<ValueInList>)
-        } else {
+        } else {// 如果返回值[ResultType]为 List<List<ValueInList>?>? 类型
             it as? List<List<ValueInList>?>
         }
     },
@@ -57,7 +57,6 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
         hide = hide,
         onSuccess = {
             val res = onSuccess(it)
-            var isEmpty = res.isNullOrEmpty()
             if (!res.isNullOrEmpty()) {
                 val headers = res.getOrNull(0)
                 val items = res.getOrNull(1)
@@ -71,9 +70,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
                     itemAdapter.clear()
                     itemAdapter.addAllToEnd(items)
                 }
-                isEmpty = headers.isNullOrEmpty() && items.isNullOrEmpty()
             }
-            isEmpty
         },
         onError = onError
     )
@@ -88,9 +85,8 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
  * @param errorAdapter              错误视图
  * @param show                      显示进度条
  * @param hide                      隐藏进度条
- * @param onSuccess                 请求成功时回调，在这里进行额外数据处理。
- * 返回值表示是否显示空视图
- * @param onError                   请求失败时回调，在这里进行额外错误处理。
+ * @param onSuccess                 请求成功时回调，在这里对[contentAdapter]进行数据处理。
+ * @param onError                   请求失败时回调，在这里进行额外错误处理，这里默认已经添加了错误视图。
  */
 @OptIn(FlowPreview::class)
 fun <ResultType> ConcatAdapter.bind(
@@ -100,7 +96,7 @@ fun <ResultType> ConcatAdapter.bind(
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onSuccess: suspend (ResultType) -> Boolean,
+    onSuccess: suspend (ResultType) -> Unit,
     onError: (suspend (Throwable) -> Unit)? = null,
 ): Flow<ResultType> {
     var isFirstLoad = true
@@ -108,7 +104,8 @@ fun <ResultType> ConcatAdapter.bind(
         .onStart {
             show?.invoke()
         }.onEach {
-            if (onSuccess(it)) {
+            onSuccess(it)
+            if (contentAdapter.itemCount == 0) {
                 clear()
                 add(emptyAdapter)
             } else {

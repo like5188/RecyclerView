@@ -45,8 +45,8 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-//        initItems()
-        initHeadersAndItems()
+        initItems()
+//        initHeadersAndItems()
 //        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
