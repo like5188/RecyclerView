@@ -19,44 +19,65 @@ import kotlinx.coroutines.flow.*
  * 不分页（线程安全）
  *
  * @param result            获取列表数据的代码块
- * @param listAdapter       列表
+ * @param headerAdapter     header
+ * @param itemAdapter       列表
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
- * @param isRefresh         是否是刷新操作。false：初始化操作；true：刷新操作
  * @param show              显示进度条
  * @param hide              隐藏进度条
  * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
+ * 返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param onError           请求失败时回调，在这里进行额外错误处理。
  */
 @OptIn(FlowPreview::class)
-suspend fun <ValueInList> ConcatAdapter.bind(
-    result: (suspend () -> List<ValueInList>?),
-    listAdapter: BaseAdapter<*, ValueInList>,
+fun <ResultType, ValueInList> ConcatAdapter.bind(
+    result: (suspend () -> ResultType),
+    headerAdapter: BaseAdapter<*, ValueInList>? = null,
+    itemAdapter: BaseAdapter<*, ValueInList>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
-    isRefresh: Boolean = false,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onSuccess: (suspend (List<ValueInList>?) -> Unit)? = null,
-    onError: (suspend (Throwable) -> Unit)? = null,
-): Flow<List<ValueInList>?> = bind(
-    result = result,
-    contentAdapter = listAdapter,
-    emptyAdapter = emptyAdapter,
-    errorAdapter = errorAdapter,
-    isRefresh = isRefresh,
-    show = show,
-    hide = hide,
-    onSuccess = {
-        if (!it.isNullOrEmpty()) {
-            listAdapter.clear()
-            listAdapter.addAllToEnd(it)
+    onSuccess: suspend (ResultType) -> List<List<ValueInList>?>? = {
+        if (headerAdapter == null) {
+            listOf(emptyList(), it as? List<ValueInList>)
+        } else {
+            it as? List<List<ValueInList>?>
         }
-        onSuccess?.invoke(it)
-        it.isNullOrEmpty()
     },
-    onError = onError
-)
+    onError: (suspend (Throwable) -> Unit)? = null,
+): Flow<ResultType> {
+    val contentAdapter = ConcatAdapter()
+    return bind(
+        result = result,
+        contentAdapter = contentAdapter,
+        emptyAdapter = emptyAdapter,
+        errorAdapter = errorAdapter,
+        show = show,
+        hide = hide,
+        onSuccess = {
+            val res = onSuccess(it)
+            var isEmpty = res.isNullOrEmpty()
+            if (!res.isNullOrEmpty()) {
+                val headers = res.getOrNull(0)
+                val items = res.getOrNull(1)
+                if (!headers.isNullOrEmpty() && headerAdapter != null) {
+                    contentAdapter.add(headerAdapter)
+                    headerAdapter.clear()
+                    headerAdapter.addAllToEnd(headers)
+                }
+                if (!items.isNullOrEmpty()) {
+                    contentAdapter.add(itemAdapter)
+                    itemAdapter.clear()
+                    itemAdapter.addAllToEnd(items)
+                }
+                isEmpty = headers.isNullOrEmpty() && items.isNullOrEmpty()
+            }
+            isEmpty
+        },
+        onError = onError
+    )
+}
 
 /**
  * 不分页（线程安全）
@@ -65,7 +86,6 @@ suspend fun <ValueInList> ConcatAdapter.bind(
  * @param contentAdapter            内容，可以包括列表、header等。
  * @param emptyAdapter              空视图
  * @param errorAdapter              错误视图
- * @param isRefresh                 是否是刷新操作。false：初始化操作；true：刷新操作
  * @param show                      显示进度条
  * @param hide                      隐藏进度条
  * @param onSuccess                 请求成功时回调，在这里进行额外数据处理。
@@ -73,37 +93,40 @@ suspend fun <ValueInList> ConcatAdapter.bind(
  * @param onError                   请求失败时回调，在这里进行额外错误处理。
  */
 @OptIn(FlowPreview::class)
-suspend fun <ResultType> ConcatAdapter.bind(
+fun <ResultType> ConcatAdapter.bind(
     result: (suspend () -> ResultType),
     contentAdapter: RecyclerView.Adapter<*>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
-    isRefresh: Boolean = false,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
     onSuccess: suspend (ResultType) -> Boolean,
     onError: (suspend (Throwable) -> Unit)? = null,
-): Flow<ResultType> = result.asFlow().flowOn(Dispatchers.IO)
-    .onStart {
-        show?.invoke()
-    }.onEach {
-        if (onSuccess(it)) {
-            clear()
-            add(emptyAdapter)
-        } else {
-            clear()
-            add(contentAdapter)
-        }
-    }.onCompletion {
-        hide?.invoke()
-    }.catch {
-        if (!isRefresh) {// 初始化时才显示错误视图
-            clear()
-            add(errorAdapter)
-            errorAdapter?.onError(it)
-        }
-        onError?.invoke(it)
-    }.flowOn(Dispatchers.Main)
+): Flow<ResultType> {
+    var isFirstLoad = true
+    return result.asFlow().flowOn(Dispatchers.IO)
+        .onStart {
+            show?.invoke()
+        }.onEach {
+            if (onSuccess(it)) {
+                clear()
+                add(emptyAdapter)
+            } else {
+                clear()
+                add(contentAdapter)
+            }
+        }.catch {
+            if (isFirstLoad) {// 初始化时才显示错误视图
+                clear()
+                add(errorAdapter)
+                errorAdapter?.onError(it)
+            }
+            onError?.invoke(it)
+        }.onCompletion {
+            hide?.invoke()
+            isFirstLoad = false
+        }.flowOn(Dispatchers.Main)
+}
 
 /**
  * 往后分页（线程安全）

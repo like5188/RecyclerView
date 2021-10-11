@@ -67,14 +67,13 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        fun getData(isRefresh: Boolean) {
+        fun getData() {
             lifecycleScope.launch {
                 mAdapter.bind(
                     result = mViewModel::getItems,
-                    listAdapter = listAdapter,
+                    itemAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
-                    isRefresh = isRefresh,
                     show = { mBinding.swipeRefreshLayout.isRefreshing = true },
                     hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
                 ).collect()
@@ -82,9 +81,9 @@ class TreeActivity : AppCompatActivity() {
         }
 
         mBinding.swipeRefreshLayout.setOnRefreshListener {
-            getData(true)
+            getData()
         }
 
-        getData(false)
+        getData()
     }
 }

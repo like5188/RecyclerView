@@ -46,8 +46,8 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.adapter = mAdapter
 
 //        initItems()
-//        initHeadersAndItems()
-        initLoadAfter()
+        initHeadersAndItems()
+//        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
     }
@@ -57,14 +57,13 @@ class ConcatActivity : AppCompatActivity() {
         val emptyAdapter = AdapterFactory.createEmptyAdapter()
         val errorAdapter = AdapterFactory.createErrorAdapter()
 
-        fun getData(isRefresh: Boolean) {
+        fun getData() {
             lifecycleScope.launch {
                 mAdapter.bind(
                     result = mViewModel::getItems,
-                    listAdapter = listAdapter,
+                    itemAdapter = listAdapter,
                     emptyAdapter = emptyAdapter,
                     errorAdapter = errorAdapter,
-                    isRefresh = isRefresh,
                     show = { mProgressDialog.show() },
                     hide = { mProgressDialog.hide() },
                 ).collect()
@@ -72,57 +71,38 @@ class ConcatActivity : AppCompatActivity() {
         }
 
         mBinding.btnRefresh.setOnClickListener {
-            getData(true)
+            getData()
         }
 
-        getData(false)
+        getData()
     }
 
     private fun initHeadersAndItems() {
         val headerAdapter = HeaderAdapter()
         val itemAdapter = ItemAdapter()
-        val contentAdapter = ConcatAdapter()
         val emptyAdapter = AdapterFactory.createEmptyAdapter()
         val errorAdapter = AdapterFactory.createErrorAdapter()
+        val flow = mAdapter.bind(
+            result = mViewModel::getHeadersAndItems,
+            itemAdapter = itemAdapter,
+            headerAdapter = headerAdapter,
+            emptyAdapter = emptyAdapter,
+            errorAdapter = errorAdapter,
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+        )
 
-        fun getData(isRefresh: Boolean) {
+        fun getData() {
             lifecycleScope.launch {
-                mAdapter.bind(
-                    result = mViewModel::getHeadersAndItems,
-                    onSuccess = {
-                        var isEmpty = it.isNullOrEmpty()
-                        if (!isEmpty) {
-                            val headers = it.getOrNull(0)
-                            val items = it.getOrNull(1)
-                            if (!headers.isNullOrEmpty()) {
-                                contentAdapter.add(headerAdapter)
-                                headerAdapter.clear()
-                                headerAdapter.addAllToEnd(headers)
-                            }
-                            if (!items.isNullOrEmpty()) {
-                                contentAdapter.add(itemAdapter)
-                                itemAdapter.clear()
-                                itemAdapter.addAllToEnd(items)
-                            }
-                            isEmpty = headers.isNullOrEmpty() && items.isNullOrEmpty()
-                        }
-                        isEmpty
-                    },
-                    contentAdapter = contentAdapter,
-                    emptyAdapter = emptyAdapter,
-                    errorAdapter = errorAdapter,
-                    isRefresh = isRefresh,
-                    show = { mProgressDialog.show() },
-                    hide = { mProgressDialog.hide() },
-                ).collect()
+                flow.collect()
             }
         }
 
         mBinding.btnRefresh.setOnClickListener {
-            getData(true)
+            getData()
         }
 
-        getData(false)
+        getData()
     }
 
     private fun initLoadAfter() {
