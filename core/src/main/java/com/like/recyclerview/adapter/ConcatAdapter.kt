@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.*
  * @param hide              隐藏进度条
  * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
  * 返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
- * @param onError           请求失败时回调，在这里进行额外错误处理。
+ * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
  */
 @OptIn(FlowPreview::class)
 fun <ResultType, ValueInList> ConcatAdapter.bind(
@@ -86,7 +86,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
  * @param show                      显示进度条
  * @param hide                      隐藏进度条
  * @param onSuccess                 请求成功时回调，在这里对[contentAdapter]进行数据处理。
- * @param onError                   请求失败时回调，在这里进行额外错误处理，这里默认已经添加了错误视图。
+ * @param onError                   请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
  */
 @OptIn(FlowPreview::class)
 fun <ResultType> ConcatAdapter.bind(
