@@ -134,14 +134,16 @@ fun <ResultType> ConcatAdapter.bind(
  * 往后分页（线程安全）
  *
  * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
- * @param listAdapter       列表。
+ * @param headerAdapter     header
+ * @param itemAdapter       列表
  * @param loadMoreAdapter   加载更多视图
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
- * @param show              初始化或者刷新开始时显示进度条
- * @param hide              初始化或者刷新成功或者失败时隐藏进度条
+ * @param show              显示进度条
+ * @param hide              隐藏进度条
  * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
- * @param onError           请求失败时回调，在这里进行额外错误处理。
+ * 返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
+ * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
  */
 fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
     recyclerView: RecyclerView,
@@ -166,47 +168,53 @@ fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
     return this@bindLoadAfter.bindLoadAfter(
         recyclerView = recyclerView,
         result = result,
-        onInitialOrRefreshSuccess = { requestType, resultType ->
-            val res = onSuccess(requestType, resultType)
-            if (res.isNullOrEmpty()) {
-                0
-            } else {
-                val headers = res.getOrNull(0)
-                val items = res.getOrNull(1)
-                contentAdapter.clear()
-                if (!headers.isNullOrEmpty() && headerAdapter != null) {
-                    contentAdapter.add(headerAdapter)
-                    headerAdapter.clear()
-                    headerAdapter.addAllToEnd(headers)
-                }
-                if (!items.isNullOrEmpty()) {
-                    contentAdapter.add(itemAdapter)
-                    itemAdapter.clear()
-                    itemAdapter.addAllToEnd(items)
-                }
-                if (headers.isNullOrEmpty() && items.isNullOrEmpty()) {
-                    0
-                } else if (!items.isNullOrEmpty()) {
-                    2
-                } else {
-                    1
-                }
-            }
-        },
-        onLoadMoreSuccess = { requestType, resultType ->
-            val res = onSuccess(requestType, resultType)
-            val items = res?.getOrNull(1)
-            if (!items.isNullOrEmpty()) {
-                itemAdapter.addAllToEnd(items)
-            }
-            items.isNullOrEmpty()
-        },
         contentAdapter = contentAdapter,
         loadMoreAdapter = loadMoreAdapter,
         emptyAdapter = emptyAdapter,
         errorAdapter = errorAdapter,
         show = show,
         hide = hide,
+        onSuccess = { requestType, resultType ->
+            val res = onSuccess(requestType, resultType)
+            when {
+                requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+                    if (res.isNullOrEmpty()) {
+                        0
+                    } else {
+                        val headers = res.getOrNull(0)
+                        val items = res.getOrNull(1)
+                        contentAdapter.clear()
+                        if (!headers.isNullOrEmpty() && headerAdapter != null) {
+                            contentAdapter.add(headerAdapter)
+                            headerAdapter.clear()
+                            headerAdapter.addAllToEnd(headers)
+                        }
+                        if (!items.isNullOrEmpty()) {
+                            contentAdapter.add(itemAdapter)
+                            itemAdapter.clear()
+                            itemAdapter.addAllToEnd(items)
+                        }
+                        if (headers.isNullOrEmpty() && items.isNullOrEmpty()) {
+                            0
+                        } else if (!items.isNullOrEmpty()) {
+                            2
+                        } else {
+                            1
+                        }
+                    }
+                }
+                requestType is RequestType.After || requestType is RequestType.Before -> {
+                    val items = res?.getOrNull(1)
+                    if (!items.isNullOrEmpty()) {
+                        itemAdapter.addAllToEnd(items)
+                        3
+                    } else {
+                        4
+                    }
+                }
+                else -> -1
+            }
+        },
         onError = onError
     )
 }
@@ -214,62 +222,58 @@ fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
 /**
  * 往后分页（线程安全）
  *
- * @param result                    使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
- * @param onInitialOrRefreshSuccess 初始化或者刷新成功时回调。
- * 返回值：0：显示空视图；1：不显示空视图，没有更多数据需要加载（只有 Header 的情况）；2：不显示空视图，有更多数据需要加载（有列表数据的情况）；
- * @param onLoadMoreSuccess         处理加载更多成功时回调。
- * 返回值表示是否还有更多数据需要加载。
- * @param contentAdapter            内容，可以包括列表、header等。
- * @param loadMoreAdapter           加载更多视图
- * @param emptyAdapter              空视图
- * @param errorAdapter              错误视图
- * @param show                      初始化或者刷新开始时显示进度条
- * @param hide                      初始化或者刷新成功或者失败时隐藏进度条
- * @param onSuccess                 请求成功时回调，在这里进行额外数据处理。
- * @param onError                   请求失败时回调，在这里进行额外错误处理。
+ * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+ * @param contentAdapter    内容，可以包括列表、header等。
+ * @param loadMoreAdapter   加载更多视图
+ * @param emptyAdapter      空视图
+ * @param errorAdapter      错误视图
+ * @param show              初始化或者刷新开始时显示进度条
+ * @param hide              初始化或者刷新成功或者失败时隐藏进度条
+ * @param onSuccess         请求成功时回调，在这里对[contentAdapter]进行数据处理。
+ * 返回值：
+ * 0：显示空视图；
+ * 1：不显示空视图，没有更多数据需要加载（只有 Header 的情况）；
+ * 2：不显示空视图，有更多数据需要加载（有列表数据的情况）；
+ * 3：还有更多数据需要加载；
+ * 4：没有更多数据需要加载；
+ * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
  */
 fun <ResultType> ConcatAdapter.bindLoadAfter(
     recyclerView: RecyclerView,
     result: Result<ResultType>,
-    onInitialOrRefreshSuccess: suspend (RequestType, ResultType) -> Int,
-    onLoadMoreSuccess: suspend (RequestType, ResultType) -> Boolean,
     contentAdapter: RecyclerView.Adapter<*>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
+    onSuccess: suspend (RequestType, ResultType) -> Int,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
 ): Flow<ResultReport<ResultType>> = result.bind(
     onSuccess = { requestType, resultType ->
-        when {
-            requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                when (onInitialOrRefreshSuccess(requestType, resultType)) {
-                    0 -> {// 显示空视图
-                        clear()
-                        add(emptyAdapter)
-                    }
-                    1 -> {// 不显示空视图，没有更多数据需要加载（只有 Header 的情况）
-                        clear()
-                        add(contentAdapter)
-                        recyclerView.scrollToTop()
-                    }
-                    2 -> {// 不显示空视图，有更多数据需要加载（有列表数据的情况）
-                        clear()
-                        addAll(contentAdapter, loadMoreAdapter)
-                        loadMoreAdapter.reload()
-                        loadMoreAdapter.onComplete()
-                        recyclerView.scrollToTop()
-                    }
-                }
+        when (onSuccess(requestType, resultType)) {
+            0 -> {// 显示空视图
+                clear()
+                add(emptyAdapter)
             }
-            requestType is RequestType.After || requestType is RequestType.Before -> {
-                if (onLoadMoreSuccess(requestType, resultType)) {
-                    loadMoreAdapter.onEnd()
-                } else {
-                    loadMoreAdapter.reload()
-                    loadMoreAdapter.onComplete()
-                }
+            1 -> {// 不显示空视图，没有更多数据需要加载（只有 Header 的情况）
+                clear()
+                add(contentAdapter)
+                recyclerView.scrollToTop()
+            }
+            2 -> {// 不显示空视图，有更多数据需要加载（有列表数据的情况）
+                clear()
+                addAll(contentAdapter, loadMoreAdapter)
+                loadMoreAdapter.reload()
+                loadMoreAdapter.onComplete()
+                recyclerView.scrollToTop()
+            }
+            3 -> {// 还有更多数据需要加载
+                loadMoreAdapter.reload()
+                loadMoreAdapter.onComplete()
+            }
+            4 -> {// 没有更多数据需要加载
+                loadMoreAdapter.onEnd()
             }
         }
     },

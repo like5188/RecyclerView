@@ -45,8 +45,8 @@ class ConcatActivity : AppCompatActivity() {
 
 //        initItems()
 //        initHeadersAndItems()
-        initLoadAfter()
-//        initLoadAfterWithHeaders()
+//        initLoadAfter()
+        initLoadAfterWithHeaders()
 //        initLoadBefore()
     }
 
