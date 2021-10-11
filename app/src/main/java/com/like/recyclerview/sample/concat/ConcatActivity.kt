@@ -16,8 +16,6 @@ import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
-import com.like.recyclerview.utils.add
-import com.like.recyclerview.utils.clear
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -46,8 +44,8 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.adapter = mAdapter
 
 //        initItems()
-        initHeadersAndItems()
-//        initLoadAfter()
+//        initHeadersAndItems()
+        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
     }
@@ -110,26 +108,22 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        val listAdapter = ItemAdapter()
-        val emptyAdapter = AdapterFactory.createEmptyAdapter()
-        val errorAdapter = AdapterFactory.createErrorAdapter()
-        val loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-            lifecycleScope.launch {
-                result.loadAfter?.invoke()
-            }
-        }
-
+        val flow = mAdapter.bindLoadAfter(
+            recyclerView = mBinding.rv,
+            result = result,
+            itemAdapter = ItemAdapter(),
+            loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
+                lifecycleScope.launch {
+                    result.loadAfter?.invoke()
+                }
+            },
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+        )
         lifecycleScope.launch {
-            mAdapter.bindLoadAfter(
-                recyclerView = mBinding.rv,
-                result = result,
-                listAdapter = listAdapter,
-                loadMoreAdapter = loadMoreAdapter,
-                emptyAdapter = emptyAdapter,
-                errorAdapter = errorAdapter,
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-            ).collect()
+            flow.collect()
         }
         lifecycleScope.launch {
             result.initial()
@@ -145,61 +139,24 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        val headerAdapter = HeaderAdapter()
-        val itemAdapter = ItemAdapter()
-        val contentAdapter = ConcatAdapter()
-        val emptyAdapter = AdapterFactory.createEmptyAdapter()
-        val errorAdapter = AdapterFactory.createErrorAdapter()
-        val loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-            lifecycleScope.launch {
-                result.loadAfter?.invoke()
-            }
-        }
+        val flow = mAdapter.bindLoadAfter(
+            recyclerView = mBinding.rv,
+            result = result,
+            headerAdapter = HeaderAdapter(),
+            itemAdapter = ItemAdapter(),
+            loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
+                lifecycleScope.launch {
+                    result.loadAfter?.invoke()
+                }
+            },
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+        )
 
         lifecycleScope.launch {
-            mAdapter.bindLoadAfter(
-                recyclerView = mBinding.rv,
-                result = result,
-                onInitialOrRefreshSuccess = {
-                    if (it.isNullOrEmpty()) {
-                        0
-                    } else {
-                        val headers = it.getOrNull(0)
-                        val items = it.getOrNull(1)
-                        contentAdapter.clear()
-                        if (!headers.isNullOrEmpty()) {
-                            contentAdapter.add(headerAdapter)
-                            headerAdapter.clear()
-                            headerAdapter.addAllToEnd(headers)
-                        }
-                        if (!items.isNullOrEmpty()) {
-                            contentAdapter.add(itemAdapter)
-                            itemAdapter.clear()
-                            itemAdapter.addAllToEnd(items)
-                        }
-                        if (headers.isNullOrEmpty() && items.isNullOrEmpty()) {
-                            0
-                        } else if (!items.isNullOrEmpty()) {
-                            2
-                        } else {
-                            1
-                        }
-                    }
-                },
-                onLoadMoreSuccess = {
-                    val items = it.getOrNull(1)
-                    if (!items.isNullOrEmpty()) {
-                        itemAdapter.addAllToEnd(items)
-                    }
-                    items.isNullOrEmpty()
-                },
-                contentAdapter = contentAdapter,
-                loadMoreAdapter = loadMoreAdapter,
-                emptyAdapter = emptyAdapter,
-                errorAdapter = errorAdapter,
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-            ).collect()
+            flow.collect()
         }
         lifecycleScope.launch {
             result.initial()

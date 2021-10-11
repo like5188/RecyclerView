@@ -62,6 +62,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
             if (!res.isNullOrEmpty()) {
                 val headers = res.getOrNull(0)
                 val items = res.getOrNull(1)
+                contentAdapter.clear()
                 if (!headers.isNullOrEmpty() && headerAdapter != null) {
                     contentAdapter.add(headerAdapter)
                     headerAdapter.clear()
@@ -142,62 +143,73 @@ fun <ResultType> ConcatAdapter.bind(
  * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
  * @param onError           请求失败时回调，在这里进行额外错误处理。
  */
-fun <ValueInList> ConcatAdapter.bindLoadAfter(
+fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
     recyclerView: RecyclerView,
-    result: Result<List<ValueInList>?>,
-    listAdapter: BaseAdapter<*, ValueInList>,
+    result: Result<ResultType>,
+    headerAdapter: BaseAdapter<*, ValueInList>? = null,
+    itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
+    onSuccess: suspend (RequestType, ResultType) -> List<List<ValueInList>?>? = { requestType, resultType ->
+        if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
+            listOf(emptyList(), resultType as? List<ValueInList>)
+        } else {// 如果返回值[ResultType]为 List<List<ValueInList>?>? 类型
+            resultType as? List<List<ValueInList>?>
+        }
+    },
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-): Flow<ResultReport<List<ValueInList>?>> = result.bind(
-    onSuccess = { requestType, data ->
-        when {
-            requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                if (data.isNullOrEmpty()) {
-                    clear()
-                    add(emptyAdapter)
+): Flow<ResultReport<ResultType>> {
+    val contentAdapter = ConcatAdapter()
+    return this@bindLoadAfter.bindLoadAfter(
+        recyclerView = recyclerView,
+        result = result,
+        onInitialOrRefreshSuccess = { requestType, resultType ->
+            val res = onSuccess(requestType, resultType)
+            if (res.isNullOrEmpty()) {
+                0
+            } else {
+                val headers = res.getOrNull(0)
+                val items = res.getOrNull(1)
+                contentAdapter.clear()
+                if (!headers.isNullOrEmpty() && headerAdapter != null) {
+                    contentAdapter.add(headerAdapter)
+                    headerAdapter.clear()
+                    headerAdapter.addAllToEnd(headers)
+                }
+                if (!items.isNullOrEmpty()) {
+                    contentAdapter.add(itemAdapter)
+                    itemAdapter.clear()
+                    itemAdapter.addAllToEnd(items)
+                }
+                if (headers.isNullOrEmpty() && items.isNullOrEmpty()) {
+                    0
+                } else if (!items.isNullOrEmpty()) {
+                    2
                 } else {
-                    clear()
-                    addAll(listAdapter, loadMoreAdapter)
-                    listAdapter.clear()
-                    listAdapter.addAllToEnd(data)
-                    loadMoreAdapter.reload()
-                    loadMoreAdapter.onComplete()
-                    recyclerView.scrollToTop()
+                    1
                 }
             }
-            requestType is RequestType.After || requestType is RequestType.Before -> {
-                if (data.isNullOrEmpty()) {
-                    loadMoreAdapter.onEnd()
-                } else {
-                    listAdapter.addAllToEnd(data)
-                    loadMoreAdapter.reload()
-                    loadMoreAdapter.onComplete()
-                }
+        },
+        onLoadMoreSuccess = { requestType, resultType ->
+            val res = onSuccess(requestType, resultType)
+            val items = res?.getOrNull(1)
+            if (!items.isNullOrEmpty()) {
+                itemAdapter.addAllToEnd(items)
             }
-        }
-        onSuccess?.invoke(requestType, data)
-    },
-    onError = { requestType, throwable ->
-        when {
-            requestType is RequestType.Initial -> {
-                clear()
-                add(errorAdapter)
-                errorAdapter?.onError(throwable)
-            }
-            requestType is RequestType.After || requestType is RequestType.Before -> {
-                loadMoreAdapter.onError(throwable)
-            }
-        }
-        onError?.invoke(requestType, throwable)
-    },
-    show = show,
-    hide = hide,
-)
+            items.isNullOrEmpty()
+        },
+        contentAdapter = contentAdapter,
+        loadMoreAdapter = loadMoreAdapter,
+        emptyAdapter = emptyAdapter,
+        errorAdapter = errorAdapter,
+        show = show,
+        hide = hide,
+        onError = onError
+    )
+}
 
 /**
  * 往后分页（线程安全）
@@ -219,21 +231,20 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
 fun <ResultType> ConcatAdapter.bindLoadAfter(
     recyclerView: RecyclerView,
     result: Result<ResultType>,
-    onInitialOrRefreshSuccess: (ResultType) -> Int,
-    onLoadMoreSuccess: (ResultType) -> Boolean,
+    onInitialOrRefreshSuccess: suspend (RequestType, ResultType) -> Int,
+    onLoadMoreSuccess: suspend (RequestType, ResultType) -> Boolean,
     contentAdapter: RecyclerView.Adapter<*>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
 ): Flow<ResultReport<ResultType>> = result.bind(
-    onSuccess = { requestType, data ->
+    onSuccess = { requestType, resultType ->
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                when (onInitialOrRefreshSuccess(data)) {
+                when (onInitialOrRefreshSuccess(requestType, resultType)) {
                     0 -> {// 显示空视图
                         clear()
                         add(emptyAdapter)
@@ -253,7 +264,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
                 }
             }
             requestType is RequestType.After || requestType is RequestType.Before -> {
-                if (onLoadMoreSuccess(data)) {
+                if (onLoadMoreSuccess(requestType, resultType)) {
                     loadMoreAdapter.onEnd()
                 } else {
                     loadMoreAdapter.reload()
@@ -261,7 +272,6 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
                 }
             }
         }
-        onSuccess?.invoke(requestType, data)
     },
     onError = { requestType, throwable ->
         when {
