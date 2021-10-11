@@ -35,9 +35,9 @@ class TreeActivity : AppCompatActivity() {
         mBinding.rv.adapter = mAdapter
         mBinding.rv.itemAnimator = null
 
-        val listAdapter = TreeRecyclerViewAdapter()
+        val itemAdapter = TreeRecyclerViewAdapter()
 
-        mBinding.rv.addItemDecoration(PinnedItemDecoration(listAdapter).apply {
+        mBinding.rv.addItemDecoration(PinnedItemDecoration(itemAdapter).apply {
             setOnPinnedHeaderRenderListener(object :
                 PinnedItemDecoration.OnPinnedItemRenderListener {
                 override fun onRender(
@@ -48,14 +48,14 @@ class TreeActivity : AppCompatActivity() {
                 ) {
                     if (item is TreeNode0 && viewDataBinding is TreeItem0Binding) {
                         viewDataBinding.root.setOnClickListener {
-                            listAdapter.clickItem(
+                            itemAdapter.clickItem(
                                 viewDataBinding,
                                 itemPosition,
                                 item
                             )
                         }
                         viewDataBinding.cb.setOnClickListener {
-                            listAdapter.clickCheckBox(
+                            itemAdapter.clickCheckBox(
                                 viewDataBinding.cb,
                                 item
                             )
@@ -67,7 +67,7 @@ class TreeActivity : AppCompatActivity() {
 
         val flow = mAdapter.bind(
             result = mViewModel::getItems,
-            itemAdapter = listAdapter,
+            itemAdapter = itemAdapter,
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mBinding.swipeRefreshLayout.isRefreshing = true },

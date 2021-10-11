@@ -21,7 +21,7 @@ import com.like.recyclerview.utils.findFirstVisiblePosition
 <androidx.recyclerview.widget.RecyclerView />
 </FrameLayout>
  */
-class PinnedItemDecoration(private val mAdapter: BaseAdapter<*, *>) : RecyclerView.ItemDecoration() {
+class PinnedItemDecoration(private val mItemAdapter: BaseAdapter<*, *>) : RecyclerView.ItemDecoration() {
     private var mCurPinnedItem: PinnedItem? = null
     private var mRecyclerViewParent: ViewGroup? = null
     private var mOnPinnedItemRenderListener: OnPinnedItemRenderListener? = null
@@ -142,9 +142,9 @@ class PinnedItemDecoration(private val mAdapter: BaseAdapter<*, *>) : RecyclerVi
      */
     private fun findPrePinnedPositionAndLayoutIdFromFirstVisibleItem(recyclerView: RecyclerView): PinnedItem? {
         val firstVisiblePosition = recyclerView.findFirstVisiblePosition()
-        if (firstVisiblePosition < mAdapter.itemCount && firstVisiblePosition >= 0) {
+        if (firstVisiblePosition < mItemAdapter.itemCount && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition downTo 0) {
-                val item = mAdapter.get(position)
+                val item = mItemAdapter.get(position)
                 if (item is IPinnedItem) {
                     return PinnedItem(
                         item.layoutId,
@@ -162,9 +162,9 @@ class PinnedItemDecoration(private val mAdapter: BaseAdapter<*, *>) : RecyclerVi
      */
     private fun findNextPinnedPositionAndLayoutIdFromFirstVisibleItem(recyclerView: RecyclerView): PinnedItem? {
         val firstVisiblePosition = recyclerView.findFirstVisiblePosition()
-        if (firstVisiblePosition < mAdapter.itemCount - 1 && firstVisiblePosition >= 0) {
-            for (position in firstVisiblePosition + 1 until mAdapter.itemCount) {
-                val item = mAdapter.get(position)
+        if (firstVisiblePosition < mItemAdapter.itemCount - 1 && firstVisiblePosition >= 0) {
+            for (position in firstVisiblePosition + 1 until mItemAdapter.itemCount) {
+                val item = mItemAdapter.get(position)
                 if (item is IPinnedItem) {
                     return PinnedItem(
                         item.layoutId,
