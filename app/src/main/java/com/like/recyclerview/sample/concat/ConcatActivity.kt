@@ -46,8 +46,8 @@ class ConcatActivity : AppCompatActivity() {
 //        initItems()
 //        initHeadersAndItems()
 //        initLoadAfter()
-        initLoadAfterWithHeaders()
-//        initLoadBefore()
+//        initLoadAfterWithHeaders()
+        initLoadBefore()
     }
 
     private fun initItems() {
@@ -172,26 +172,22 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
 
-        val listAdapter = ItemAdapter()
-        val emptyAdapter = AdapterFactory.createEmptyAdapter()
-        val errorAdapter = AdapterFactory.createErrorAdapter()
-        val loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-            lifecycleScope.launch {
-                result.loadBefore?.invoke()
-            }
-        }
-
+        val flow = mAdapter.bindLoadBefore(
+            recyclerView = mBinding.rv,
+            result = result,
+            itemAdapter = ItemAdapter(),
+            loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
+                lifecycleScope.launch {
+                    result.loadBefore?.invoke()
+                }
+            },
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+        )
         lifecycleScope.launch {
-            mAdapter.bindLoadBefore(
-                recyclerView = mBinding.rv,
-                result = result,
-                itemAdapter = listAdapter,
-                loadMoreAdapter = loadMoreAdapter,
-                emptyAdapter = emptyAdapter,
-                errorAdapter = errorAdapter,
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-            ).collect()
+            flow.collect()
         }
         lifecycleScope.launch {
             result.initial()

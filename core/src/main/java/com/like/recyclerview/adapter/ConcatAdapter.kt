@@ -23,8 +23,8 @@ import kotlinx.coroutines.flow.*
  * @param itemAdapter       列表
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
- * @param show              显示进度条
- * @param hide              隐藏进度条
+ * @param show              初始化或者刷新开始时显示进度条
+ * @param hide              初始化或者刷新成功或者失败时隐藏进度条
  * @param onSuccess         请求成功时回调，在这里进行数据处理。
  * 返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
@@ -82,14 +82,14 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
 /**
  * 不分页（线程安全）
  *
- * @param result                    获取数据的代码块
- * @param contentAdapter            内容，可以包括列表、header等。
- * @param emptyAdapter              空视图
- * @param errorAdapter              错误视图
- * @param show                      显示进度条
- * @param hide                      隐藏进度条
- * @param onSuccess                 请求成功时回调，在这里对[contentAdapter]进行数据处理。
- * @param onError                   请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
+ * @param result            获取数据的代码块
+ * @param contentAdapter    内容，可以包括列表、header等。
+ * @param emptyAdapter      空视图
+ * @param errorAdapter      错误视图
+ * @param show              初始化或者刷新开始时显示进度条
+ * @param hide              初始化或者刷新成功或者失败时隐藏进度条
+ * @param onSuccess         请求成功时回调，在这里对[contentAdapter]进行数据处理。
+ * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
  */
 @OptIn(FlowPreview::class)
 fun <ResultType> ConcatAdapter.bind(
@@ -139,8 +139,8 @@ fun <ResultType> ConcatAdapter.bind(
  * @param loadMoreAdapter   加载更多视图
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
- * @param show              显示进度条
- * @param hide              隐藏进度条
+ * @param show              初始化或者刷新开始时显示进度条
+ * @param hide              初始化或者刷新成功或者失败时隐藏进度条
  * @param onSuccess         请求成功时回调，在这里进行数据处理。
  * 返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
@@ -304,49 +304,51 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
  * @param errorAdapter      错误视图
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onSuccess         请求成功时回调，在这里进行额外数据处理。
- * @param onError           请求失败时回调，在这里进行额外错误处理。
+ * @param onSuccess         请求成功时回调，在这里进行数据处理。
+ * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
  */
-fun <ValueInList> ConcatAdapter.bindLoadBefore(
+fun <ResultType, ValueInList> ConcatAdapter.bindLoadBefore(
     recyclerView: RecyclerView,
-    result: Result<List<ValueInList>?>,
+    result: Result<ResultType>,
     itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
+    onSuccess: suspend (RequestType, ResultType) -> List<ValueInList>? = { requestType, resultType ->
+        resultType as? List<ValueInList>
+    },
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-): Flow<ResultReport<List<ValueInList>?>> = result.bind(
-    onSuccess = { requestType, data ->
+): Flow<ResultReport<ResultType>> = result.bind(
+    onSuccess = { requestType, resultType ->
+        val res = onSuccess(requestType, resultType)
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                if (data.isNullOrEmpty()) {
+                if (res.isNullOrEmpty()) {
                     clear()
                     add(emptyAdapter)
                 } else {
                     clear()
                     addAll(loadMoreAdapter, itemAdapter)
                     itemAdapter.clear()
-                    itemAdapter.addAllToEnd(data)
+                    itemAdapter.addAllToEnd(res)
                     loadMoreAdapter.reload()
                     loadMoreAdapter.onComplete()
                     recyclerView.scrollToBottom()
                 }
             }
             requestType is RequestType.After || requestType is RequestType.Before -> {
-                if (data.isNullOrEmpty()) {
+                if (res.isNullOrEmpty()) {
                     loadMoreAdapter.onEnd()
                 } else {
-                    itemAdapter.addAllToStart(data)
-                    recyclerView.keepPosition(data.size, 1)
+                    itemAdapter.addAllToStart(res)
+                    recyclerView.keepPosition(res.size, 1)
                     loadMoreAdapter.reload()
                     loadMoreAdapter.onComplete()
                 }
             }
         }
-        onSuccess?.invoke(requestType, data)
     },
     onError = { requestType, throwable ->
         when {
