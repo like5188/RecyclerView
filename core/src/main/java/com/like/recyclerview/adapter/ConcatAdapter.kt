@@ -234,12 +234,12 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
                         clear()
                         add(emptyAdapter)
                     }
-                    1 -> {// 不显示空视图，没有更多数据需要加载
+                    1 -> {// 不显示空视图，没有更多数据需要加载（只有 Header 的情况）
                         clear()
                         add(contentAdapter)
                         recyclerView.scrollToTop()
                     }
-                    2 -> {// 不显示空视图，有更多数据需要加载
+                    2 -> {// 不显示空视图，有更多数据需要加载（有列表数据的情况）
                         clear()
                         add(contentAdapter)
                         add(loadMoreAdapter)
