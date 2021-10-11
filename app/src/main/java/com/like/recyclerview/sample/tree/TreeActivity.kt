@@ -66,6 +66,7 @@ class TreeActivity : AppCompatActivity() {
         })
 
         val flow = mAdapter.bind(
+            recyclerView = mBinding.rv,
             result = mViewModel::getItems,
             itemAdapter = itemAdapter,
             emptyAdapter = AdapterFactory.createEmptyAdapter(),

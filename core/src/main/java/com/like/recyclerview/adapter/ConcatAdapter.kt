@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.*
  */
 @OptIn(FlowPreview::class)
 fun <ResultType, ValueInList> ConcatAdapter.bind(
+    recyclerView: RecyclerView,
     result: (suspend () -> ResultType),
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
@@ -49,6 +50,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
 ): Flow<ResultType> {
     val contentAdapter = ConcatAdapter()
     return bind(
+        recyclerView = recyclerView,
         result = result,
         contentAdapter = contentAdapter,
         emptyAdapter = emptyAdapter,
@@ -90,6 +92,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
  */
 @OptIn(FlowPreview::class)
 fun <ResultType> ConcatAdapter.bind(
+    recyclerView: RecyclerView,
     result: (suspend () -> ResultType),
     contentAdapter: RecyclerView.Adapter<*>,
     emptyAdapter: BaseAdapter<*, *>? = null,
@@ -111,6 +114,7 @@ fun <ResultType> ConcatAdapter.bind(
             } else {
                 clear()
                 add(contentAdapter)
+                recyclerView.scrollToTop()
             }
         }.catch {
             if (isFirstLoad) {// 初始化时才显示错误视图

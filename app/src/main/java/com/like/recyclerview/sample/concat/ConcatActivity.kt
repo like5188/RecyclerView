@@ -46,14 +46,15 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.adapter = mAdapter
 
 //        initItems()
-//        initHeadersAndItems()
-        initLoadAfter()
+        initHeadersAndItems()
+//        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
     }
 
     private fun initItems() {
         val flow = mAdapter.bind(
+            recyclerView = mBinding.rv,
             result = mViewModel::getItems,
             itemAdapter = ItemAdapter(),
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
@@ -77,6 +78,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initHeadersAndItems() {
         val flow = mAdapter.bind(
+            recyclerView = mBinding.rv,
             result = mViewModel::getHeadersAndItems,
             headerAdapter = HeaderAdapter(),
             itemAdapter = ItemAdapter(),
