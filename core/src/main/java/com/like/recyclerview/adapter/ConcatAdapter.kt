@@ -241,8 +241,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
                     }
                     2 -> {// 不显示空视图，有更多数据需要加载（有列表数据的情况）
                         clear()
-                        add(contentAdapter)
-                        add(loadMoreAdapter)
+                        addAll(contentAdapter, loadMoreAdapter)
                         loadMoreAdapter.reload()
                         loadMoreAdapter.onComplete()
                         recyclerView.scrollToTop()
