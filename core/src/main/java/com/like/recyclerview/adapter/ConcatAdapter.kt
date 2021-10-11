@@ -39,30 +39,24 @@ suspend fun <ValueInList> ConcatAdapter.bind(
     hide: (() -> Unit)? = null,
     onSuccess: (suspend (List<ValueInList>?) -> Unit)? = null,
     onError: (suspend (Throwable) -> Unit)? = null,
-): Flow<List<ValueInList>?> = result.asFlow().flowOn(Dispatchers.IO)
-    .onStart {
-        show?.invoke()
-    }.onEach {
-        if (it.isNullOrEmpty()) {
-            clear()
-            add(emptyAdapter)
-        } else {
-            clear()
-            add(listAdapter)
+): Flow<List<ValueInList>?> = bind(
+    result = result,
+    contentAdapter = listAdapter,
+    emptyAdapter = emptyAdapter,
+    errorAdapter = errorAdapter,
+    isRefresh = isRefresh,
+    show = show,
+    hide = hide,
+    onSuccess = {
+        if (!it.isNullOrEmpty()) {
             listAdapter.clear()
             listAdapter.addAllToEnd(it)
         }
         onSuccess?.invoke(it)
-    }.onCompletion {
-        hide?.invoke()
-    }.catch {
-        if (!isRefresh) {// 初始化时才显示错误视图
-            clear()
-            add(errorAdapter)
-            errorAdapter?.onError(it)
-        }
-        onError?.invoke(it)
-    }.flowOn(Dispatchers.Main)
+        it.isNullOrEmpty()
+    },
+    onError = onError
+)
 
 /**
  * 不分页（线程安全）
