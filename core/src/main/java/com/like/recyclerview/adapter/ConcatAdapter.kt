@@ -180,7 +180,7 @@ fun <ValueInList> ConcatAdapter.bindLoadAfter(
  *
  * @param result                    使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
  * @param onInitialOrRefreshSuccess 初始化或者刷新成功时回调。
- * 返回值：0：显示空视图；1：不显示空视图，没有更多数据需要加载；2：不显示空视图，有更多数据需要加载；
+ * 返回值：0：显示空视图；1：不显示空视图，没有更多数据需要加载（只有 Header 的情况）；2：不显示空视图，有更多数据需要加载（有列表数据的情况）；
  * @param onLoadMoreSuccess         处理加载更多成功时回调。
  * 返回值表示是否还有更多数据需要加载。
  * @param contentAdapter            内容，可以包括列表、header等。
