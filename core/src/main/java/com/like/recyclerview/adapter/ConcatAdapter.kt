@@ -298,7 +298,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
  * 往前分页（线程安全）
  *
  * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
- * @param listAdapter       列表。
+ * @param itemAdapter       列表。
  * @param loadMoreAdapter   加载更多视图
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
@@ -310,7 +310,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
 fun <ValueInList> ConcatAdapter.bindLoadBefore(
     recyclerView: RecyclerView,
     result: Result<List<ValueInList>?>,
-    listAdapter: BaseAdapter<*, ValueInList>,
+    itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
@@ -327,9 +327,9 @@ fun <ValueInList> ConcatAdapter.bindLoadBefore(
                     add(emptyAdapter)
                 } else {
                     clear()
-                    addAll(loadMoreAdapter, listAdapter)
-                    listAdapter.clear()
-                    listAdapter.addAllToEnd(data)
+                    addAll(loadMoreAdapter, itemAdapter)
+                    itemAdapter.clear()
+                    itemAdapter.addAllToEnd(data)
                     loadMoreAdapter.reload()
                     loadMoreAdapter.onComplete()
                     recyclerView.scrollToBottom()
@@ -339,7 +339,7 @@ fun <ValueInList> ConcatAdapter.bindLoadBefore(
                 if (data.isNullOrEmpty()) {
                     loadMoreAdapter.onEnd()
                 } else {
-                    listAdapter.addAllToStart(data)
+                    itemAdapter.addAllToStart(data)
                     recyclerView.keepPosition(data.size, 1)
                     loadMoreAdapter.reload()
                     loadMoreAdapter.onComplete()

@@ -185,7 +185,7 @@ class ConcatActivity : AppCompatActivity() {
             mAdapter.bindLoadBefore(
                 recyclerView = mBinding.rv,
                 result = result,
-                listAdapter = listAdapter,
+                itemAdapter = listAdapter,
                 loadMoreAdapter = loadMoreAdapter,
                 emptyAdapter = emptyAdapter,
                 errorAdapter = errorAdapter,
