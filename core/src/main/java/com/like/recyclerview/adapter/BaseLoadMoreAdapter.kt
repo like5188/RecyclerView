@@ -5,6 +5,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.viewholder.BindingViewHolder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -31,7 +32,7 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val on
         if (context is LifecycleOwner) {
             if (isRunning.compareAndSet(false, true)) {
                 Log.v(TAG, "触发加载更多")
-                context.lifecycleScope.launch {
+                context.lifecycleScope.launch(Dispatchers.IO) {
                     onLoadMore()
                 }
             }
