@@ -113,9 +113,7 @@ class ConcatActivity : AppCompatActivity() {
             result = result,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-                lifecycleScope.launch {
-                    result.loadAfter?.invoke()
-                }
+                result.loadAfter?.invoke()
             },
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),
@@ -145,9 +143,7 @@ class ConcatActivity : AppCompatActivity() {
             headerAdapter = HeaderAdapter(),
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-                lifecycleScope.launch {
-                    result.loadAfter?.invoke()
-                }
+                result.loadAfter?.invoke()
             },
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),
@@ -177,9 +173,7 @@ class ConcatActivity : AppCompatActivity() {
             result = result,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-                lifecycleScope.launch {
-                    result.loadBefore?.invoke()
-                }
+                result.loadBefore?.invoke()
             },
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),

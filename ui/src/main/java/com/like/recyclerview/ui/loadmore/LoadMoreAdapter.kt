@@ -3,7 +3,7 @@ package com.like.recyclerview.ui.loadmore
 import com.like.recyclerview.adapter.BaseLoadMoreAdapter
 import com.like.recyclerview.ui.databinding.ItemLoadMoreBinding
 
-class LoadMoreAdapter(onLoad: () -> Unit) : BaseLoadMoreAdapter<ItemLoadMoreBinding, LoadMoreItem>(onLoad) {
+class LoadMoreAdapter(onLoadMore: suspend () -> Unit) : BaseLoadMoreAdapter<ItemLoadMoreBinding, LoadMoreItem>(onLoadMore) {
 
     override fun onComplete() {
         super.onComplete()

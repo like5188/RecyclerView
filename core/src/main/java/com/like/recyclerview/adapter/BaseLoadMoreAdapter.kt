@@ -2,13 +2,16 @@ package com.like.recyclerview.adapter
 
 import android.util.Log
 import androidx.databinding.ViewDataBinding
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.viewholder.BindingViewHolder
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
  */
-open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val onLoad: () -> Unit) :
+open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val onLoadMore: suspend () -> Unit) :
     BaseErrorAdapter<VB, ValueInList>() {
     companion object {
         private const val TAG = "AbstractLoadMoreAdapter"
@@ -24,12 +27,16 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val on
     }
 
     private fun load() {
-        if (isRunning.compareAndSet(false, true)) {
-            Log.v(TAG, "触发加载更多")
-            onLoad()
+        val context = mHolder.itemView.context
+        if (context is LifecycleOwner) {
+            if (isRunning.compareAndSet(false, true)) {
+                Log.v(TAG, "触发加载更多")
+                context.lifecycleScope.launch {
+                    onLoadMore()
+                }
+            }
         }
     }
-
 
     /**
      * 重新加载数据，从而触发 onBindViewHolder 方法，触发加载更多逻辑。
