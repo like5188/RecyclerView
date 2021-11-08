@@ -23,58 +23,57 @@ import kotlinx.coroutines.flow.*
  * @param itemAdapter       列表
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
+ * @param transformer       在这里进行数据转换，返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onSuccess         请求成功时回调，在这里进行数据处理。
- * 返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
+ * @param onSuccess         请求成功时回调。
  * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
  */
 @OptIn(FlowPreview::class)
 fun <ResultType, ValueInList> ConcatAdapter.bind(
     recyclerView: RecyclerView,
-    result: (suspend () -> ResultType),
+    result: suspend () -> ResultType,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
-    show: (() -> Unit)? = null,
-    hide: (() -> Unit)? = null,
-    onSuccess: suspend (ResultType) -> List<List<ValueInList>?>? = {
+    transformer: suspend (ResultType) -> List<List<ValueInList>?>? = {
         if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
             listOf(emptyList(), it as? List<ValueInList>)
         } else {// 如果返回值[ResultType]为 List<List<ValueInList>?>? 类型
             it as? List<List<ValueInList>?>
         }
     },
+    show: (() -> Unit)? = null,
+    hide: (() -> Unit)? = null,
+    onSuccess: (suspend (ResultType) -> Unit)? = null,
     onError: (suspend (Throwable) -> Unit)? = null,
 ): Flow<ResultType> {
-    val contentAdapter = ConcatAdapter()
     return bind(
         recyclerView = recyclerView,
         result = result,
-        contentAdapter = contentAdapter,
+        contentAdapter = ConcatAdapter(),
         emptyAdapter = emptyAdapter,
         errorAdapter = errorAdapter,
-        show = show,
-        hide = hide,
-        onSuccess = {
-            val res = onSuccess(it)
-            if (!res.isNullOrEmpty()) {
-                val headers = res.getOrNull(0)
-                val items = res.getOrNull(1)
-                contentAdapter.clear()
-                if (!headers.isNullOrEmpty() && headerAdapter != null) {
-                    contentAdapter.add(headerAdapter)
-                    headerAdapter.clear()
-                    headerAdapter.addAllToEnd(headers)
-                }
-                if (!items.isNullOrEmpty()) {
-                    contentAdapter.add(itemAdapter)
-                    itemAdapter.clear()
-                    itemAdapter.addAllToEnd(items)
-                }
+        contentAdapterDataHandler = { contentAdapter, resultType ->
+            val res = transformer(resultType)
+            val headers = res?.getOrNull(0)
+            val items = res?.getOrNull(1)
+            contentAdapter.clear()
+            if (!headers.isNullOrEmpty() && headerAdapter != null) {
+                contentAdapter.add(headerAdapter)
+                headerAdapter.clear()
+                headerAdapter.addAllToEnd(headers)
+            }
+            if (!items.isNullOrEmpty()) {
+                contentAdapter.add(itemAdapter)
+                itemAdapter.clear()
+                itemAdapter.addAllToEnd(items)
             }
         },
+        show = show,
+        hide = hide,
+        onSuccess = onSuccess,
         onError = onError
     )
 }
@@ -82,25 +81,27 @@ fun <ResultType, ValueInList> ConcatAdapter.bind(
 /**
  * 不分页（线程安全）
  *
- * @param result            获取数据的代码块
- * @param contentAdapter    内容，可以包括列表、header等。
- * @param emptyAdapter      空视图
- * @param errorAdapter      错误视图
- * @param show              初始化或者刷新开始时显示进度条
- * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onSuccess         请求成功时回调，在这里对[contentAdapter]进行数据处理。
- * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
+ * @param result                        获取数据的代码块
+ * @param contentAdapter                内容，可以包括列表、header等。
+ * @param emptyAdapter                  空视图
+ * @param errorAdapter                  错误视图
+ * @param contentAdapterDataHandler     [contentAdapter]数据处理
+ * @param show                          初始化或者刷新开始时显示进度条
+ * @param hide                          初始化或者刷新成功或者失败时隐藏进度条
+ * @param onSuccess                     请求成功时回调。
+ * @param onError                       请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
  */
 @OptIn(FlowPreview::class)
-fun <ResultType> ConcatAdapter.bind(
+fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> ConcatAdapter.bind(
     recyclerView: RecyclerView,
-    result: (suspend () -> ResultType),
-    contentAdapter: RecyclerView.Adapter<*>,
+    result: suspend () -> ResultType,
+    contentAdapter: ContentAdapter,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
+    contentAdapterDataHandler: suspend (ContentAdapter, ResultType) -> Unit,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onSuccess: suspend (ResultType) -> Unit,
+    onSuccess: (suspend (ResultType) -> Unit)? = null,
     onError: (suspend (Throwable) -> Unit)? = null,
 ): Flow<ResultType> {
     var isFirstLoad = true
@@ -108,7 +109,7 @@ fun <ResultType> ConcatAdapter.bind(
         .onStart {
             show?.invoke()
         }.onEach {
-            onSuccess(it)
+            contentAdapterDataHandler(contentAdapter, it)
             if (contentAdapter.itemCount == 0) {
                 clear()
                 add(emptyAdapter)
@@ -117,6 +118,7 @@ fun <ResultType> ConcatAdapter.bind(
                 add(contentAdapter)
                 recyclerView.scrollToTop()
             }
+            onSuccess?.invoke(it)
         }.catch {
             if (isFirstLoad) {// 初始化时才显示错误视图
                 clear()
@@ -139,10 +141,10 @@ fun <ResultType> ConcatAdapter.bind(
  * @param loadMoreAdapter   加载更多视图
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
+ * @param transformer       在这里进行数据转换，返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onSuccess         请求成功时回调，在这里进行数据处理。
- * 返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
+ * @param onSuccess         请求成功时回调。
  * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
  */
 fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
@@ -153,15 +155,16 @@ fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
-    show: (() -> Unit)? = null,
-    hide: (() -> Unit)? = null,
-    onSuccess: suspend (RequestType, ResultType) -> List<List<ValueInList>?>? = { requestType, resultType ->
+    transformer: suspend (RequestType, ResultType) -> List<List<ValueInList>?>? = { requestType, resultType ->
         if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
             listOf(emptyList(), resultType as? List<ValueInList>)
         } else {// 如果返回值[ResultType]为 List<List<ValueInList>?>? 类型
             resultType as? List<List<ValueInList>?>
         }
     },
+    show: (() -> Unit)? = null,
+    hide: (() -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
 ): Flow<ResultReport<ResultType>> {
     val contentAdapter = ConcatAdapter()
@@ -172,10 +175,8 @@ fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
         loadMoreAdapter = loadMoreAdapter,
         emptyAdapter = emptyAdapter,
         errorAdapter = errorAdapter,
-        show = show,
-        hide = hide,
-        onSuccess = { requestType, resultType ->
-            val res = onSuccess(requestType, resultType)
+        contentAdapterDataHandler = { contentAdapter, requestType, resultType ->
+            val res = transformer(requestType, resultType)
             when {
                 requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
                     if (res.isNullOrEmpty()) {
@@ -215,6 +216,9 @@ fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
                 else -> -1
             }
         },
+        show = show,
+        hide = hide,
+        onSuccess = onSuccess,
         onError = onError
     )
 }
@@ -222,36 +226,38 @@ fun <ResultType, ValueInList> ConcatAdapter.bindLoadAfter(
 /**
  * 往后分页（线程安全）
  *
- * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
- * @param contentAdapter    内容，可以包括列表、header等。
- * @param loadMoreAdapter   加载更多视图
- * @param emptyAdapter      空视图
- * @param errorAdapter      错误视图
- * @param show              初始化或者刷新开始时显示进度条
- * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onSuccess         请求成功时回调，在这里对[contentAdapter]进行数据处理。
+ * @param result                        使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+ * @param contentAdapter                内容，可以包括列表、header等。
+ * @param loadMoreAdapter               加载更多视图
+ * @param emptyAdapter                  空视图
+ * @param errorAdapter                  错误视图
+ * @param contentAdapterDataHandler     [contentAdapter]数据处理
  * 返回值：
  * 0：显示空视图；
  * 1：不显示空视图，没有更多数据需要加载（只有 Header 的情况）；
  * 2：不显示空视图，有更多数据需要加载（有列表数据的情况）；
  * 3：还有更多数据需要加载；
  * 4：没有更多数据需要加载；
- * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
+ * @param show                          初始化或者刷新开始时显示进度条
+ * @param hide                          初始化或者刷新成功或者失败时隐藏进度条
+ * @param onSuccess                     请求成功时回调。
+ * @param onError                       请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
  */
-fun <ResultType> ConcatAdapter.bindLoadAfter(
+fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> ConcatAdapter.bindLoadAfter(
     recyclerView: RecyclerView,
     result: Result<ResultType>,
-    contentAdapter: RecyclerView.Adapter<*>,
+    contentAdapter: ContentAdapter,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
+    contentAdapterDataHandler: suspend (ContentAdapter, RequestType, ResultType) -> Int,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onSuccess: suspend (RequestType, ResultType) -> Int,
+    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
 ): Flow<ResultReport<ResultType>> = result.bind(
     onSuccess = { requestType, resultType ->
-        when (onSuccess(requestType, resultType)) {
+        when (contentAdapterDataHandler(contentAdapter, requestType, resultType)) {
             0 -> {// 显示空视图
                 clear()
                 add(emptyAdapter)
@@ -276,6 +282,7 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
                 loadMoreAdapter.onEnd()
             }
         }
+        onSuccess?.invoke(requestType, resultType)
     },
     onError = { requestType, throwable ->
         when {
@@ -302,9 +309,10 @@ fun <ResultType> ConcatAdapter.bindLoadAfter(
  * @param loadMoreAdapter   加载更多视图
  * @param emptyAdapter      空视图
  * @param errorAdapter      错误视图
+ * @param transformer       在这里进行数据转换，返回值为一个集合。
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onSuccess         请求成功时回调，在这里进行数据处理。
+ * @param onSuccess         请求成功时回调。
  * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
  */
 fun <ResultType, ValueInList> ConcatAdapter.bindLoadBefore(
@@ -314,15 +322,16 @@ fun <ResultType, ValueInList> ConcatAdapter.bindLoadBefore(
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
-    show: (() -> Unit)? = null,
-    hide: (() -> Unit)? = null,
-    onSuccess: suspend (RequestType, ResultType) -> List<ValueInList>? = { requestType, resultType ->
+    transformer: suspend (RequestType, ResultType) -> List<ValueInList>? = { requestType, resultType ->
         resultType as? List<ValueInList>
     },
+    show: (() -> Unit)? = null,
+    hide: (() -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
 ): Flow<ResultReport<ResultType>> = result.bind(
     onSuccess = { requestType, resultType ->
-        val res = onSuccess(requestType, resultType)
+        val res = transformer(requestType, resultType)
         when {
             requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
                 if (res.isNullOrEmpty()) {
@@ -349,6 +358,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindLoadBefore(
                 }
             }
         }
+        onSuccess?.invoke(requestType, resultType)
     },
     onError = { requestType, throwable ->
         when {
