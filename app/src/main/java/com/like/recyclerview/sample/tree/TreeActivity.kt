@@ -7,7 +7,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
-import com.like.recyclerview.adapter.bind
+import com.like.recyclerview.adapter.bindFlow
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
@@ -15,6 +15,7 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
 import com.like.recyclerview.ui.util.AdapterFactory
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -65,9 +66,9 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        val flow = mAdapter.bind(
+        val flow = mAdapter.bindFlow(
+            dataFlow = mViewModel::getItems.asFlow(),
             recyclerView = mBinding.rv,
-            result = mViewModel::getItems,
             itemAdapter = itemAdapter,
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),
