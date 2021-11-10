@@ -11,9 +11,10 @@ class ItemDataSource {
         Log.d("tag", "ItemDataSource")
         delay(1000)
         return when (i++) {
-            0 -> throw RuntimeException("load error")
+            0 -> throw RuntimeException("load error 0")
             1 -> throw RuntimeException("load error 1")
-            2 -> emptyList()
+            2 -> throw RuntimeException("load error 2")
+            3 -> emptyList()
             else -> {
                 (0 until 10).map {
                     DataFactory.createItem(it)

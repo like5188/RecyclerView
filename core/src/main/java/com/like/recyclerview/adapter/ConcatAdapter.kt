@@ -8,9 +8,10 @@ import com.like.recyclerview.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * 绑定不分页数据到 ConcatAdapter（线程安全）
+ * 收集不分页数据到 ConcatAdapter（线程安全）
  *
  * @param dataFlow          获取数据的[Flow]
  * @param headerAdapter     header
@@ -21,9 +22,11 @@ import kotlinx.coroutines.flow.*
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
  * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
+ * @param onSuccess         请求成功时回调
+ * @return 操作请求数据的代码块
  */
 @OptIn(FlowPreview::class)
-fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
+suspend fun <ResultType, ValueInList> ConcatAdapter.collectFlow(
     dataFlow: Flow<ResultType>,
     recyclerView: RecyclerView,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
@@ -40,8 +43,9 @@ fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
     onError: (suspend (Throwable) -> Unit)? = null,
-): Flow<ResultType> {
-    return bindFlow(
+    onSuccess: (suspend (ResultType) -> Unit)? = null,
+): suspend () -> Unit {
+    return collectFlow(
         recyclerView = recyclerView,
         dataFlow = dataFlow,
         contentAdapter = ConcatAdapter(),
@@ -65,12 +69,13 @@ fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
         },
         show = show,
         hide = hide,
-        onError = onError
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
 /**
- * 绑定不分页数据到 ConcatAdapter（线程安全）
+ * 收集不分页数据到 ConcatAdapter（线程安全）
  *
  * @param dataFlow                      获取数据的[Flow]
  * @param contentAdapter                内容，可以包括列表、header等。
@@ -80,9 +85,11 @@ fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
  * @param show                          初始化或者刷新开始时显示进度条
  * @param hide                          初始化或者刷新成功或者失败时隐藏进度条
  * @param onError                       请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
+ * @param onSuccess                     请求成功时回调
+ * @return 操作请求数据的代码块
  */
 @OptIn(FlowPreview::class)
-private fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> ConcatAdapter.bindFlow(
+private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> ConcatAdapter.collectFlow(
     dataFlow: Flow<ResultType>,
     recyclerView: RecyclerView,
     contentAdapter: ContentAdapter,
@@ -92,12 +99,24 @@ private fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> ConcatAdapter
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
     onError: (suspend (Throwable) -> Unit)? = null,
-): Flow<ResultType> {
-    var isFirstLoad = true
-    return dataFlow.flowOn(Dispatchers.IO)
+    onSuccess: (suspend (ResultType) -> Unit)? = null,
+): suspend () -> Unit {
+    val isFirstLoad = AtomicBoolean(true)
+    val flow = dataFlow.flowOn(Dispatchers.IO)
         .onStart {
             show?.invoke()
-        }.onEach {
+        }.onCompletion {
+            hide?.invoke()
+        }.catch {
+            if (isFirstLoad.compareAndSet(true, false)) {// 初始化时才显示错误视图
+                clear()
+                add(errorAdapter)
+                errorAdapter?.onError(it)
+            }
+            onError?.invoke(it)
+        }.flowOn(Dispatchers.Main)
+    val collect = suspend {
+        flow.collect {
             contentAdapterDataHandler(contentAdapter, it)
             if (contentAdapter.itemCount == 0) {
                 clear()
@@ -107,17 +126,11 @@ private fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> ConcatAdapter
                 add(contentAdapter)
                 recyclerView.scrollToTop()
             }
-        }.catch {
-            if (isFirstLoad) {// 初始化时才显示错误视图
-                clear()
-                add(errorAdapter)
-                errorAdapter?.onError(it)
-            }
-            onError?.invoke(it)
-        }.onCompletion {
-            hide?.invoke()
-            isFirstLoad = false
-        }.flowOn(Dispatchers.Main)
+            onSuccess?.invoke(it)
+        }
+    }
+    collect()
+    return collect
 }
 
 /**

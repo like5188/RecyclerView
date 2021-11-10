@@ -7,7 +7,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
-import com.like.recyclerview.adapter.bindFlow
+import com.like.recyclerview.adapter.collectFlow
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
@@ -16,7 +16,6 @@ import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
 import com.like.recyclerview.ui.util.AdapterFactory
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class TreeActivity : AppCompatActivity() {
@@ -66,26 +65,21 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        val flow = mAdapter.bindFlow(
-            dataFlow = mViewModel::getItems.asFlow(),
-            recyclerView = mBinding.rv,
-            itemAdapter = itemAdapter,
-            emptyAdapter = AdapterFactory.createEmptyAdapter(),
-            errorAdapter = AdapterFactory.createErrorAdapter(),
-            show = { mBinding.swipeRefreshLayout.isRefreshing = true },
-            hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
-        )
-
-        fun getData() {
-            lifecycleScope.launch {
-                flow.collect()
+        lifecycleScope.launch {
+            val getData = mAdapter.collectFlow(
+                dataFlow = mViewModel::getItems.asFlow(),
+                recyclerView = mBinding.rv,
+                itemAdapter = itemAdapter,
+                emptyAdapter = AdapterFactory.createEmptyAdapter(),
+                errorAdapter = AdapterFactory.createErrorAdapter(),
+                show = { mBinding.swipeRefreshLayout.isRefreshing = true },
+                hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
+            )
+            mBinding.swipeRefreshLayout.setOnRefreshListener {
+                lifecycleScope.launch {
+                    getData()
+                }
             }
         }
-
-        mBinding.swipeRefreshLayout.setOnRefreshListener {
-            getData()
-        }
-
-        getData()
     }
 }
