@@ -140,10 +140,7 @@ class ConcatActivity : AppCompatActivity() {
             } else {
                 it
             }
-        }.retryWhen { cause, attempt ->
-            Logger.e("retryWhen")
-            cause.message == "load error 0"
-        }.flowOn(Dispatchers.IO)
+        }
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -215,10 +212,7 @@ class ConcatActivity : AppCompatActivity() {
             } else {
                 it
             }
-        }.retryWhen { cause, attempt ->
-            Logger.e("retryWhen")
-            cause.message == "load error 0"
-        }.flowOn(Dispatchers.IO)
+        }
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
