@@ -48,25 +48,25 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-        lifecycleScope.launchWhenResumed {
-            (0..3).asFlow()
-                .map {
-                    delay(1000)
-                    if (it == 2) {
-                        throw RuntimeException("test error")
-                    }
-                    it
-                }.retryWhen { cause, attempt ->
-                    Logger.v("retryWhen cause=$cause attempt=$attempt")
-                    cause.message == "test error" && attempt == 0L
-                }.onCompletion {
-                    Logger.w("onCompletion $it")
-                }.catch {
-                    Logger.e("catch $it")
-                }.collect {
-                    Logger.e("collect $it")
-                }
-        }
+//        lifecycleScope.launchWhenResumed {
+//            (0..3).asFlow()
+//                .map {
+//                    delay(1000)
+//                    if (it == 2) {
+//                        throw RuntimeException("test error")
+//                    }
+//                    it
+//                }.retryWhen { cause, attempt ->
+//                    Logger.v("retryWhen cause=$cause attempt=$attempt")
+//                    cause.message == "test error" && attempt == 0L
+//                }.onCompletion {
+//                    Logger.w("onCompletion $it")
+//                }.catch {
+//                    Logger.e("catch $it")
+//                }.collect {
+//                    Logger.e("collect $it")
+//                }
+//        }
 
         initItems()
 //        initHeadersAndItems()
