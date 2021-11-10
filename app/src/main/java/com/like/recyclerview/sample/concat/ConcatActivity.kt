@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
+import com.like.common.util.Logger
 import com.like.paging.RequestState
 import com.like.paging.ResultReport
 import com.like.recyclerview.adapter.bindFlow
@@ -18,9 +19,8 @@ import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -47,18 +47,21 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.adapter = mAdapter
 
-//        initItems()
+        initItems()
 //        initHeadersAndItems()
 //        initLoadAfter()
 //        initLoadAfterWithHeaders()
-        initLoadBefore()
+//        initLoadBefore()
     }
 
     private fun initItems() {
         val flow = mAdapter.bindFlow(
             dataFlow = mViewModel::getItems.asFlow().map {
                 it?.take(3)
-            },
+            }.retryWhen { cause, attempt ->
+                Logger.e("retryWhen")
+                cause.message == "load error"
+            }.flowOn(Dispatchers.IO),
             recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
