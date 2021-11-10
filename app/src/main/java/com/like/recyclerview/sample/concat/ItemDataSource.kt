@@ -15,6 +15,8 @@ class ItemDataSource {
             1 -> throw RuntimeException("load error 1")
             2 -> throw RuntimeException("load error 2")
             3 -> emptyList()
+            4 -> throw RuntimeException("load error 4")
+            6 -> throw RuntimeException("load error 6")
             else -> {
                 (0 until 10).map {
                     DataFactory.createItem(it)

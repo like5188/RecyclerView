@@ -73,9 +73,9 @@ class ConcatActivity : AppCompatActivity() {
 
 //        initItems()
 //        initHeadersAndItems()
-        initLoadAfter()
+//        initLoadAfter()
 //        initLoadAfterWithHeaders()
-//        initLoadBefore()
+        initLoadBefore()
     }
 
     private fun initItems() {
@@ -140,7 +140,10 @@ class ConcatActivity : AppCompatActivity() {
             } else {
                 it
             }
-        }
+        }.retryWhen { cause, attempt ->
+            Logger.e("retryWhen")
+            cause.message == "load error 0"
+        }.flowOn(Dispatchers.IO)
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -204,6 +207,18 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadBefore() {
         val result = mViewModel.loadBeforeResult
+        result.dataFlow = result.dataFlow.map {
+            val state = it.state
+            val type = it.type
+            if (state is RequestState.Success) {
+                ResultReport(type, RequestState.Success(state.data?.take(3)))
+            } else {
+                it
+            }
+        }.retryWhen { cause, attempt ->
+            Logger.e("retryWhen")
+            cause.message == "load error 0"
+        }.flowOn(Dispatchers.IO)
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {

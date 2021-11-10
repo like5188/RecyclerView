@@ -8,7 +8,6 @@ import com.like.recyclerview.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 收集不分页数据到 ConcatAdapter（线程安全）
@@ -21,7 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @param transformer       在这里进行数据转换，返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
+ * @param onError           请求失败时回调。
+ * 在这里进行额外错误处理：
+ * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
  * @param onSuccess         请求成功时回调
  * @return 操作请求数据的代码块
  */
@@ -84,7 +85,9 @@ suspend fun <ResultType, ValueInList> ConcatAdapter.collectFlow(
  * @param contentAdapterDataHandler     [contentAdapter]数据处理
  * @param show                          初始化或者刷新开始时显示进度条
  * @param hide                          初始化或者刷新成功或者失败时隐藏进度条
- * @param onError                       请求失败时回调，在这里进行额外错误处理，这里默认在初始化失败时添加了错误视图，刷新失败时没有做处理。
+ * @param onError                       请求失败时回调。
+ * 在这里进行额外错误处理：
+ * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
  * @param onSuccess                     请求成功时回调
  * @return 操作请求数据的代码块
  */
@@ -101,17 +104,25 @@ private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> Conca
     onError: (suspend (Throwable) -> Unit)? = null,
     onSuccess: (suspend (ResultType) -> Unit)? = null,
 ): suspend () -> Unit {
-    val isFirstLoad = AtomicBoolean(true)
     val flow = dataFlow.flowOn(Dispatchers.IO)
         .onStart {
             show?.invoke()
         }.onCompletion {
             hide?.invoke()
         }.catch {
-            if (isFirstLoad.compareAndSet(true, false)) {// 初始化时才显示错误视图
-                clear()
-                add(errorAdapter)
-                errorAdapter?.onError(it)
+            when (adapters.firstOrNull()) {
+                null -> {
+                    add(errorAdapter)
+                    errorAdapter?.onError(it)
+                }
+                errorAdapter -> {
+                    errorAdapter?.onError(it)
+                }
+                emptyAdapter -> {
+                    clear()
+                    add(errorAdapter)
+                    errorAdapter?.onError(it)
+                }
             }
             onError?.invoke(it)
         }.flowOn(Dispatchers.Main)
@@ -145,7 +156,10 @@ private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> Conca
  * @param transformer       在这里进行数据转换，返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
+ * @param onError           请求失败时回调。
+ * 在这里进行额外错误处理：
+ * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
+ * 加载更多失败时，直接更新[loadMoreAdapter]。
  * @param onSuccess         请求成功时回调。
  */
 suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadAfter(
@@ -240,7 +254,10 @@ suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadAfter(
  * 4：没有更多数据需要加载；
  * @param show                          初始化或者刷新开始时显示进度条
  * @param hide                          初始化或者刷新成功或者失败时隐藏进度条
- * @param onError                       请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
+ * @param onError                       请求失败时回调。
+ * 在这里进行额外错误处理：
+ * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
+ * 加载更多失败时，直接更新[loadMoreAdapter]。
  * @param onSuccess                     请求成功时回调。
  */
 private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> ConcatAdapter.collectResultForLoadAfter(
@@ -261,10 +278,21 @@ private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> Conca
         hide = hide,
         onError = { requestType, throwable ->
             when {
-                requestType is RequestType.Initial -> {
-                    clear()
-                    add(errorAdapter)
-                    errorAdapter?.onError(throwable)
+                requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+                    when (adapters.firstOrNull()) {
+                        null -> {
+                            add(errorAdapter)
+                            errorAdapter?.onError(throwable)
+                        }
+                        errorAdapter -> {
+                            errorAdapter?.onError(throwable)
+                        }
+                        emptyAdapter -> {
+                            clear()
+                            add(errorAdapter)
+                            errorAdapter?.onError(throwable)
+                        }
+                    }
                 }
                 requestType is RequestType.After || requestType is RequestType.Before -> {
                     loadMoreAdapter.onError(throwable)
@@ -313,7 +341,10 @@ private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> Conca
  * @param transformer       在这里进行数据转换，返回值为一个集合。
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新成功或者失败时隐藏进度条
- * @param onError           请求失败时回调，在这里进行额外错误处理，这里默认在初始化或者加载更多失败时添加了错误视图，刷新失败时没有做处理。
+ * @param onError           请求失败时回调。
+ * 在这里进行额外错误处理：
+ * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
+ * 加载更多失败时，直接更新[loadMoreAdapter]。
  * @param onSuccess         请求成功时回调。
  */
 suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
@@ -336,10 +367,21 @@ suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
         hide = hide,
         onError = { requestType, throwable ->
             when {
-                requestType is RequestType.Initial -> {
-                    clear()
-                    add(errorAdapter)
-                    errorAdapter?.onError(throwable)
+                requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+                    when (adapters.firstOrNull()) {
+                        null -> {
+                            add(errorAdapter)
+                            errorAdapter?.onError(throwable)
+                        }
+                        errorAdapter -> {
+                            errorAdapter?.onError(throwable)
+                        }
+                        emptyAdapter -> {
+                            clear()
+                            add(errorAdapter)
+                            errorAdapter?.onError(throwable)
+                        }
+                    }
                 }
                 requestType is RequestType.After || requestType is RequestType.Before -> {
                     loadMoreAdapter.onError(throwable)

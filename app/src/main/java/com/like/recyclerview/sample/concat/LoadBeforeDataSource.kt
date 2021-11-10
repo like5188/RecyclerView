@@ -27,8 +27,12 @@ class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRe
         return when (i++) {
             0 -> {
                 when (j++) {
-                    0 -> throw RuntimeException("initial error")
-                    1 -> emptyList()
+                    0 -> throw RuntimeException("load error 0")
+                    1 -> throw RuntimeException("load error 1")
+                    2 -> throw RuntimeException("load error 2")
+                    3 -> emptyList()
+                    4 -> throw RuntimeException("load error 4")
+                    6 -> throw RuntimeException("load error 6")
                     else -> {
                         (end..start).map {
                             DataFactory.createItem(it)
