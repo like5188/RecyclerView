@@ -73,9 +73,9 @@ class ConcatActivity : AppCompatActivity() {
 
 //        initItems()
 //        initHeadersAndItems()
-//        initLoadAfter()
+        initLoadAfter()
 //        initLoadAfterWithHeaders()
-        initLoadBefore()
+//        initLoadBefore()
     }
 
     private fun initItems() {
