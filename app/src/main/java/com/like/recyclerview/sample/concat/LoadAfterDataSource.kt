@@ -28,8 +28,9 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRec
         return when (i++) {
             0 -> {
                 when (j++) {
-                    0 -> throw RuntimeException("initial error")
-                    1 -> emptyList()
+                    0 -> throw RuntimeException("initial error 1")
+                    1 -> throw RuntimeException("initial error 2")
+                    2 -> emptyList()
                     else -> {
                         (start until end).map {
                             DataFactory.createItem(it)

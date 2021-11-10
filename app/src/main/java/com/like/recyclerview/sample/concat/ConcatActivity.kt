@@ -72,8 +72,8 @@ class ConcatActivity : AppCompatActivity() {
 //        }
 
 //        initItems()
-        initHeadersAndItems()
-//        initLoadAfter()
+//        initHeadersAndItems()
+        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
     }
@@ -160,6 +160,9 @@ class ConcatActivity : AppCompatActivity() {
                 errorAdapter = AdapterFactory.createErrorAdapter(),
                 show = { mProgressDialog.show() },
                 hide = { mProgressDialog.hide() },
+                onError = { requestType, throwable ->
+                    ToastUtils.show(throwable.message)
+                }
             )
         }
         lifecycleScope.launch {
@@ -189,6 +192,9 @@ class ConcatActivity : AppCompatActivity() {
                 errorAdapter = AdapterFactory.createErrorAdapter(),
                 show = { mProgressDialog.show() },
                 hide = { mProgressDialog.hide() },
+                onError = { requestType, throwable ->
+                    ToastUtils.show(throwable.message)
+                }
             )
         }
         lifecycleScope.launch {
@@ -217,6 +223,9 @@ class ConcatActivity : AppCompatActivity() {
                 errorAdapter = AdapterFactory.createErrorAdapter(),
                 show = { mProgressDialog.show() },
                 hide = { mProgressDialog.hide() },
+                onError = { requestType, throwable ->
+                    ToastUtils.show(throwable.message)
+                }
             )
         }
         lifecycleScope.launch {

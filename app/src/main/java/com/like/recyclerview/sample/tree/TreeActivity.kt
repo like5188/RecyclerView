@@ -7,6 +7,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
+import com.hjq.toast.ToastUtils
 import com.like.recyclerview.adapter.collectFlow
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
@@ -74,6 +75,9 @@ class TreeActivity : AppCompatActivity() {
                 errorAdapter = AdapterFactory.createErrorAdapter(),
                 show = { mBinding.swipeRefreshLayout.isRefreshing = true },
                 hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
+                onError = {
+                    ToastUtils.show(it.message)
+                }
             )
             mBinding.swipeRefreshLayout.setOnRefreshListener {
                 lifecycleScope.launch {
