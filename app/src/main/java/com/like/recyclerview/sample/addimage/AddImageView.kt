@@ -30,6 +30,10 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
         layoutManager = WrapGridLayoutManager(context, 4)
     }
 
+    /**
+     * @param maxSelectNum  最大图片选择数量
+     * @param onItemChanged 添加删除图片监听
+     */
     fun init(maxSelectNum: Int = Int.MAX_VALUE, onItemChanged: (() -> Unit)? = null) {
         myItemAdapter = MyItemAdapter(maxSelectNum).also { it.onItemChanged = onItemChanged }
         myPlusAdapter = MyPlusAdapter(R.drawable.icon_add, maxSelectNum)
