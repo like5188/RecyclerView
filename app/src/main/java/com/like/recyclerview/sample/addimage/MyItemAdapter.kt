@@ -7,7 +7,7 @@ import com.like.recyclerview.sample.databinding.ViewImageBinding
 import com.like.recyclerview.viewholder.BindingViewHolder
 import java.io.File
 
-class MyItemAdapter : ItemAdapter<ViewImageBinding, AddImageViewInfo>( 9) {
+class MyItemAdapter(maxSelectNum: Int = Int.MAX_VALUE) : ItemAdapter<ViewImageBinding, AddImageViewInfo>(maxSelectNum) {
     val showDeleteButton: ObservableBoolean = ObservableBoolean()
 
     override fun onBindViewHolder(
@@ -17,7 +17,7 @@ class MyItemAdapter : ItemAdapter<ViewImageBinding, AddImageViewInfo>( 9) {
         item: AddImageViewInfo
     ) {
         super.onBindViewHolder(holder, binding, position, item)
-        binding.iv.load(File(item.compressImagePath))
+        binding.iv.load(File(item.localMedia.compressPath))
         binding.tv.text = item.des
         binding.root.setOnLongClickListener {
             // 显示删除按钮

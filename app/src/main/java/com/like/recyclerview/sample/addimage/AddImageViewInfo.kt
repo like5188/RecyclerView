@@ -6,8 +6,6 @@ import com.luck.picture.lib.entity.LocalMedia
 
 class AddImageViewInfo(val localMedia: LocalMedia, val des: String) : IRecyclerViewItem {
     override var layoutId: Int = R.layout.view_image
-    val imagePath: String = localMedia.path
-    val compressImagePath: String = localMedia.compressPath
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -15,13 +13,13 @@ class AddImageViewInfo(val localMedia: LocalMedia, val des: String) : IRecyclerV
 
         other as AddImageViewInfo
 
-        if (imagePath != other.imagePath) return false
+        if (localMedia != other.localMedia) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return imagePath.hashCode()
+        return localMedia.hashCode()
     }
 
 }

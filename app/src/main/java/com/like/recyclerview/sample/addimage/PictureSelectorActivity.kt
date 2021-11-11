@@ -9,15 +9,12 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPictureSelectorBinding
 
 class PictureSelectorActivity : AppCompatActivity() {
-    companion object {
-        const val TAG = "PictureSelectorActivity"
-    }
-
     private val mBinding by lazy {
         DataBindingUtil.setContentView<ActivityPictureSelectorBinding>(this, R.layout.activity_picture_selector)
     }
-    private val myItemAdapter = MyItemAdapter()
-    private val myPlusAdapter = MyPlusAdapter(R.drawable.icon_take_photo)
+    private val maxSelectNum = 2
+    private val myItemAdapter = MyItemAdapter(maxSelectNum)
+    private val myPlusAdapter = MyPlusAdapter(R.drawable.icon_add, maxSelectNum)
     private var i = 0
 
     private val mAdapterManager: AdapterManager<AddImageViewInfo> by lazy {

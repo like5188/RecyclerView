@@ -6,8 +6,9 @@ import com.like.recyclerview.sample.databinding.ViewAddImageBinding
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 class MyPlusAdapter(
-    @DrawableRes addImageResId: Int
-) : PlusAdapter<ViewAddImageBinding, AddInfo>() {
+    @DrawableRes addImageResId: Int,
+    maxSelectNum: Int = Int.MAX_VALUE
+) : PlusAdapter<ViewAddImageBinding, AddInfo>(maxSelectNum) {
 
     init {
         addToEnd(AddInfo(addImageResId))
