@@ -13,7 +13,7 @@ class PictureSelectorActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding.addImageView.init(1)
+        mBinding.addImageView.init(9)
     }
 
 }
