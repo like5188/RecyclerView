@@ -44,10 +44,12 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
         when {
             curCount + items.size < maxSelectNum -> {
                 addAllToEnd(items)
+                onAdded()
             }
             curCount + items.size == maxSelectNum -> {// 移除+号
                 notifyRemovePlus()
                 addAllToEnd(items)
+                onAdded()
             }
             else -> {// 不能添加
                 Toast.makeText(activity, "只能添加 $maxSelectNum 张图片", Toast.LENGTH_SHORT).show()
@@ -60,12 +62,22 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
         when {
             curCount < maxSelectNum -> {
                 remove(position)
+                onRemoved()
             }
             curCount == maxSelectNum -> {// 添加+号
                 remove(position)
                 notifyAddPlus()
+                onRemoved()
             }
         }
+    }
+
+    open fun onAdded() {
+
+    }
+
+    open fun onRemoved() {
+
     }
 
 }
