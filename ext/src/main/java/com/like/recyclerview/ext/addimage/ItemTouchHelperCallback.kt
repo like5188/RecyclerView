@@ -15,7 +15,7 @@ import com.like.recyclerview.adapter.BaseAdapter
 class ItemTouchHelperCallback(private val adapter: BaseAdapter<*, *>) : ItemTouchHelper.Callback() {
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-        if (viewHolder.bindingAdapter != adapter) {
+        if (viewHolder.bindingAdapter != adapter) {// 避免操作 PlusAdapter
             return makeMovementFlags(0, 0)
         }
         val dragFlags = when (recyclerView.layoutManager) {
@@ -30,7 +30,7 @@ class ItemTouchHelperCallback(private val adapter: BaseAdapter<*, *>) : ItemTouc
             return false
         }
         val fromPosition = viewHolder.bindingAdapterPosition
-        val toPosition = target.bindingAdapterPosition
+        val toPosition = target.bindingAdapterPosition// 不能使用 absoluteAdapterPosition，否则当移动到加号上去会崩溃。
         adapter.moveItem(fromPosition, toPosition)
         return true
     }
