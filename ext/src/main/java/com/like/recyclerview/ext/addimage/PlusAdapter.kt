@@ -14,9 +14,9 @@ open class PlusAdapter<VB : ViewDataBinding, ValueInList>(
     private val maxSelectNum: Int = Int.MAX_VALUE
 ) : BaseAdapter<VB, ValueInList>() {
     lateinit var activity: AppCompatActivity
-    lateinit var getLocalMedias: () -> List<LocalMedia>
-    lateinit var addItems: (List<LocalMedia>) -> Unit
-    lateinit var onPlusItemClicked: () -> Unit
+    lateinit var getSelectedLocalMedias: () -> List<LocalMedia>
+    lateinit var onSelected: (List<LocalMedia>) -> Unit
+    lateinit var onPlusClicked: () -> Unit
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
         super.onBindViewHolder(holder, binding, position, item)
@@ -24,15 +24,15 @@ open class PlusAdapter<VB : ViewDataBinding, ValueInList>(
             activity.lifecycleScope.launch {
                 if (maxSelectNum == 1) {
                     activity.selectSinglePhoto()?.apply {
-                        addItems(listOf(this))
+                        onSelected(listOf(this))
                     }
                 } else {
-                    activity.selectMultiplePhoto(getLocalMedias(), maxSelectNum)?.apply {
-                        addItems(this)
+                    activity.selectMultiplePhoto(getSelectedLocalMedias(), maxSelectNum)?.apply {
+                        onSelected(this)
                     }
                 }
             }
-            onPlusItemClicked()
+            onPlusClicked()
         }
     }
 

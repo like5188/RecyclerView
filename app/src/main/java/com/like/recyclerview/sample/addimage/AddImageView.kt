@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ObservableBoolean
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import com.like.recyclerview.ext.addimage.AdapterManager
+import com.like.recyclerview.ext.addimage.AddImageAdapterManager
 import com.like.recyclerview.ext.addimage.ItemAdapter
 import com.like.recyclerview.ext.addimage.PlusAdapter
 import com.like.recyclerview.layoutmanager.WrapGridLayoutManager
@@ -37,11 +37,11 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
     fun init(maxSelectNum: Int = Int.MAX_VALUE, onItemChanged: (() -> Unit)? = null) {
         myItemAdapter = MyItemAdapter(maxSelectNum).also { it.onItemChanged = onItemChanged }
         myPlusAdapter = MyPlusAdapter(R.drawable.icon_add, maxSelectNum)
-        adapter = AdapterManager(
+        adapter = AddImageAdapterManager(
             activity = context as AppCompatActivity,
             itemAdapter = myItemAdapter,
             plusAdapter = myPlusAdapter,
-            getLocalMedias = {
+            getSelectedLocalMedias = {
                 myItemAdapter.mList.map {
                     it.localMedia
                 }
@@ -49,10 +49,10 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
             itemCreator = {
                 AddImageViewInfo(it)
             },
-            onPlusItemClicked = {
+            onPlusClicked = {
                 myItemAdapter.showDeleteButton.set(false)
             }
-        ).getAdapter()
+        ).getConcatAdapter()
     }
 
     fun getSelectedImages() = myItemAdapter.mList

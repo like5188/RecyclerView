@@ -15,7 +15,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
 ) : BaseAdapter<VB, ValueInList>() {
     lateinit var activity: AppCompatActivity
     lateinit var itemCreator: (LocalMedia) -> ValueInList
-    lateinit var getLocalMedias: () -> List<LocalMedia>
+    lateinit var getSelectedLocalMedias: () -> List<LocalMedia>
     lateinit var notifyRemovePlus: () -> Unit
     lateinit var notifyAddPlus: () -> Unit
     private val mItemTouchHelper by lazy {
@@ -25,7 +25,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
         super.onBindViewHolder(holder, binding, position, item)
         holder.binding.root.setOnClickListener {
-            activity.previewPhotos(getLocalMedias(), position)
+            activity.previewPhotos(getSelectedLocalMedias(), position)
         }
     }
 
@@ -35,7 +35,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     }
 
     fun addLocalMedias(list: List<LocalMedia>) {
-        val localMedias = getLocalMedias()
+        val localMedias = getSelectedLocalMedias()
         // 去掉已经添加过的
         val items = list.filter { !localMedias.contains(it) }.map {
             itemCreator(it)
