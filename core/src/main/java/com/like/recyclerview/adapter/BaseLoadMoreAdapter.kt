@@ -32,7 +32,7 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val on
         if (context is LifecycleOwner) {
             if (isRunning.compareAndSet(false, true)) {
                 Log.v(TAG, "触发加载更多")
-                context.lifecycleScope.launch(Dispatchers.IO) {
+                context.lifecycleScope.launch {
                     onLoadMore()
                 }
             }

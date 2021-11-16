@@ -273,61 +273,61 @@ private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> Conca
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ) {
-    result.collect(
-        show = show,
-        hide = hide,
-        onError = { requestType, throwable ->
-            when {
-                requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                    when (adapters.firstOrNull()) {
-                        null -> {
-                            add(errorAdapter)
-                            errorAdapter?.onError(throwable)
-                        }
-                        errorAdapter -> {
-                            errorAdapter?.onError(throwable)
-                        }
-                        emptyAdapter -> {
-                            clear()
-                            add(errorAdapter)
-                            errorAdapter?.onError(throwable)
-                        }
-                    }
-                }
-                requestType is RequestType.After || requestType is RequestType.Before -> {
-                    loadMoreAdapter.onError(throwable)
-                }
-            }
-            onError?.invoke(requestType, throwable)
-        }
-    ) { requestType, resultType ->
-        when (contentAdapterDataHandler(contentAdapter, requestType, resultType)) {
-            0 -> {// 显示空视图
-                clear()
-                add(emptyAdapter)
-            }
-            1 -> {// 不显示空视图，没有更多数据需要加载（只有 Header 的情况）
-                clear()
-                add(contentAdapter)
-                recyclerView.scrollToTop()
-            }
-            2 -> {// 不显示空视图，有更多数据需要加载（有列表数据的情况）
-                clear()
-                addAll(contentAdapter, loadMoreAdapter)
-                loadMoreAdapter.reload()
-                loadMoreAdapter.onComplete()
-                recyclerView.scrollToTop()
-            }
-            3 -> {// 还有更多数据需要加载
-                loadMoreAdapter.reload()
-                loadMoreAdapter.onComplete()
-            }
-            4 -> {// 没有更多数据需要加载
-                loadMoreAdapter.onEnd()
-            }
-        }
-        onSuccess?.invoke(requestType, resultType)
-    }
+//    result.collect(
+//        show = show,
+//        hide = hide,
+//        onError = { requestType, throwable ->
+//            when {
+//                requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+//                    when (adapters.firstOrNull()) {
+//                        null -> {
+//                            add(errorAdapter)
+//                            errorAdapter?.onError(throwable)
+//                        }
+//                        errorAdapter -> {
+//                            errorAdapter?.onError(throwable)
+//                        }
+//                        emptyAdapter -> {
+//                            clear()
+//                            add(errorAdapter)
+//                            errorAdapter?.onError(throwable)
+//                        }
+//                    }
+//                }
+//                requestType is RequestType.After || requestType is RequestType.Before -> {
+//                    loadMoreAdapter.onError(throwable)
+//                }
+//            }
+//            onError?.invoke(requestType, throwable)
+//        }
+//    ) { requestType, resultType ->
+//        when (contentAdapterDataHandler(contentAdapter, requestType, resultType)) {
+//            0 -> {// 显示空视图
+//                clear()
+//                add(emptyAdapter)
+//            }
+//            1 -> {// 不显示空视图，没有更多数据需要加载（只有 Header 的情况）
+//                clear()
+//                add(contentAdapter)
+//                recyclerView.scrollToTop()
+//            }
+//            2 -> {// 不显示空视图，有更多数据需要加载（有列表数据的情况）
+//                clear()
+//                addAll(contentAdapter, loadMoreAdapter)
+//                loadMoreAdapter.reload()
+//                loadMoreAdapter.onComplete()
+//                recyclerView.scrollToTop()
+//            }
+//            3 -> {// 还有更多数据需要加载
+//                loadMoreAdapter.reload()
+//                loadMoreAdapter.onComplete()
+//            }
+//            4 -> {// 没有更多数据需要加载
+//                loadMoreAdapter.onEnd()
+//            }
+//        }
+//        onSuccess?.invoke(requestType, resultType)
+//    }
 }
 
 /**
@@ -347,7 +347,7 @@ private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> Conca
  * 加载更多失败时，直接更新[loadMoreAdapter]。
  * @param onSuccess         请求成功时回调。
  */
-suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
+fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
     result: Result<ResultType>,
     recyclerView: RecyclerView,
     itemAdapter: BaseAdapter<*, ValueInList>,
@@ -361,38 +361,34 @@ suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-) {
-    result.collect(
-        show = show,
-        hide = hide,
-        onError = { requestType, throwable ->
-            when {
-                requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                    when (adapters.firstOrNull()) {
-                        null -> {
-                            add(errorAdapter)
-                            errorAdapter?.onError(throwable)
-                        }
-                        errorAdapter -> {
-                            errorAdapter?.onError(throwable)
-                        }
-                        emptyAdapter -> {
-                            clear()
-                            add(errorAdapter)
-                            errorAdapter?.onError(throwable)
-                        }
+): ResultHandler {
+    val resultHandler = ResultHandler()
+    resultHandler.initial = suspend {
+        result.initial()
+            .flowOn(Dispatchers.IO)
+            .onStart {
+                show?.invoke()
+            }.onCompletion {
+                hide?.invoke()
+            }.catch {
+                when (adapters.firstOrNull()) {
+                    null -> {
+                        add(errorAdapter)
+                        errorAdapter?.onError(it)
+                    }
+                    errorAdapter -> {
+                        errorAdapter?.onError(it)
+                    }
+                    emptyAdapter -> {
+                        clear()
+                        add(errorAdapter)
+                        errorAdapter?.onError(it)
                     }
                 }
-                requestType is RequestType.After || requestType is RequestType.Before -> {
-                    loadMoreAdapter.onError(throwable)
-                }
-            }
-            onError?.invoke(requestType, throwable)
-        }
-    ) { requestType, resultType ->
-        val res = transformer(requestType, resultType)
-        when {
-            requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+                onError?.invoke(RequestType.Initial, it)
+            }.flowOn(Dispatchers.Main)
+            .collect {
+                val res = transformer(RequestType.Initial, it)
                 if (res.isNullOrEmpty()) {
                     clear()
                     add(emptyAdapter)
@@ -405,8 +401,59 @@ suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
                     loadMoreAdapter.onComplete()
                     recyclerView.scrollToBottom()
                 }
+                onSuccess?.invoke(RequestType.Initial, it)
             }
-            requestType is RequestType.After || requestType is RequestType.Before -> {
+    }
+    resultHandler.refresh = suspend {
+        result.refresh()
+            .flowOn(Dispatchers.IO)
+            .onStart {
+                show?.invoke()
+            }.onCompletion {
+                hide?.invoke()
+            }.catch {
+                when (adapters.firstOrNull()) {
+                    null -> {
+                        add(errorAdapter)
+                        errorAdapter?.onError(it)
+                    }
+                    errorAdapter -> {
+                        errorAdapter?.onError(it)
+                    }
+                    emptyAdapter -> {
+                        clear()
+                        add(errorAdapter)
+                        errorAdapter?.onError(it)
+                    }
+                }
+                onError?.invoke(RequestType.Refresh, it)
+            }.flowOn(Dispatchers.Main)
+            .collect {
+                val res = transformer(RequestType.Refresh, it)
+                if (res.isNullOrEmpty()) {
+                    clear()
+                    add(emptyAdapter)
+                } else {
+                    clear()
+                    addAll(loadMoreAdapter, itemAdapter)
+                    itemAdapter.clear()
+                    itemAdapter.addAllToEnd(res)
+                    loadMoreAdapter.reload()
+                    loadMoreAdapter.onComplete()
+                    recyclerView.scrollToBottom()
+                }
+                onSuccess?.invoke(RequestType.Refresh, it)
+            }
+    }
+    resultHandler.loadBefore = suspend {
+        result.loadBefore()
+            .flowOn(Dispatchers.IO)
+            .catch {
+                loadMoreAdapter.onError(it)
+                onError?.invoke(RequestType.Before, it)
+            }.flowOn(Dispatchers.Main)
+            .collect {
+                val res = transformer(RequestType.Before, it)
                 if (res.isNullOrEmpty()) {
                     loadMoreAdapter.onEnd()
                 } else {
@@ -415,9 +462,22 @@ suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
                     loadMoreAdapter.reload()
                     loadMoreAdapter.onComplete()
                 }
+                onSuccess?.invoke(RequestType.Before, it)
             }
-        }
-        onSuccess?.invoke(requestType, resultType)
     }
+    return resultHandler
+}
 
+class ResultHandler {
+    // 初始化操作
+    var initial: suspend () -> Unit = {}
+
+    // 刷新操作
+    var refresh: suspend () -> Unit = {}
+
+    // 往后加载更多
+    var loadAfter: suspend () -> Unit = {}
+
+    // 往前加载更多
+    var loadBefore: suspend () -> Unit = {}
 }

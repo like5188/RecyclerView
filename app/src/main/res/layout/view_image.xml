@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.like.common.view.SquareImageView
+        <ImageView
             android:id="@+id/iv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
