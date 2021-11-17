@@ -15,7 +15,7 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
     }
 
     override fun get(position: Int): ValueInList? {
-        if (position < 0 || position > mList.size) return null
+        if (position < 0 || position >= mList.size) return null
         return mList[position]
     }
 
