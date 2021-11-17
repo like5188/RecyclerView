@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -14,11 +15,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
+        <com.like.common.view.RatioShapeableImageView
             android:id="@+id/iv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            app:height_ratio="1"
+            app:shapeAppearanceOverlay="@style/CircleRatioShapeableImageView"
+            app:width_ratio="1" />
 
         <ImageView
             android:id="@+id/iv_delete"
