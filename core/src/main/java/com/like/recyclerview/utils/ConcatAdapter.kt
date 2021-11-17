@@ -73,11 +73,15 @@ fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
     itemAdapter: BaseAdapter<*, ValueInList>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
-    transformer: suspend (ResultType) -> List<List<ValueInList>?>? = {
+    transformer: suspend (ResultType) -> List<List<ValueInList>?>? = { resultType ->
         if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
-            listOf(emptyList(), it as? List<ValueInList>)
+            if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
+                listOf(emptyList(), resultType as? List<ValueInList>)
+            } else {
+                emptyList()
+            }
         } else {// 如果返回值[ResultType]为 List<List<ValueInList>?>? 类型
-            it as? List<List<ValueInList>?>
+            resultType as? List<List<ValueInList>?>
         }
     },
     show: (() -> Unit)? = null,
@@ -145,7 +149,11 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     transformer: suspend (RequestType, ResultType) -> List<List<ValueInList>?>? = { requestType, resultType ->
         if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
-            listOf(emptyList(), resultType as? List<ValueInList>)
+            if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
+                listOf(emptyList(), resultType as? List<ValueInList>)
+            } else {
+                emptyList()
+            }
         } else {// 如果返回值[ResultType]为 List<List<ValueInList>?>? 类型
             resultType as? List<List<ValueInList>?>
         }
@@ -216,7 +224,11 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
             emptyAdapter,
             errorAdapter,
             transformer = { requestType, resultType ->
-                listOf(emptyList(), transformer(requestType, resultType))
+                if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
+                    listOf(emptyList(), transformer(requestType, resultType))
+                } else {
+                    emptyList()
+                }
             },
             show,
             hide,
@@ -269,13 +281,7 @@ private suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForPagi
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
-    transformer: suspend (RequestType, ResultType) -> List<List<ValueInList>?>? = { requestType, resultType ->
-        if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
-            listOf(emptyList(), resultType as? List<ValueInList>)
-        } else {// 如果返回值[ResultType]为 List<List<ValueInList>?>? 类型
-            resultType as? List<List<ValueInList>?>
-        }
-    },
+    transformer: suspend (RequestType, ResultType) -> List<List<ValueInList>?>?,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
