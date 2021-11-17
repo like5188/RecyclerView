@@ -66,7 +66,7 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        val getData = mAdapter.bindFlow(
+        val request = mAdapter.bindFlow(
             dataFlow = mViewModel::getItems.asFlow(),
             recyclerView = mBinding.rv,
             itemAdapter = itemAdapter,
@@ -80,11 +80,11 @@ class TreeActivity : AppCompatActivity() {
         )
         mBinding.swipeRefreshLayout.setOnRefreshListener {
             lifecycleScope.launch {
-                getData()
+                request()
             }
         }
         lifecycleScope.launch {
-            getData()
+            request()
         }
     }
 }

@@ -76,7 +76,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initItems() {
-        val getData = mAdapter.bindFlow(
+        val request = mAdapter.bindFlow(
             dataFlow = mViewModel::getItems.asFlow().map {
                 it?.take(3)
             }.retryWhen { cause, attempt ->
@@ -95,16 +95,16 @@ class ConcatActivity : AppCompatActivity() {
         )
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                getData()
+                request()
             }
         }
         lifecycleScope.launch {
-            getData()
+            request()
         }
     }
 
     private fun initHeadersAndItems() {
-        val getData = mAdapter.bindFlow(
+        val request = mAdapter.bindFlow(
             dataFlow = mViewModel::getHeadersAndItems.asFlow(),
             recyclerView = mBinding.rv,
             headerAdapter = HeaderAdapter(),
@@ -120,12 +120,12 @@ class ConcatActivity : AppCompatActivity() {
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                getData()
+                request()
             }
         }
 
         lifecycleScope.launch {
-            getData()
+            request()
         }
     }
 
@@ -202,7 +202,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadBefore() {
-        val resultHandler = mAdapter.bindResultForBefore(
+        val request = mAdapter.bindResultForBefore(
             result = mViewModel.loadBeforeResult.apply {
                 flow = flow.map {
                     it?.take(3)
@@ -225,12 +225,12 @@ class ConcatActivity : AppCompatActivity() {
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                resultHandler.refresh()
+                request.refresh()
             }
         }
 
         lifecycleScope.launch {
-            resultHandler.initial()
+            request.initial()
         }
     }
 

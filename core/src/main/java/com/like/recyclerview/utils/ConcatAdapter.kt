@@ -162,7 +162,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): ResultHandler = ResultHandler().apply {
+): Request = Request().apply {
     suspend fun collect() {
         collectResultForPaging(
             true,
@@ -212,7 +212,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): ResultHandler = ResultHandler().apply {
+): Request = Request().apply {
     suspend fun collect() {
         collectResultForPaging(
             false,
@@ -270,7 +270,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
  * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
  * 加载更多失败时，直接更新[loadMoreAdapter]。
  * @param onSuccess         请求成功时回调。
- * @return [ResultHandler]  用于进行各种请求操作。
+ * @return [Request]  用于进行各种请求操作。
  */
 private suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForPaging(
     isAfter: Boolean,
@@ -383,7 +383,7 @@ private suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForPagi
         }
 }
 
-class ResultHandler {
+class Request {
     // 初始化操作
     var initial: suspend () -> Unit = {}
 
