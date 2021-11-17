@@ -17,7 +17,7 @@ object AdapterFactory {
         addToEnd(ErrorItem())
     }
 
-    fun createLoadMoreAdapter(onLoadMore: suspend () -> Unit) = LoadMoreAdapter(onLoadMore).apply {
+    fun createLoadMoreAdapter() = LoadMoreAdapter().apply {
         addToEnd(LoadMoreItem())
     }
 

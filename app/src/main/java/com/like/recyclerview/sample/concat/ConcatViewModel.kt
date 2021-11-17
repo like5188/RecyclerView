@@ -12,10 +12,10 @@ class ConcatViewModel : ViewModel() {
     val LoadAfterWithHeadersResult = LoadAfterWithHeadersDataSource(PAGE_SIZE).result()
     val loadBeforeResult = LoadBeforeDataSource(PAGE_SIZE).result()
 
-    private val itemResult = ItemDataSource()
-    private val headerResult = HeaderDataSource()
+    private val itemDataSource = ItemDataSource()
+    private val headerDataSource = HeaderDataSource()
 
-    suspend fun getHeadersAndItems() = successIfAllSuccess(headerResult::load, itemResult::load)
+    suspend fun getHeadersAndItems() = successIfAllSuccess(headerDataSource::load, itemDataSource::load)
 
-    suspend fun getItems() = itemResult.load()
+    suspend fun getItems() = itemDataSource.load()
 }

@@ -5,19 +5,18 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.viewholder.BindingViewHolder
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
  */
-open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val onLoadMore: suspend () -> Unit) :
-    BaseErrorAdapter<VB, ValueInList>() {
+open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAdapter<VB, ValueInList>() {
     companion object {
         private const val TAG = "AbstractLoadMoreAdapter"
     }
 
+    internal var onLoadMore: suspend () -> Unit = {}
     private var isRunning = AtomicBoolean(true)
     private lateinit var mHolder: BindingViewHolder<VB>
 

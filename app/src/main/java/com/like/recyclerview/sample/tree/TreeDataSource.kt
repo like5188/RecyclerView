@@ -3,7 +3,7 @@ package com.like.recyclerview.sample.tree
 import com.like.recyclerview.sample.R
 import kotlinx.coroutines.delay
 
-class TreeNotPagingDataSource {
+class TreeDataSource {
     private var i = 0
 
     suspend fun load(): List<TreeNode0>? {

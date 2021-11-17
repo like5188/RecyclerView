@@ -48,7 +48,6 @@ fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerVi
     }
 }
 
-
 /**
  * 收集不分页数据[dataFlow]并显示到 ConcatAdapter（线程安全）
  *
@@ -181,10 +180,11 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
         result.refresh()
         collect()
     }
-    before = suspend {
+    after = suspend {
         result.before()
         collect()
     }
+    loadMoreAdapter.onLoadMore = after
 }
 
 /**
@@ -236,6 +236,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
         result.before()
         collect()
     }
+    loadMoreAdapter.onLoadMore = before
 }
 
 /**

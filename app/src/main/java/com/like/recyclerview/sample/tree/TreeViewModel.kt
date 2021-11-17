@@ -3,9 +3,9 @@ package com.like.recyclerview.sample.tree
 import androidx.lifecycle.ViewModel
 
 class TreeViewModel : ViewModel() {
-    private val treeNotPagingDataSource = TreeNotPagingDataSource()
+    private val treeDataSource = TreeDataSource()
 
     suspend fun getItems(): List<TreeNode0>? {
-        return treeNotPagingDataSource.load()
+        return treeDataSource.load()
     }
 }

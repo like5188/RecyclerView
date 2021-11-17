@@ -9,15 +9,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import com.hjq.toast.ToastUtils
 import com.like.common.util.Logger
-import com.like.recyclerview.adapter.ResultHandler
-import com.like.recyclerview.adapter.collectFlow
-import com.like.recyclerview.adapter.bindResultForLoadBefore
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
+import com.like.recyclerview.utils.bindFlow
+import com.like.recyclerview.utils.bindResultForBefore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOn
@@ -77,54 +76,56 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initItems() {
-        lifecycleScope.launch {
-            val getData = mAdapter.collectFlow(
-                dataFlow = mViewModel::getItems.asFlow().map {
-                    it?.take(3)
-                }.retryWhen { cause, attempt ->
-                    Logger.e("retryWhen")
-                    attempt == 0L
-                }.flowOn(Dispatchers.IO),
-                recyclerView = mBinding.rv,
-                itemAdapter = ItemAdapter(),
-                emptyAdapter = AdapterFactory.createEmptyAdapter(),
-                errorAdapter = AdapterFactory.createErrorAdapter(),
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-                onError = {
-                    ToastUtils.show(it.message)
-                }
-            )
-
-            mBinding.btnRefresh.setOnClickListener {
-                lifecycleScope.launch {
-                    getData()
-                }
+        val getData = mAdapter.bindFlow(
+            dataFlow = mViewModel::getItems.asFlow().map {
+                it?.take(3)
+            }.retryWhen { cause, attempt ->
+                Logger.e("retryWhen")
+                attempt == 0L
+            }.flowOn(Dispatchers.IO),
+            recyclerView = mBinding.rv,
+            itemAdapter = ItemAdapter(),
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+            onError = {
+                ToastUtils.show(it.message)
             }
+        )
+        mBinding.btnRefresh.setOnClickListener {
+            lifecycleScope.launch {
+                getData()
+            }
+        }
+        lifecycleScope.launch {
+            getData()
         }
     }
 
     private fun initHeadersAndItems() {
-        lifecycleScope.launch {
-            val getData = mAdapter.collectFlow(
-                dataFlow = mViewModel::getHeadersAndItems.asFlow(),
-                recyclerView = mBinding.rv,
-                headerAdapter = HeaderAdapter(),
-                itemAdapter = ItemAdapter(),
-                emptyAdapter = AdapterFactory.createEmptyAdapter(),
-                errorAdapter = AdapterFactory.createErrorAdapter(),
-                show = { mProgressDialog.show() },
-                hide = { mProgressDialog.hide() },
-                onError = {
-                    ToastUtils.show(it.message)
-                }
-            )
-
-            mBinding.btnRefresh.setOnClickListener {
-                lifecycleScope.launch {
-                    getData()
-                }
+        val getData = mAdapter.bindFlow(
+            dataFlow = mViewModel::getHeadersAndItems.asFlow(),
+            recyclerView = mBinding.rv,
+            headerAdapter = HeaderAdapter(),
+            itemAdapter = ItemAdapter(),
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+            onError = {
+                ToastUtils.show(it.message)
             }
+        )
+
+        mBinding.btnRefresh.setOnClickListener {
+            lifecycleScope.launch {
+                getData()
+            }
+        }
+
+        lifecycleScope.launch {
+            getData()
         }
     }
 
@@ -201,22 +202,18 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadBefore() {
-        val result = mViewModel.loadBeforeResult.apply {
-            flow = flow.map {
-                it?.take(3)
-            }.retryWhen { cause, attempt ->
-                Logger.e("retryWhen")
-                attempt == 0L
-            }.flowOn(Dispatchers.IO)
-        }
-        var resultHandler = ResultHandler()
-        resultHandler = mAdapter.bindResultForLoadBefore(
-            result = result,
+        val resultHandler = mAdapter.bindResultForBefore(
+            result = mViewModel.loadBeforeResult.apply {
+                flow = flow.map {
+                    it?.take(3)
+                }.retryWhen { cause, attempt ->
+                    Logger.e("retryWhen")
+                    attempt == 0L
+                }.flowOn(Dispatchers.IO)
+            },
             recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
-            loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-                resultHandler.before()
-            },
+            loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
