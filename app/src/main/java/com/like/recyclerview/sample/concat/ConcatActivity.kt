@@ -81,7 +81,7 @@ class ConcatActivity : AppCompatActivity() {
                 it?.take(3)
             }.retryWhen { cause, attempt ->
                 Logger.e("retryWhen")
-                attempt == 0L
+                cause.message == "load error 0" && attempt == 0L
             }.flowOn(Dispatchers.IO),
             recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
@@ -208,7 +208,7 @@ class ConcatActivity : AppCompatActivity() {
                     it?.take(3)
                 }.retryWhen { cause, attempt ->
                     Logger.e("retryWhen")
-                    attempt == 0L
+                    cause.message == "load error 0" && attempt == 0L
                 }.flowOn(Dispatchers.IO)
             },
             recyclerView = mBinding.rv,
