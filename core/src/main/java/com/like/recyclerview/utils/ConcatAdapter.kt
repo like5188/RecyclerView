@@ -1,12 +1,53 @@
-package com.like.recyclerview.adapter
+package com.like.recyclerview.utils
 
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.like.paging.RequestType
 import com.like.paging.Result
-import com.like.recyclerview.utils.*
+import com.like.recyclerview.adapter.BaseAdapter
+import com.like.recyclerview.adapter.BaseErrorAdapter
+import com.like.recyclerview.adapter.BaseLoadMoreAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+
+fun ConcatAdapter.clear() {
+    adapters.forEach {
+        this.removeAdapter(it)
+    }
+}
+
+fun ConcatAdapter.contains(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?): Boolean {
+    adapter ?: return false
+    adapters.forEach {
+        if (it == adapter) {
+            return true
+        }
+    }
+    return false
+}
+
+fun ConcatAdapter.add(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    adapter ?: return
+    addAdapter(adapter)
+}
+
+fun ConcatAdapter.addAll(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    adapters.forEach {
+        add(it)
+    }
+}
+
+fun ConcatAdapter.remove(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    adapter ?: return
+    removeAdapter(adapter)
+}
+
+fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+    adapters.forEach {
+        remove(it)
+    }
+}
+
 
 /**
  * 收集不分页数据[dataFlow]并显示到 ConcatAdapter（线程安全）
