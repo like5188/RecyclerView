@@ -361,10 +361,13 @@ fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): ResultHandler {
-    val resultHandler = ResultHandler()
-    resultHandler.initial = suspend {
+): ResultHandler = ResultHandler().apply {
+    fun initialOrRefresh() {
+
+    }
+    initial = suspend {
         result.initial()
+        result.flow
             .flowOn(Dispatchers.IO)
             .onStart {
                 show?.invoke()
@@ -404,8 +407,9 @@ fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
                 onSuccess?.invoke(RequestType.Initial, it)
             }
     }
-    resultHandler.refresh = suspend {
+    refresh = suspend {
         result.refresh()
+        result.flow
             .flowOn(Dispatchers.IO)
             .onStart {
                 show?.invoke()
@@ -445,8 +449,9 @@ fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
                 onSuccess?.invoke(RequestType.Refresh, it)
             }
     }
-    resultHandler.loadBefore = suspend {
-        result.loadBefore()
+    loadBefore = suspend {
+        result.before()
+        result.flow
             .flowOn(Dispatchers.IO)
             .catch {
                 loadMoreAdapter.onError(it)
@@ -465,7 +470,6 @@ fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
                 onSuccess?.invoke(RequestType.Before, it)
             }
     }
-    return resultHandler
 }
 
 class ResultHandler {
