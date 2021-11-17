@@ -11,7 +11,7 @@ import com.hjq.toast.ToastUtils
 import com.like.common.util.Logger
 import com.like.recyclerview.adapter.ResultHandler
 import com.like.recyclerview.adapter.collectFlow
-import com.like.recyclerview.adapter.collectResultForLoadBefore
+import com.like.recyclerview.adapter.bindResultForLoadBefore
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
@@ -210,7 +210,7 @@ class ConcatActivity : AppCompatActivity() {
             }.flowOn(Dispatchers.IO)
         }
         var resultHandler = ResultHandler()
-        resultHandler = mAdapter.collectResultForLoadBefore(
+        resultHandler = mAdapter.bindResultForLoadBefore(
             result = result,
             recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),

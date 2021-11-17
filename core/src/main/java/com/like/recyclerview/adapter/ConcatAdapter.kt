@@ -331,7 +331,7 @@ private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> Conca
 }
 
 /**
- * 收集往前分页数据到 ConcatAdapter（线程安全）
+ * 绑定往前分页数据[Result]到 ConcatAdapter
  *
  * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
  * @param itemAdapter       列表。
@@ -346,8 +346,9 @@ private suspend fun <ResultType, ContentAdapter : RecyclerView.Adapter<*>> Conca
  * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
  * 加载更多失败时，直接更新[loadMoreAdapter]。
  * @param onSuccess         请求成功时回调。
+ * @return [ResultHandler] 用于进行各种请求操作。
  */
-fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
+fun <ResultType, ValueInList> ConcatAdapter.bindResultForLoadBefore(
     result: Result<ResultType>,
     recyclerView: RecyclerView,
     itemAdapter: BaseAdapter<*, ValueInList>,
