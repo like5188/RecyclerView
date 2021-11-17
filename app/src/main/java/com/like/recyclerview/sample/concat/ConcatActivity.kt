@@ -16,6 +16,7 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.bindFlow
+import com.like.recyclerview.utils.bindResultForAfter
 import com.like.recyclerview.utils.bindResultForBefore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
@@ -68,11 +69,11 @@ class ConcatActivity : AppCompatActivity() {
 //                }
 //        }
 
-//        initItems()
+        initItems()
 //        initHeadersAndItems()
 //        initLoadAfter()
 //        initLoadAfterWithHeaders()
-        initLoadBefore()
+//        initLoadBefore()
     }
 
     private fun initItems() {
@@ -93,11 +94,13 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(it.message)
             }
         )
+
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
                 request()
             }
         }
+
         lifecycleScope.launch {
             request()
         }
@@ -130,75 +133,63 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadAfter() {
-//        val result = mViewModel.loadAfterResult
-//        result.dataFlow = result.dataFlow.map {
-//            val state = it.state
-//            val type = it.type
-//            if (state is RequestState.Success) {
-//                ResultReport(type, RequestState.Success(state.data?.take(3)))
-//            } else {
-//                it
-//            }
-//        }
-//
-//        mBinding.btnRefresh.setOnClickListener {
-//            lifecycleScope.launch {
-//                result.refresh()
-//            }
-//        }
-//
-//        lifecycleScope.launch {
-//            mAdapter.collectResultForLoadAfter(
-//                result = result,
-//                recyclerView = mBinding.rv,
-//                itemAdapter = ItemAdapter(),
-//                loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-//                    result.loadAfter?.invoke()
-//                },
-//                emptyAdapter = AdapterFactory.createEmptyAdapter(),
-//                errorAdapter = AdapterFactory.createErrorAdapter(),
-//                show = { mProgressDialog.show() },
-//                hide = { mProgressDialog.hide() },
-//                onError = { requestType, throwable ->
-//                    ToastUtils.show(throwable.message)
-//                }
-//            )
-//        }
-//        lifecycleScope.launch {
-//            result.initial()
-//        }
+        val request = mAdapter.bindResultForAfter(
+            result = mViewModel.loadAfterResult.apply {
+                flow = flow.map {
+                    it?.take(3)
+                }.retryWhen { cause, attempt ->
+                    Logger.e("retryWhen")
+                    cause.message == "load error 0" && attempt == 0L
+                }.flowOn(Dispatchers.IO)
+            },
+            recyclerView = mBinding.rv,
+            itemAdapter = ItemAdapter(),
+            loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
+            }
+        )
+
+        mBinding.btnRefresh.setOnClickListener {
+            lifecycleScope.launch {
+                request.refresh()
+            }
+        }
+
+        lifecycleScope.launch {
+            request.initial()
+        }
     }
 
     private fun initLoadAfterWithHeaders() {
-//        val result = mViewModel.LoadAfterWithHeadersResult
-//
-//        mBinding.btnRefresh.setOnClickListener {
-//            lifecycleScope.launch {
-//                result.refresh()
-//            }
-//        }
-//
-//        lifecycleScope.launch {
-//            mAdapter.collectResultForLoadAfter(
-//                result = result,
-//                recyclerView = mBinding.rv,
-//                headerAdapter = HeaderAdapter(),
-//                itemAdapter = ItemAdapter(),
-//                loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-//                    result.loadAfter?.invoke()
-//                },
-//                emptyAdapter = AdapterFactory.createEmptyAdapter(),
-//                errorAdapter = AdapterFactory.createErrorAdapter(),
-//                show = { mProgressDialog.show() },
-//                hide = { mProgressDialog.hide() },
-//                onError = { requestType, throwable ->
-//                    ToastUtils.show(throwable.message)
-//                }
-//            )
-//        }
-//        lifecycleScope.launch {
-//            result.initial()
-//        }
+        val request = mAdapter.bindResultForAfter(
+            result = mViewModel.LoadAfterWithHeadersResult,
+            recyclerView = mBinding.rv,
+            headerAdapter = HeaderAdapter(),
+            itemAdapter = ItemAdapter(),
+            loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
+            emptyAdapter = AdapterFactory.createEmptyAdapter(),
+            errorAdapter = AdapterFactory.createErrorAdapter(),
+            show = { mProgressDialog.show() },
+            hide = { mProgressDialog.hide() },
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
+            }
+        )
+
+        mBinding.btnRefresh.setOnClickListener {
+            lifecycleScope.launch {
+                request.refresh()
+            }
+        }
+
+        lifecycleScope.launch {
+            request.initial()
+        }
     }
 
     private fun initLoadBefore() {

@@ -189,7 +189,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
         collect()
     }
     after = suspend {
-        result.before()
+        result.after()
         collect()
     }
     loadMoreAdapter.onLoadMore = after
