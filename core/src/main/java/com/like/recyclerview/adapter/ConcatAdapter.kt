@@ -362,114 +362,137 @@ fun <ResultType, ValueInList> ConcatAdapter.collectResultForLoadBefore(
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ): ResultHandler = ResultHandler().apply {
-    fun initialOrRefresh() {
-
-    }
     initial = suspend {
         result.initial()
-        result.flow
-            .flowOn(Dispatchers.IO)
-            .onStart {
-                show?.invoke()
-            }.onCompletion {
-                hide?.invoke()
-            }.catch {
-                when (adapters.firstOrNull()) {
-                    null -> {
-                        add(errorAdapter)
-                        errorAdapter?.onError(it)
-                    }
-                    errorAdapter -> {
-                        errorAdapter?.onError(it)
-                    }
-                    emptyAdapter -> {
-                        clear()
-                        add(errorAdapter)
-                        errorAdapter?.onError(it)
-                    }
-                }
-                onError?.invoke(RequestType.Initial, it)
-            }.flowOn(Dispatchers.Main)
-            .collect {
-                val res = transformer(RequestType.Initial, it)
-                if (res.isNullOrEmpty()) {
-                    clear()
-                    add(emptyAdapter)
-                } else {
-                    clear()
-                    addAll(loadMoreAdapter, itemAdapter)
-                    itemAdapter.clear()
-                    itemAdapter.addAllToEnd(res)
-                    loadMoreAdapter.reload()
-                    loadMoreAdapter.onComplete()
-                    recyclerView.scrollToBottom()
-                }
-                onSuccess?.invoke(RequestType.Initial, it)
-            }
+        collectInitialOrRefreshResultForBefore(
+            result,
+            recyclerView,
+            itemAdapter,
+            loadMoreAdapter,
+            emptyAdapter,
+            errorAdapter,
+            transformer,
+            show,
+            hide,
+            onError,
+            onSuccess
+        )
     }
     refresh = suspend {
         result.refresh()
-        result.flow
-            .flowOn(Dispatchers.IO)
-            .onStart {
-                show?.invoke()
-            }.onCompletion {
-                hide?.invoke()
-            }.catch {
-                when (adapters.firstOrNull()) {
-                    null -> {
-                        add(errorAdapter)
-                        errorAdapter?.onError(it)
-                    }
-                    errorAdapter -> {
-                        errorAdapter?.onError(it)
-                    }
-                    emptyAdapter -> {
-                        clear()
-                        add(errorAdapter)
-                        errorAdapter?.onError(it)
-                    }
-                }
-                onError?.invoke(RequestType.Refresh, it)
-            }.flowOn(Dispatchers.Main)
-            .collect {
-                val res = transformer(RequestType.Refresh, it)
-                if (res.isNullOrEmpty()) {
-                    clear()
-                    add(emptyAdapter)
-                } else {
-                    clear()
-                    addAll(loadMoreAdapter, itemAdapter)
-                    itemAdapter.clear()
-                    itemAdapter.addAllToEnd(res)
-                    loadMoreAdapter.reload()
-                    loadMoreAdapter.onComplete()
-                    recyclerView.scrollToBottom()
-                }
-                onSuccess?.invoke(RequestType.Refresh, it)
-            }
+        collectInitialOrRefreshResultForBefore(
+            result,
+            recyclerView,
+            itemAdapter,
+            loadMoreAdapter,
+            emptyAdapter,
+            errorAdapter,
+            transformer,
+            show,
+            hide,
+            onError,
+            onSuccess
+        )
     }
-    loadBefore = suspend {
+    before = suspend {
         result.before()
-        result.flow
-            .flowOn(Dispatchers.IO)
-            .catch {
-                loadMoreAdapter.onError(it)
-                onError?.invoke(RequestType.Before, it)
-            }.flowOn(Dispatchers.Main)
-            .collect {
-                val res = transformer(RequestType.Before, it)
-                if (res.isNullOrEmpty()) {
-                    loadMoreAdapter.onEnd()
-                } else {
-                    itemAdapter.addAllToStart(res)
-                    recyclerView.keepPosition(res.size, 1)
-                    loadMoreAdapter.reload()
-                    loadMoreAdapter.onComplete()
-                }
-                onSuccess?.invoke(RequestType.Before, it)
-            }
+        collectBeforeResultForBefore(
+            result,
+            recyclerView,
+            itemAdapter,
+            loadMoreAdapter,
+            transformer,
+            onError,
+            onSuccess
+        )
     }
+}
+
+private suspend fun <ResultType, ValueInList> ConcatAdapter.collectInitialOrRefreshResultForBefore(
+    result: Result<ResultType>,
+    recyclerView: RecyclerView,
+    itemAdapter: BaseAdapter<*, ValueInList>,
+    loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
+    emptyAdapter: BaseAdapter<*, *>? = null,
+    errorAdapter: BaseErrorAdapter<*, *>? = null,
+    transformer: suspend (RequestType, ResultType) -> List<ValueInList>? = { requestType, resultType ->
+        resultType as? List<ValueInList>
+    },
+    show: (() -> Unit)? = null,
+    hide: (() -> Unit)? = null,
+    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+) {
+    result.flow
+        .flowOn(Dispatchers.IO)
+        .onStart {
+            show?.invoke()
+        }.onCompletion {
+            hide?.invoke()
+        }.catch {
+            when (adapters.firstOrNull()) {
+                null -> {
+                    add(errorAdapter)
+                    errorAdapter?.onError(it)
+                }
+                errorAdapter -> {
+                    errorAdapter?.onError(it)
+                }
+                emptyAdapter -> {
+                    clear()
+                    add(errorAdapter)
+                    errorAdapter?.onError(it)
+                }
+            }
+            onError?.invoke(result.requestType(), it)
+        }.flowOn(Dispatchers.Main)
+        .collect {
+            val res = transformer(result.requestType(), it)
+            if (res.isNullOrEmpty()) {
+                clear()
+                add(emptyAdapter)
+            } else {
+                clear()
+                addAll(loadMoreAdapter, itemAdapter)
+                itemAdapter.clear()
+                itemAdapter.addAllToEnd(res)
+                loadMoreAdapter.reload()
+                loadMoreAdapter.onComplete()
+                recyclerView.scrollToBottom()
+            }
+            onSuccess?.invoke(result.requestType(), it)
+        }
+}
+
+private suspend fun <ResultType, ValueInList> ConcatAdapter.collectBeforeResultForBefore(
+    result: Result<ResultType>,
+    recyclerView: RecyclerView,
+    itemAdapter: BaseAdapter<*, ValueInList>,
+    loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
+    transformer: suspend (RequestType, ResultType) -> List<ValueInList>? = { requestType, resultType ->
+        resultType as? List<ValueInList>
+    },
+    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+) {
+    result.flow
+        .flowOn(Dispatchers.IO)
+        .catch {
+            loadMoreAdapter.onError(it)
+            onError?.invoke(result.requestType(), it)
+        }.flowOn(Dispatchers.Main)
+        .collect {
+            val res = transformer(result.requestType(), it)
+            if (res.isNullOrEmpty()) {
+                loadMoreAdapter.onEnd()
+            } else {
+                itemAdapter.addAllToStart(res)
+                recyclerView.keepPosition(res.size, 1)
+                loadMoreAdapter.reload()
+                loadMoreAdapter.onComplete()
+            }
+            onSuccess?.invoke(result.requestType(), it)
+        }
 }
 
 class ResultHandler {
@@ -480,8 +503,8 @@ class ResultHandler {
     var refresh: suspend () -> Unit = {}
 
     // 往后加载更多
-    var loadAfter: suspend () -> Unit = {}
+    var after: suspend () -> Unit = {}
 
     // 往前加载更多
-    var loadBefore: suspend () -> Unit = {}
+    var before: suspend () -> Unit = {}
 }

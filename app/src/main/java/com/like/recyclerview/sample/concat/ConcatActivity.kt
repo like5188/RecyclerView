@@ -83,7 +83,7 @@ class ConcatActivity : AppCompatActivity() {
                     it?.take(3)
                 }.retryWhen { cause, attempt ->
                     Logger.e("retryWhen")
-                    cause.message == "load error 0"
+                    attempt == 0L
                 }.flowOn(Dispatchers.IO),
                 recyclerView = mBinding.rv,
                 itemAdapter = ItemAdapter(),
@@ -201,14 +201,21 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadBefore() {
-        val result = mViewModel.loadBeforeResult
+        val result = mViewModel.loadBeforeResult.apply {
+            flow = flow.map {
+                it?.take(3)
+            }.retryWhen { cause, attempt ->
+                Logger.e("retryWhen")
+                attempt == 0L
+            }.flowOn(Dispatchers.IO)
+        }
         var resultHandler = ResultHandler()
         resultHandler = mAdapter.collectResultForLoadBefore(
             result = result,
             recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter {
-                resultHandler.loadBefore()
+                resultHandler.before()
             },
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),
@@ -218,15 +225,6 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
         )
-//        result.dataFlow = result.dataFlow.map {
-//            val state = it.state
-//            val type = it.type
-//            if (state is RequestState.Success) {
-//                ResultReport(type, RequestState.Success(state.data?.take(3)))
-//            } else {
-//                it
-//            }
-//        }
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
