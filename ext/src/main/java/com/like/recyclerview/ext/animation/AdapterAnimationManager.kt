@@ -6,9 +6,31 @@ import android.view.animation.Interpolator
 import android.view.animation.LinearInterpolator
 import com.like.recyclerview.viewholder.BindingViewHolder
 
+/*
+class ItemAdapter : BaseAdapter<ViewDataBinding, IRecyclerViewItem>() {
+    private val mAdapterAnimationManager: AdapterAnimationManager by lazy {
+        AdapterAnimationManager {
+            val scaleX = ObjectAnimator.ofFloat(it, "scaleX", 0.5f, 1f)
+            val scaleY = ObjectAnimator.ofFloat(it, "scaleY", 0.5f, 1f)
+            arrayOf(scaleX, scaleY)
+        }.apply {
+            setFirstOnly(false)
+        }
+    }
+
+    override fun onBindViewHolder(
+        holder: BindingViewHolder<ViewDataBinding>,
+        binding: ViewDataBinding,
+        position: Int,
+        item: IRecyclerViewItem
+    ) {
+        super.onBindViewHolder(holder, binding, position, item)
+        mAdapterAnimationManager.onBindViewHolder(holder)
+    }
+}
+ */
 /**
  * item 动画管理
- * 使用方式：在 adapter 的 onBindViewHolder 方法中调用 adapterAnimationManager.onBindViewHolder(holder, position)
  *
  * @param animators 需要item执行的动画效果
  *
