@@ -2,6 +2,7 @@ package com.like.recyclerview.utils
 
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.like.common.util.ControlledRunner
 import com.like.paging.RequestType
 import com.like.paging.Result
 import com.like.recyclerview.adapter.BaseAdapter
@@ -180,19 +181,19 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
             onSuccess
         )
     }
-    initial = suspend {
+    mInitial = suspend {
         result.initial()
         collect()
     }
-    refresh = suspend {
+    mRefresh = suspend {
         result.refresh()
         collect()
     }
-    after = suspend {
+    mAfter = suspend {
         result.after()
         collect()
     }
-    loadMoreAdapter.onLoadMore = after
+    loadMoreAdapter.onLoadMore = ::after
 }
 
 /**
@@ -236,19 +237,19 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
             onSuccess
         )
     }
-    initial = suspend {
+    mInitial = suspend {
         result.initial()
         collect()
     }
-    refresh = suspend {
+    mRefresh = suspend {
         result.refresh()
         collect()
     }
-    before = suspend {
+    mBefore = suspend {
         result.before()
         collect()
     }
-    loadMoreAdapter.onLoadMore = before
+    loadMoreAdapter.onLoadMore = ::before
 }
 
 /**
@@ -384,15 +385,45 @@ private suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForPagi
 }
 
 class Request {
+    private val mControlledRunner = ControlledRunner<Unit>()
+
     // 初始化操作
-    var initial: suspend () -> Unit = {}
+    internal lateinit var mInitial: suspend () -> Unit
 
     // 刷新操作
-    var refresh: suspend () -> Unit = {}
+    internal lateinit var mRefresh: suspend () -> Unit
 
     // 往后加载更多
-    var after: suspend () -> Unit = {}
+    internal lateinit var mAfter: suspend () -> Unit
 
     // 往前加载更多
-    var before: suspend () -> Unit = {}
+    internal lateinit var mBefore: suspend () -> Unit
+
+    suspend fun initial() {
+        if (!::mInitial.isInitialized) return
+        mControlledRunner.cancelPreviousThenRun {
+            mInitial()
+        }
+    }
+
+    suspend fun refresh() {
+        if (!::mRefresh.isInitialized) return
+        mControlledRunner.cancelPreviousThenRun {
+            mRefresh()
+        }
+    }
+
+    suspend fun after() {
+        if (!::mAfter.isInitialized) return
+        mControlledRunner.joinPreviousOrRun {
+            mAfter()
+        }
+    }
+
+    suspend fun before() {
+        if (!::mBefore.isInitialized) return
+        mControlledRunner.joinPreviousOrRun {
+            mBefore()
+        }
+    }
 }

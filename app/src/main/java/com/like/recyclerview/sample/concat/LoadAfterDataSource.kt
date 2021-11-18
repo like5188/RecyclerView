@@ -1,5 +1,6 @@
 package com.like.recyclerview.sample.concat
 
+import com.like.common.util.Logger
 import com.like.paging.RequestType
 import com.like.paging.dataSource.byPageNoKeyed.PageNoKeyedPagingDataSource
 import com.like.recyclerview.model.IRecyclerViewItem
@@ -10,9 +11,14 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRec
     private var j = 0
 
     override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<IRecyclerViewItem>? {
-        delay(1000)
+        Logger.d("load requestType=$requestType pageNo=$pageNo")
         if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
             i = 0
+        }
+        if (i == 0) {
+            delay(3000)
+        } else {
+            delay(3000)
         }
         return getAfter(pageNo, pageSize)
     }
@@ -24,11 +30,11 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRec
             0 -> {
                 when (j++) {
                     0 -> throw RuntimeException("load error 0")
-                    1 -> throw RuntimeException("load error 1")
-                    2 -> throw RuntimeException("load error 2")
-                    3 -> emptyList()
-                    4 -> throw RuntimeException("load error 4")
-                    6 -> throw RuntimeException("load error 6")
+//                    1 -> throw RuntimeException("load error 1")
+//                    2 -> throw RuntimeException("load error 2")
+//                    3 -> emptyList()
+//                    4 -> throw RuntimeException("load error 4")
+//                    6 -> throw RuntimeException("load error 6")
                     else -> {
                         (start until end).map {
                             DataFactory.createItem(it)

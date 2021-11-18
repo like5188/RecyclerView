@@ -6,7 +6,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.viewholder.BindingViewHolder
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
@@ -17,7 +16,6 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     }
 
     internal var onLoadMore: suspend () -> Unit = {}
-    private var isRunning = AtomicBoolean(true)
     private lateinit var mHolder: BindingViewHolder<VB>
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
@@ -29,11 +27,9 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     private fun load() {
         val context = mHolder.itemView.context
         if (context is LifecycleOwner) {
-            if (isRunning.compareAndSet(false, true)) {
+            context.lifecycleScope.launch {
                 Log.v(TAG, "触发加载更多")
-                context.lifecycleScope.launch {
-                    onLoadMore()
-                }
+                onLoadMore()
             }
         }
     }
@@ -55,7 +51,6 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
         if (::mHolder.isInitialized) {
             mHolder.binding.root.setOnClickListener(null)
         }
-        isRunning.compareAndSet(true, false)
     }
 
     /**

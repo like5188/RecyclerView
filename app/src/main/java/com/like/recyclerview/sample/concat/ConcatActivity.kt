@@ -69,9 +69,9 @@ class ConcatActivity : AppCompatActivity() {
 //                }
 //        }
 
-        initItems()
+//        initItems()
 //        initHeadersAndItems()
-//        initLoadAfter()
+        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
     }
@@ -134,14 +134,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadAfter() {
         val request = mAdapter.bindResultForAfter(
-            result = mViewModel.loadAfterResult.apply {
-                flow = flow.map {
-                    it?.take(3)
-                }.retryWhen { cause, attempt ->
-                    Logger.e("retryWhen")
-                    cause.message == "load error 0" && attempt == 0L
-                }.flowOn(Dispatchers.IO)
-            },
+            result = mViewModel.loadAfterResult,
             recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
