@@ -77,7 +77,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initItems() {
-        val request = mAdapter.bindFlow(
+        val result = mAdapter.bindFlow(
             dataFlow = mViewModel::getItems.asFlow().map {
                 it?.take(3)
             }.retryWhen { cause, attempt ->
@@ -90,24 +90,22 @@ class ConcatActivity : AppCompatActivity() {
             errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
-            onError = {
-                ToastUtils.show(it.message)
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
             }
         )
-
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                request()
+                result.refresh()
             }
         }
-
         lifecycleScope.launch {
-            request()
+            result.initial()
         }
     }
 
     private fun initHeadersAndItems() {
-        val request = mAdapter.bindFlow(
+        val result = mAdapter.bindFlow(
             dataFlow = mViewModel::getHeadersAndItems.asFlow(),
             recyclerView = mBinding.rv,
             headerAdapter = HeaderAdapter(),
@@ -116,25 +114,25 @@ class ConcatActivity : AppCompatActivity() {
             errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
-            onError = {
-                ToastUtils.show(it.message)
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
             }
         )
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                request()
+                result.refresh()
             }
         }
 
         lifecycleScope.launch {
-            request()
+            result.initial()
         }
     }
 
     private fun initLoadAfter() {
         val request = mAdapter.bindResultForAfter(
-            result = mViewModel.loadAfterResult,
+            pagingResult = mViewModel.loadAfterResult,
             recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
@@ -146,13 +144,11 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
         )
-
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
                 request.refresh()
             }
         }
-
         lifecycleScope.launch {
             request.initial()
         }
@@ -160,7 +156,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadAfterWithHeaders() {
         val request = mAdapter.bindResultForAfter(
-            result = mViewModel.LoadAfterWithHeadersResult,
+            pagingResult = mViewModel.LoadAfterWithHeadersResult,
             recyclerView = mBinding.rv,
             headerAdapter = HeaderAdapter(),
             itemAdapter = ItemAdapter(),
@@ -173,13 +169,11 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
         )
-
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
                 request.refresh()
             }
         }
-
         lifecycleScope.launch {
             request.initial()
         }
@@ -187,7 +181,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadBefore() {
         val request = mAdapter.bindResultForBefore(
-            result = mViewModel.loadBeforeResult.apply {
+            pagingResult = mViewModel.loadBeforeResult.apply {
                 flow = flow.map {
                     it?.take(3)
                 }.retryWhen { cause, attempt ->
@@ -206,13 +200,11 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
         )
-
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
                 request.refresh()
             }
         }
-
         lifecycleScope.launch {
             request.initial()
         }

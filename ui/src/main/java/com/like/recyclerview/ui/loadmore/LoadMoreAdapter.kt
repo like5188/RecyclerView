@@ -5,9 +5,9 @@ import com.like.recyclerview.ui.databinding.ItemLoadMoreBinding
 
 class LoadMoreAdapter : BaseLoadMoreAdapter<ItemLoadMoreBinding, LoadMoreItem>() {
 
-    override fun onComplete() {
-        super.onComplete()
-        get(0)?.onComplete()
+    override fun onLoading() {
+        super.onLoading()
+        get(0)?.onLoading()
     }
 
     override fun onEnd() {

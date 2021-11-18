@@ -45,21 +45,19 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     }
 
     /**
-     * 请求数据完成时调用此方法。子类可以重写此方法进行界面更新。
+     * 请求数据时调用此方法。子类可以重写此方法进行界面更新。
      */
-    open fun onComplete() {
-        if (::mHolder.isInitialized) {
-            mHolder.binding.root.setOnClickListener(null)
-        }
+    open fun onLoading() {
+        if (!::mHolder.isInitialized) return
+        mHolder.binding.root.setOnClickListener(null)
     }
 
     /**
      * 没有更多数据时调用此方法。子类可以重写此方法进行界面更新。
      */
     open fun onEnd() {
-        if (::mHolder.isInitialized) {
-            mHolder.binding.root.setOnClickListener(null)
-        }
+        if (!::mHolder.isInitialized) return
+        mHolder.binding.root.setOnClickListener(null)
     }
 
     /**
@@ -68,11 +66,10 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
      */
     override fun onError(throwable: Throwable) {
         super.onError(throwable)
-        if (::mHolder.isInitialized) {
-            mHolder.binding.root.setOnClickListener {
-                onComplete()
-                load()
-            }
+        if (!::mHolder.isInitialized) return
+        mHolder.binding.root.setOnClickListener {
+            onLoading()
+            load()
         }
     }
 }

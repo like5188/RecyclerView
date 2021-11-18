@@ -2,9 +2,9 @@ package com.like.recyclerview.utils
 
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.like.common.util.ControlledRunner
+import com.like.paging.PagingResult
 import com.like.paging.RequestType
-import com.like.paging.Result
+import com.like.paging.util.ConcurrencyHelper
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseErrorAdapter
 import com.like.recyclerview.adapter.BaseLoadMoreAdapter
@@ -50,7 +50,7 @@ fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerVi
 }
 
 /**
- * 收集不分页数据[dataFlow]并显示到 ConcatAdapter（线程安全）
+ * 收集不分页数据[Flow]并显示到 ConcatAdapter（线程安全）
  *
  * @param dataFlow          获取数据的[Flow]
  * @param recyclerView
@@ -65,7 +65,6 @@ fun ConcatAdapter.removeAll(vararg adapters: RecyclerView.Adapter<out RecyclerVi
  * 在这里进行额外错误处理：
  * 如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
  * @param onSuccess         请求成功时回调
- * @return 用于进行请求操作
  */
 fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
     dataFlow: Flow<ResultType>,
@@ -87,61 +86,58 @@ fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
     },
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onError: (suspend (Throwable) -> Unit)? = null,
-    onSuccess: (suspend (ResultType) -> Unit)? = null,
-): suspend () -> Unit = suspend {
-    dataFlow.flowOn(Dispatchers.IO)
-        .onStart {
-            show?.invoke()
-        }.onCompletion {
-            hide?.invoke()
-        }.catch {
-            when (adapters.firstOrNull()) {
-                null -> {
-                    add(errorAdapter)
-                    errorAdapter?.onError(it)
-                }
-                errorAdapter -> {
-                    errorAdapter?.onError(it)
-                }
-                emptyAdapter -> {
-                    clear()
-                    add(errorAdapter)
-                    errorAdapter?.onError(it)
-                }
+    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+): Result<ResultType> = Result(dataFlow).apply {
+    this.show = show
+    this.hide = hide
+    this.onError = { requestType, throwable ->
+        when (adapters.firstOrNull()) {
+            null -> {
+                add(errorAdapter)
+                errorAdapter?.onError(throwable)
             }
-            onError?.invoke(it)
-        }.flowOn(Dispatchers.Main)
-        .collect {
-            val res = transformer(it)
-            clear()
-            if (res.isNullOrEmpty()) {
-                // 显示空视图
-                add(emptyAdapter)
-            } else {
-                val headers = res.getOrNull(0)
-                val items = res.getOrNull(1)
-                if (!headers.isNullOrEmpty() && headerAdapter != null) {
-                    headerAdapter.clear()
-                    headerAdapter.addAllToEnd(headers)
-                    add(headerAdapter)
-                }
-                if (!items.isNullOrEmpty()) {
-                    itemAdapter.clear()
-                    itemAdapter.addAllToEnd(items)
-                    add(itemAdapter)
-                }
-                recyclerView.scrollToTop()
+            errorAdapter -> {
+                errorAdapter?.onError(throwable)
             }
-            onSuccess?.invoke(it)
+            emptyAdapter -> {
+                clear()
+                add(errorAdapter)
+                errorAdapter?.onError(throwable)
+            }
         }
+        onError?.invoke(requestType, throwable)
+    }
+    this.onSuccess = { requestType, resultType ->
+        val res = transformer(resultType)
+        clear()
+        if (res.isNullOrEmpty()) {
+            // 显示空视图
+            add(emptyAdapter)
+        } else {
+            val headers = res.getOrNull(0)
+            val items = res.getOrNull(1)
+            if (!headers.isNullOrEmpty() && headerAdapter != null) {
+                headerAdapter.clear()
+                headerAdapter.addAllToEnd(headers)
+                add(headerAdapter)
+            }
+            if (!items.isNullOrEmpty()) {
+                itemAdapter.clear()
+                itemAdapter.addAllToEnd(items)
+                add(itemAdapter)
+            }
+            recyclerView.scrollToTop()
+        }
+        onSuccess?.invoke(requestType, resultType)
+    }
 }
 
 /**
- * 绑定往后分页数据[Result]并显示到 ConcatAdapter
+ * 绑定往后分页数据并显示到 ConcatAdapter
  */
 fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
-    result: Result<ResultType>,
+    pagingResult: PagingResult<ResultType>,
     recyclerView: RecyclerView,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
@@ -163,44 +159,18 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): Request = Request().apply {
-    suspend fun collect() {
-        collectResultForPaging(
-            true,
-            result,
-            recyclerView,
-            headerAdapter,
-            itemAdapter,
-            loadMoreAdapter,
-            emptyAdapter,
-            errorAdapter,
-            transformer,
-            show,
-            hide,
-            onError,
-            onSuccess
-        )
-    }
-    mInitial = suspend {
-        result.initial()
-        collect()
-    }
-    mRefresh = suspend {
-        result.refresh()
-        collect()
-    }
-    mAfter = suspend {
-        result.after()
-        collect()
-    }
+): Result<ResultType> = bindResultForPaging(
+    true, pagingResult, recyclerView, headerAdapter, itemAdapter, loadMoreAdapter,
+    emptyAdapter, errorAdapter, transformer, show, hide, onError, onSuccess
+).apply {
     loadMoreAdapter.onLoadMore = ::after
 }
 
 /**
- * 绑定往前分页数据[Result]并显示到 ConcatAdapter
+ * 绑定往前分页数据并显示到 ConcatAdapter
  */
 fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
-    result: Result<ResultType>,
+    pagingResult: PagingResult<ResultType>,
     recyclerView: RecyclerView,
     itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
@@ -213,50 +183,25 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): Request = Request().apply {
-    suspend fun collect() {
-        collectResultForPaging(
-            false,
-            result,
-            recyclerView,
-            null,
-            itemAdapter,
-            loadMoreAdapter,
-            emptyAdapter,
-            errorAdapter,
-            transformer = { requestType, resultType ->
-                if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
-                    listOf(emptyList(), transformer(requestType, resultType))
-                } else {
-                    emptyList()
-                }
-            },
-            show,
-            hide,
-            onError,
-            onSuccess
-        )
-    }
-    mInitial = suspend {
-        result.initial()
-        collect()
-    }
-    mRefresh = suspend {
-        result.refresh()
-        collect()
-    }
-    mBefore = suspend {
-        result.before()
-        collect()
-    }
+): Result<ResultType> = bindResultForPaging(
+    false, pagingResult, recyclerView, null, itemAdapter, loadMoreAdapter, emptyAdapter, errorAdapter,
+    transformer = { requestType, resultType ->
+        if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
+            listOf(emptyList(), transformer(requestType, resultType))
+        } else {
+            emptyList()
+        }
+    },
+    show, hide, onError, onSuccess
+).apply {
     loadMoreAdapter.onLoadMore = ::before
 }
 
 /**
- * 收集分页数据[Result]并显示到 ConcatAdapter（线程安全）
+ * 收集分页数据[PagingResult]并显示到 ConcatAdapter（线程安全）
  *
  * @param isAfter           是否是往后加载更多。true：往后加载更多；false：往前加载更多；
- * @param result            使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+ * @param pagingResult      使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
  * @param recyclerView
  * @param headerAdapter     header 的 adapter
  * @param itemAdapter       列表的 adapter
@@ -271,11 +216,10 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
  * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
  * 加载更多失败时，直接更新[loadMoreAdapter]。
  * @param onSuccess         请求成功时回调。
- * @return [Request]  用于进行各种请求操作。
  */
-private suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForPaging(
+private fun <ResultType, ValueInList> ConcatAdapter.bindResultForPaging(
     isAfter: Boolean,
-    result: Result<ResultType>,
+    pagingResult: PagingResult<ResultType>,
     recyclerView: RecyclerView,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
@@ -287,143 +231,191 @@ private suspend fun <ResultType, ValueInList> ConcatAdapter.collectResultForPagi
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-) {
-    result.flow
-        .flowOn(Dispatchers.IO)
-        .onStart {
-            val requestType = result.requestType()
-            if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
-                show?.invoke()
-            }
-        }.onCompletion {
-            val requestType = result.requestType()
-            if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
-                hide?.invoke()
-            }
-        }.catch {
-            val requestType = result.requestType()
-            when {
-                requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                    when (adapters.firstOrNull()) {
-                        null -> {
-                            add(errorAdapter)
-                            errorAdapter?.onError(it)
-                        }
-                        errorAdapter -> {
-                            errorAdapter?.onError(it)
-                        }
-                        emptyAdapter -> {
-                            clear()
-                            add(errorAdapter)
-                            errorAdapter?.onError(it)
-                        }
+): Result<ResultType> = Result(pagingResult).apply {
+    this.show = show
+    this.hide = hide
+    this.onError = { requestType, throwable ->
+        when {
+            requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+                // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
+                when (adapters.firstOrNull()) {
+                    null -> {
+                        add(errorAdapter)
+                        errorAdapter?.onError(throwable)
+                    }
+                    errorAdapter -> {
+                        errorAdapter?.onError(throwable)
+                    }
+                    emptyAdapter -> {
+                        clear()
+                        add(errorAdapter)
+                        errorAdapter?.onError(throwable)
                     }
                 }
-                requestType is RequestType.After || requestType is RequestType.Before -> {
-                    loadMoreAdapter.onError(it)
-                }
             }
-            onError?.invoke(requestType, it)
-        }.flowOn(Dispatchers.Main)
-        .collect {
-            val requestType = result.requestType()
-            val res = transformer(requestType, it)
-            when {
-                requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
-                    clear()
-                    if (res.isNullOrEmpty()) {
-                        // 显示空视图
-                        add(emptyAdapter)
-                    } else {
-                        val headers = res.getOrNull(0)
-                        val items = res.getOrNull(1)
-                        // 往后加载更多时，才添加 header
-                        if (isAfter && !headers.isNullOrEmpty() && headerAdapter != null) {
-                            headerAdapter.clear()
-                            headerAdapter.addAllToEnd(headers)
-                            add(headerAdapter)
-                        }
-                        if (!items.isNullOrEmpty()) {
-                            itemAdapter.clear()
-                            if (isAfter) {
-                                itemAdapter.addAllToEnd(items)
-                                addAll(itemAdapter, loadMoreAdapter)
-                            } else {
-                                itemAdapter.addAllToStart(items)
-                                addAll(loadMoreAdapter, itemAdapter)
-                            }
-                            loadMoreAdapter.reload()
-                            loadMoreAdapter.onComplete()
-                        }
-                        if (isAfter) {
-                            recyclerView.scrollToTop()
-                        } else {
-                            recyclerView.scrollToBottom()
-                        }
+            requestType is RequestType.After || requestType is RequestType.Before -> {
+                // 加载更多失败时，直接更新[loadMoreAdapter]
+                loadMoreAdapter.onError(throwable)
+            }
+        }
+        onError?.invoke(requestType, throwable)
+    }
+    this.onSuccess = { requestType, resultType ->
+        val res = transformer(requestType, resultType)
+        when {
+            requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+                clear()
+                if (res.isNullOrEmpty()) {
+                    // 显示空视图
+                    add(emptyAdapter)
+                } else {
+                    val headers = res.getOrNull(0)
+                    val items = res.getOrNull(1)
+                    // 往后加载更多时，才添加 header
+                    if (isAfter && !headers.isNullOrEmpty() && headerAdapter != null) {
+                        headerAdapter.clear()
+                        headerAdapter.addAllToEnd(headers)
+                        add(headerAdapter)
                     }
-                }
-                requestType is RequestType.After || requestType is RequestType.Before -> {
-                    val items = res?.getOrNull(1)
-                    if (items.isNullOrEmpty()) {
-                        // 没有更多数据需要加载
-                        loadMoreAdapter.onEnd()
-                    } else {
-                        // 还有更多数据需要加载
+                    if (!items.isNullOrEmpty()) {
+                        itemAdapter.clear()
                         if (isAfter) {
                             itemAdapter.addAllToEnd(items)
+                            addAll(itemAdapter, loadMoreAdapter)
                         } else {
                             itemAdapter.addAllToStart(items)
-                            recyclerView.keepPosition(items.size, 1)
+                            addAll(loadMoreAdapter, itemAdapter)
                         }
                         loadMoreAdapter.reload()
-                        loadMoreAdapter.onComplete()
+                        loadMoreAdapter.onLoading()
+                    }
+                    if (isAfter) {
+                        recyclerView.scrollToTop()
+                    } else {
+                        recyclerView.scrollToBottom()
                     }
                 }
             }
-            onSuccess?.invoke(result.requestType(), it)
+            requestType is RequestType.After || requestType is RequestType.Before -> {
+                val items = res?.getOrNull(1)
+                if (items.isNullOrEmpty()) {
+                    // 没有更多数据需要加载
+                    loadMoreAdapter.onEnd()
+                } else {
+                    // 还有更多数据需要加载
+                    if (isAfter) {
+                        itemAdapter.addAllToEnd(items)
+                    } else {
+                        itemAdapter.addAllToStart(items)
+                        recyclerView.keepPosition(items.size, 1)
+                    }
+                    loadMoreAdapter.reload()
+                    loadMoreAdapter.onLoading()
+                }
+            }
         }
+        onSuccess?.invoke(requestType, resultType)
+    }
 }
 
-class Request {
-    private val mControlledRunner = ControlledRunner<Unit>()
+/**
+ * 封装了初始化、刷新、往后加载更多、往前加载更多这四种操作。
+ * 请求并发处理规则：
+ * 1、初始化、刷新：如果有操作正在执行，则取消正在执行的操作，执行新操作。
+ * 2、往后加载更多、往前加载更多：如果有操作正在执行，则放弃新操作，否则执行新操作。
+ */
+class Result<ResultType> {
+    private val mConcurrencyHelper = ConcurrencyHelper()
 
-    // 初始化操作
-    internal lateinit var mInitial: suspend () -> Unit
+    /**
+     * 初始化或者刷新开始时显示进度条
+     */
+    internal var show: (() -> Unit)? = null
 
-    // 刷新操作
-    internal lateinit var mRefresh: suspend () -> Unit
+    /**
+     * 初始化或者刷新完成时隐藏进度条
+     */
+    internal var hide: (() -> Unit)? = null
 
-    // 往后加载更多
-    internal lateinit var mAfter: suspend () -> Unit
+    /**
+     * 请求失败时回调
+     */
+    internal var onError: (suspend (RequestType, Throwable) -> Unit)? = null
 
-    // 往前加载更多
-    internal lateinit var mBefore: suspend () -> Unit
+    /**
+     * 请求成功时回调
+     */
+    internal var onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null
+
+    private var pagingResult: PagingResult<ResultType>? = null
+    private var flow: Flow<ResultType>? = null
+
+    internal constructor(pagingResult: PagingResult<ResultType>) {
+        this.pagingResult = pagingResult
+    }
+
+    internal constructor(flow: Flow<ResultType>) {
+        this.flow = flow
+    }
 
     suspend fun initial() {
-        if (!::mInitial.isInitialized) return
-        mControlledRunner.cancelPreviousThenRun {
-            mInitial()
+        mConcurrencyHelper.cancelPreviousThenRun {
+            pagingResult?.setRequestType?.invoke(RequestType.Initial)
+            collect(RequestType.Initial, show, hide, onError, onSuccess)
         }
     }
 
     suspend fun refresh() {
-        if (!::mRefresh.isInitialized) return
-        mControlledRunner.cancelPreviousThenRun {
-            mRefresh()
+        mConcurrencyHelper.cancelPreviousThenRun {
+            pagingResult?.setRequestType?.invoke(RequestType.Refresh)
+            collect(RequestType.Refresh, show, hide, onError, onSuccess)
         }
     }
 
     suspend fun after() {
-        if (!::mAfter.isInitialized) return
-        mControlledRunner.joinPreviousOrRun {
-            mAfter()
+        mConcurrencyHelper.dropIfPreviousRunning {
+            pagingResult?.setRequestType?.invoke(RequestType.After)
+            collect(RequestType.After, show, hide, onError, onSuccess)
         }
     }
 
     suspend fun before() {
-        if (!::mBefore.isInitialized) return
-        mControlledRunner.joinPreviousOrRun {
-            mBefore()
+        mConcurrencyHelper.dropIfPreviousRunning {
+            pagingResult?.setRequestType?.invoke(RequestType.Before)
+            collect(RequestType.Before, show, hide, onError, onSuccess)
         }
+    }
+
+    /**
+     * 收集分页数据
+     *
+     * @param show              初始化或者刷新开始时显示进度条
+     * @param hide              初始化或者刷新完成时隐藏进度条
+     * @param onError           请求失败时回调。
+     * @param onSuccess         请求成功时回调。
+     */
+    private suspend fun collect(
+        requestType: RequestType,
+        show: (() -> Unit)? = null,
+        hide: (() -> Unit)? = null,
+        onError: (suspend (RequestType, Throwable) -> Unit)? = null,
+        onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+    ) {
+        val flow = pagingResult?.flow ?: flow ?: return
+        flow.flowOn(Dispatchers.IO)
+            .onStart {
+                if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
+                    show?.invoke()
+                }
+            }.onCompletion {
+                if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
+                    hide?.invoke()
+                }
+            }.catch {
+                onError?.invoke(requestType, it)
+            }.flowOn(Dispatchers.Main)
+            .collect {
+                onSuccess?.invoke(requestType, it)
+            }
     }
 }

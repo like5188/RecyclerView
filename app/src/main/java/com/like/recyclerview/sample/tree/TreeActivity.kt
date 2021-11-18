@@ -66,7 +66,7 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        val request = mAdapter.bindFlow(
+        val result = mAdapter.bindFlow(
             dataFlow = mViewModel::getItems.asFlow(),
             recyclerView = mBinding.rv,
             itemAdapter = itemAdapter,
@@ -74,17 +74,17 @@ class TreeActivity : AppCompatActivity() {
             errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mBinding.swipeRefreshLayout.isRefreshing = true },
             hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
-            onError = {
-                ToastUtils.show(it.message)
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
             }
         )
         mBinding.swipeRefreshLayout.setOnRefreshListener {
             lifecycleScope.launch {
-                request()
+                result.refresh()
             }
         }
         lifecycleScope.launch {
-            request()
+            result.initial()
         }
     }
 }

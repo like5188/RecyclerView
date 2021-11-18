@@ -9,12 +9,12 @@ import com.like.recyclerview.ui.R
 /**
  * 用于 RecyclerView 的往后加载更多的视图
  *
- * @param completeTip       加载中的描述
+ * @param loadingTip        加载中的描述
  * @param endTip            没有数据了的描述
  * @param errorTip          加载失败的描述
  */
 data class LoadMoreItem(
-    val completeTip: String = "加载中……",
+    val loadingTip: String = "加载中……",
     val endTip: String = "没有数据啦",
     val errorTip: String = "加载失败，点击重试！",
     @ColorRes val bgColor: Int = R.color.recyclerview_bg_white_0,
@@ -22,20 +22,26 @@ data class LoadMoreItem(
     @ColorRes val textColor: Int = R.color.recyclerview_text_gray_0,
     val textSize: Float = 16f,
 ) : IRecyclerViewItem {
+    companion object {
+        const val LOADING = 0
+        const val END = 1
+        const val ERROR = 2
+    }
+
     override val layoutId: Int = R.layout.item_load_more
     override val variableId: Int = BR.loadMoreItem
-    val status: ObservableInt = ObservableInt(0)
+    val status: ObservableInt = ObservableInt(LOADING)
 
-    fun onComplete() {
-        status.set(0)
+    fun onLoading() {
+        status.set(LOADING)
     }
 
     fun onEnd() {
-        status.set(1)
+        status.set(END)
     }
 
     fun onError(throwable: Throwable) {
-        status.set(2)
+        status.set(ERROR)
     }
 
 }

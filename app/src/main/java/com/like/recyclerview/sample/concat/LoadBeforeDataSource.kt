@@ -5,7 +5,7 @@ import com.like.paging.dataSource.byPageNoKeyed.PageNoKeyedPagingDataSource
 import com.like.recyclerview.model.IRecyclerViewItem
 import kotlinx.coroutines.delay
 
-class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(10, 0, pageSize) {
+class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(10, pageSize) {
     private var i = 0
     private var j = 0
 

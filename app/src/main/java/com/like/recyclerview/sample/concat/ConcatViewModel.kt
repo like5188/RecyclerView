@@ -8,9 +8,9 @@ class ConcatViewModel : ViewModel() {
         const val PAGE_SIZE = 20
     }
 
-    val loadAfterResult = LoadAfterDataSource(PAGE_SIZE).result()
-    val LoadAfterWithHeadersResult = LoadAfterWithHeadersDataSource(PAGE_SIZE).result()
-    val loadBeforeResult = LoadBeforeDataSource(PAGE_SIZE).result()
+    val loadAfterResult = LoadAfterDataSource(PAGE_SIZE).pagingResult()
+    val LoadAfterWithHeadersResult = LoadAfterWithHeadersDataSource(PAGE_SIZE).pagingResult()
+    val loadBeforeResult = LoadBeforeDataSource(PAGE_SIZE).pagingResult()
 
     private val itemDataSource = ItemDataSource()
     private val headerDataSource = HeaderDataSource()

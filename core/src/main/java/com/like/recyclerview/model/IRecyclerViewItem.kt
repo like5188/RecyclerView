@@ -10,12 +10,12 @@ package com.like.recyclerview.model
         return R.layout.item_error
     }
  * 如果不实现此接口，那么就需要在 Adapter 中实现：
-    override fun onBindViewHolder(holder: BindingViewHolder<ItemErrorBinding>, position: Int) {
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
         super.onBindViewHolder(holder, position)
         holder.binding.setVariable(BR.errorItem, get(position))
     }
 
-    override fun getLayoutId(position: Int): Int {
+    override fun getItemViewType(position: Int, item: ValueInList): Int {
         return R.layout.item_error
     }
  */

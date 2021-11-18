@@ -45,11 +45,11 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
     }
 
     final override fun getItemViewType(position: Int): Int {
-        val item = get(position)
+        val item = get(position) ?: return -1
         if (item is IRecyclerViewItem) {
             return item.layoutId
         }
-        return getLayoutId(position)
+        return getItemViewType(position, item)
     }
 
     final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
@@ -67,7 +67,7 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
         onBindViewHolder(holder, holder.binding, holder.bindingAdapterPosition, item)
     }
 
-    open fun getLayoutId(position: Int): Int = -1
+    open fun getItemViewType(position: Int, item: ValueInList): Int = -1
 
     open fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {}
 

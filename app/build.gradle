@@ -67,7 +67,11 @@ android {
         exclude 'META-INF/*.kotlin_module'
     }
 }
-
+repositories {
+    flatDir {
+        dirs '../core/libs', 'libs'
+    }
+}
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.3.1'
@@ -78,7 +82,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation 'com.github.like5188:Common:6.7.2'
-    implementation 'com.github.like5188:Paging:2.0.1'
+//    implementation 'com.github.like5188:Paging:2.0.1'
+    implementation(name: 'paging-release', ext: 'aar')
     implementation "io.github.lucksiege:pictureselector:v2.7.3-rc05"
     implementation "io.coil-kt:coil:1.3.2"
     implementation "com.github.getActivity:ToastUtils:9.5"
