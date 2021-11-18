@@ -132,7 +132,14 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadAfter() {
         val request = mAdapter.bindResultForAfter(
-            pagingResult = mViewModel.loadAfterResult,
+            pagingResult = mViewModel.loadAfterResult.apply {
+                flow = flow.map {
+                    it?.take(4)
+                }.retryWhen { cause, attempt ->
+                    Logger.e("retryWhen")
+                    cause.message == "load error 0" && attempt == 0L
+                }.flowOn(Dispatchers.IO)
+            },
             recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
