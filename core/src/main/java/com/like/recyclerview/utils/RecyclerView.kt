@@ -34,6 +34,7 @@ fun <ResultType, ValueInList> RecyclerView.bindFlow(
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     transformer: suspend (ResultType) -> List<List<ValueInList>?>? = { resultType ->
+        @Suppress("UNCHECKED_CAST")
         if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
             if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
                 listOf(emptyList(), resultType as? List<ValueInList>)
@@ -106,6 +107,7 @@ fun <ResultType, ValueInList> RecyclerView.bindAfterPagingResult(
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     transformer: suspend (RequestType, ResultType) -> List<List<ValueInList>?>? = { requestType, resultType ->
+        @Suppress("UNCHECKED_CAST")
         if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
             if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
                 listOf(emptyList(), resultType as? List<ValueInList>)
@@ -137,6 +139,7 @@ fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
     emptyAdapter: BaseAdapter<*, *>? = null,
     errorAdapter: BaseErrorAdapter<*, *>? = null,
     transformer: suspend (RequestType, ResultType) -> List<ValueInList>? = { requestType, resultType ->
+        @Suppress("UNCHECKED_CAST")
         resultType as? List<ValueInList>
     },
     show: (() -> Unit)? = null,
