@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.*
  * 收集不分页数据[Flow]并显示到 RecyclerView（线程安全）
  *
  * @param dataFlow          获取数据的[Flow]
+ * @param concatAdapter     合并的 adapter
  * @param headerAdapter     header 的 adapter
  * @param itemAdapter       列表的 adapter
  * @param emptyAdapter      空视图 的 adapter
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.*
  */
 fun <ResultType, ValueInList> RecyclerView.bindFlow(
     dataFlow: Flow<ResultType>,
+    concatAdapter: ConcatAdapter,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
     emptyAdapter: BaseAdapter<*, *>? = null,
@@ -51,8 +53,6 @@ fun <ResultType, ValueInList> RecyclerView.bindFlow(
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ): RequestHandler<ResultType> = RequestHandler(dataFlow).apply {
-    val concatAdapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    adapter = concatAdapter
     this.show = show
     this.hide = hide
     this.onError = { requestType, throwable ->
@@ -102,6 +102,7 @@ fun <ResultType, ValueInList> RecyclerView.bindFlow(
  */
 fun <ResultType, ValueInList> RecyclerView.bindAfterPagingResult(
     pagingResult: PagingResult<ResultType>,
+    concatAdapter: ConcatAdapter,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
@@ -124,7 +125,7 @@ fun <ResultType, ValueInList> RecyclerView.bindAfterPagingResult(
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ): RequestHandler<ResultType> = bindPagingResult(
-    true, pagingResult, headerAdapter, itemAdapter, loadMoreAdapter,
+    true, pagingResult, concatAdapter, headerAdapter, itemAdapter, loadMoreAdapter,
     emptyAdapter, errorAdapter, transformer, show, hide, onError, onSuccess
 ).apply {
     loadMoreAdapter.onLoadMore = ::after
@@ -135,6 +136,7 @@ fun <ResultType, ValueInList> RecyclerView.bindAfterPagingResult(
  */
 fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
     pagingResult: PagingResult<ResultType>,
+    concatAdapter: ConcatAdapter,
     itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
     emptyAdapter: BaseAdapter<*, *>? = null,
@@ -148,7 +150,7 @@ fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ): RequestHandler<ResultType> = bindPagingResult(
-    false, pagingResult, null, itemAdapter, loadMoreAdapter, emptyAdapter, errorAdapter,
+    false, pagingResult, concatAdapter, null, itemAdapter, loadMoreAdapter, emptyAdapter, errorAdapter,
     transformer = { requestType, resultType ->
         if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
             listOf(emptyList(), transformer(requestType, resultType))
@@ -166,6 +168,7 @@ fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
  *
  * @param isAfter           是否是往后加载更多。true：往后加载更多；false：往前加载更多；
  * @param pagingResult      使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+ * @param concatAdapter     合并的 adapter
  * @param headerAdapter     header 的 adapter
  * @param itemAdapter       列表的 adapter
  * @param loadMoreAdapter   加载更多视图 的 adapter
@@ -183,6 +186,7 @@ fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
 private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
     isAfter: Boolean,
     pagingResult: PagingResult<ResultType>,
+    concatAdapter: ConcatAdapter,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
@@ -194,8 +198,6 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ): RequestHandler<ResultType> = RequestHandler(pagingResult).apply {
-    val concatAdapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    adapter = concatAdapter
     this.show = show
     this.hide = hide
     this.onError = { requestType, throwable ->
