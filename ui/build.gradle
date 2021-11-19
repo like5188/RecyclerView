@@ -29,11 +29,7 @@ android {
         enabled true
     }
 }
-repositories {
-    flatDir {
-        dirs '../core/libs', 'libs'
-    }
-}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.3.1'
@@ -44,5 +40,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation project(':core')
-    implementation(name: 'paging-release', ext: 'aar')
 }
