@@ -6,7 +6,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.ConcatAdapter
 import com.hjq.toast.ToastUtils
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
@@ -26,14 +25,10 @@ class TreeActivity : AppCompatActivity() {
     private val mViewModel by lazy {
         ViewModelProvider(this).get(TreeViewModel::class.java)
     }
-    private val mAdapter by lazy {
-        ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
-        mBinding.rv.adapter = mAdapter
         mBinding.rv.itemAnimator = null
 
         val itemAdapter = TreeRecyclerViewAdapter()
@@ -66,9 +61,8 @@ class TreeActivity : AppCompatActivity() {
             })
         })
 
-        val requestHandler = mAdapter.bindFlow(
+        val requestHandler = mBinding.rv.bindFlow(
             dataFlow = mViewModel::getItems.asFlow(),
-            recyclerView = mBinding.rv,
             itemAdapter = itemAdapter,
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),

@@ -68,7 +68,7 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
         super.onError(throwable)
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener {
-            onLoading()
+            onLoading()// 此处不能调用reload()方法，会闪烁影响体验。
             load()
         }
     }

@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.ConcatAdapter
 import com.hjq.toast.ToastUtils
 import com.like.common.util.Logger
 import com.like.recyclerview.decoration.ColorLineItemDecoration
@@ -15,9 +14,9 @@ import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
-import com.like.recyclerview.utils.bindFlow
 import com.like.recyclerview.utils.bindAfterPagingResult
 import com.like.recyclerview.utils.bindBeforePagingResult
+import com.like.recyclerview.utils.bindFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOn
@@ -39,15 +38,11 @@ class ConcatActivity : AppCompatActivity() {
     private val mProgressDialog by lazy {
         ProgressDialog(this)
     }
-    private val mAdapter by lazy {
-        ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        mBinding.rv.adapter = mAdapter
 
 //        lifecycleScope.launchWhenResumed {
 //            (0..3).asFlow()
@@ -77,14 +72,13 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initItems() {
-        val requestHandler = mAdapter.bindFlow(
+        val requestHandler = mBinding.rv.bindFlow(
             dataFlow = mViewModel::getItems.asFlow().map {
                 it?.take(3)
             }.retryWhen { cause, attempt ->
                 Logger.e("retryWhen")
                 cause.message == "load error 0" && attempt == 0L
             }.flowOn(Dispatchers.IO),
-            recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
             errorAdapter = AdapterFactory.createErrorAdapter(),
@@ -105,9 +99,8 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initHeadersAndItems() {
-        val requestHandler = mAdapter.bindFlow(
+        val requestHandler = mBinding.rv.bindFlow(
             dataFlow = mViewModel::getHeadersAndItems.asFlow(),
-            recyclerView = mBinding.rv,
             headerAdapter = HeaderAdapter(),
             itemAdapter = ItemAdapter(),
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
@@ -131,7 +124,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadAfter() {
-        val requestHandler = mAdapter.bindAfterPagingResult(
+        val requestHandler = mBinding.rv.bindAfterPagingResult(
             pagingResult = mViewModel.loadAfterResult.apply {
                 flow = flow.map {
                     it?.take(4)
@@ -140,7 +133,6 @@ class ConcatActivity : AppCompatActivity() {
                     cause.message == "load error 0" && attempt == 0L
                 }.flowOn(Dispatchers.IO)
             },
-            recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
@@ -162,9 +154,8 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadAfterWithHeaders() {
-        val requestHandler = mAdapter.bindAfterPagingResult(
+        val requestHandler = mBinding.rv.bindAfterPagingResult(
             pagingResult = mViewModel.LoadAfterWithHeadersResult,
-            recyclerView = mBinding.rv,
             headerAdapter = HeaderAdapter(),
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
@@ -187,7 +178,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadBefore() {
-        val requestHandler = mAdapter.bindBeforePagingResult(
+        val requestHandler = mBinding.rv.bindBeforePagingResult(
             pagingResult = mViewModel.loadBeforeResult.apply {
                 flow = flow.map {
                     it?.take(3)
@@ -196,7 +187,6 @@ class ConcatActivity : AppCompatActivity() {
                     cause.message == "load error 0" && attempt == 0L
                 }.flowOn(Dispatchers.IO)
             },
-            recyclerView = mBinding.rv,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
             emptyAdapter = AdapterFactory.createEmptyAdapter(),
