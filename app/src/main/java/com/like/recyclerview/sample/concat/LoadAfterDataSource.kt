@@ -16,9 +16,9 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRec
             i = 0
         }
         if (i == 0) {
-            delay(3000)
+            delay(1000)
         } else {
-            delay(3000)
+            delay(1000)
         }
         return getAfter(pageNo, pageSize)
     }
@@ -29,7 +29,7 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRec
         return when (i++) {
             0 -> {
                 when (j++) {
-                    0 -> throw RuntimeException("load error 0")
+//                    0 -> throw RuntimeException("load error 0")
 //                    1 -> throw RuntimeException("load error 1")
 //                    2 -> throw RuntimeException("load error 2")
 //                    3 -> emptyList()

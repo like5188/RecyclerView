@@ -38,7 +38,7 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
      * 重新加载数据，从而触发 onBindViewHolder 方法，触发加载更多逻辑。
      * 因为在数据量太少时，比如 pagesize==1，不能多次触发加载更多。
      */
-    fun reload() {
+    private fun reload() {
         val data = get(0) ?: return
         clear()
         addToEnd(data)
@@ -50,6 +50,7 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     open fun onLoading() {
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener(null)
+        reload()
     }
 
     /**
@@ -68,8 +69,7 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
         super.onError(throwable)
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener {
-            onLoading()// 此处不能调用reload()方法，会闪烁影响体验。
-            load()
+            onLoading()
         }
     }
 }

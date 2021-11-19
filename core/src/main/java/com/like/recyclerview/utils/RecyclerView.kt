@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
-import com.like.paging.util.ConcurrencyHelper
 import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.adapter.BaseErrorAdapter
 import com.like.recyclerview.adapter.BaseLoadMoreAdapter
@@ -247,7 +246,6 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                             itemAdapter.addAllToStart(items)
                             concatAdapter.addAll(loadMoreAdapter, itemAdapter)
                         }
-                        loadMoreAdapter.reload()
                         loadMoreAdapter.onLoading()
                     }
                     if (isAfter) {
@@ -270,7 +268,6 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                         itemAdapter.addAllToStart(items)
                         keepPosition(items.size, 1)
                     }
-                    loadMoreAdapter.reload()
                     loadMoreAdapter.onLoading()
                 }
             }

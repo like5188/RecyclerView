@@ -127,7 +127,7 @@ class ConcatActivity : AppCompatActivity() {
         val requestHandler = mBinding.rv.bindAfterPagingResult(
             pagingResult = mViewModel.loadAfterResult.apply {
                 flow = flow.map {
-                    it?.take(4)
+                    it?.take(1)
                 }.retryWhen { cause, attempt ->
                     Logger.e("retryWhen")
                     cause.message == "load error 0" && attempt == 0L
