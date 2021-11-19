@@ -30,7 +30,7 @@ class ConcurrencyHelper {
             return
         }
 
-        return coroutineScope {
+        coroutineScope {
             val newTask = async(start = LAZY) {
                 block()
             }
@@ -49,7 +49,7 @@ class ConcurrencyHelper {
     suspend fun cancelPreviousThenRun(block: suspend () -> Unit) {
         activeTask.get()?.cancelAndJoin()
 
-        return coroutineScope {
+        coroutineScope {
             val newTask = async(start = LAZY) {
                 block()
             }
