@@ -5,7 +5,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.viewholder.BindingViewHolder
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -13,7 +12,7 @@ import kotlinx.coroutines.launch
  */
 open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAdapter<VB, ValueInList>() {
     companion object {
-        private const val TAG = "AbstractLoadMoreAdapter"
+        private const val TAG = "BaseLoadMoreAdapter"
     }
 
     internal var onLoadMore: suspend () -> Unit = {}
@@ -31,12 +30,15 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     open fun onLoading() {
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener(null)
-        val context = mHolder.itemView.context
-        if (context is LifecycleOwner) {
-            context.lifecycleScope.launch {
-                Log.v(TAG, "触发加载更多")
-                delay(1000)
-                onLoadMore()
+        // 这里必须使用post()方法，让onLoading()方法早点结束，从而不影响ConcurrencyHelper的并发处理规则。
+        // 否则连续触发加载更多的任务会被丢弃，造成错误。
+        mHolder.binding.root.post {
+            val context = mHolder.itemView.context
+            if (context is LifecycleOwner) {
+                context.lifecycleScope.launch {
+                    Log.v(TAG, "触发加载更多")
+                    onLoadMore()
+                }
             }
         }
     }
