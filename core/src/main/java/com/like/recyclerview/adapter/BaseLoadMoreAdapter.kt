@@ -21,45 +21,41 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
         super.onBindViewHolder(holder, binding, position, item)
         mHolder = holder
-        onLoading()
+        loading()
     }
 
     /**
      * 请求数据时调用此方法。子类可以重写此方法进行界面更新。
      */
-    open fun onLoading() {
+    open fun loading() {
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener(null)
-        // 这里必须使用post()方法，让onLoading()方法早点结束，从而不影响ConcurrencyHelper的并发处理规则。
-        // 否则连续触发加载更多的任务会被丢弃，造成错误。
-        mHolder.binding.root.post {
-            val context = mHolder.itemView.context
-            if (context is LifecycleOwner) {
-                context.lifecycleScope.launch {
-                    Log.v(TAG, "触发加载更多")
-                    onLoadMore()
-                }
+        val context = mHolder.itemView.context
+        if (context is LifecycleOwner) {
+            context.lifecycleScope.launch {
+                Log.v(TAG, "触发加载更多")
+                onLoadMore()
             }
         }
     }
 
     /**
-     * 没有更多数据时调用此方法。子类可以重写此方法进行界面更新。
+     * 没有更多数据时调用此方法更新界面。子类可以重写此方法进行界面更新。
      */
-    open fun onEnd() {
+    open fun end() {
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener(null)
     }
 
     /**
-     * 请求数据出错时调用此方法。子类可以重写此方法进行界面更新。
+     * 请求数据出错时调用此方法更新界面。子类可以重写此方法进行界面更新。
      * 此方法中添加了出错重试点击监听。
      */
-    override fun onError(throwable: Throwable) {
-        super.onError(throwable)
+    override fun error(throwable: Throwable) {
+        super.error(throwable)
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener {
-            onLoading()
+            loading()
         }
     }
 }

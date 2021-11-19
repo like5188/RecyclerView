@@ -1,5 +1,6 @@
 package com.like.recyclerview.utils
 
+import androidx.core.view.postDelayed
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -58,15 +59,15 @@ fun <ResultType, ValueInList> RecyclerView.bindFlow(
         when (concatAdapter.adapters.firstOrNull()) {
             null -> {
                 concatAdapter.add(errorAdapter)
-                errorAdapter?.onError(throwable)
+                errorAdapter?.error(throwable)
             }
             errorAdapter -> {
-                errorAdapter?.onError(throwable)
+                errorAdapter?.error(throwable)
             }
             emptyAdapter -> {
                 concatAdapter.clear()
                 concatAdapter.add(errorAdapter)
-                errorAdapter?.onError(throwable)
+                errorAdapter?.error(throwable)
             }
         }
         onError?.invoke(requestType, throwable)
@@ -204,24 +205,25 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                 when (concatAdapter.adapters.firstOrNull()) {
                     null -> {
                         concatAdapter.add(errorAdapter)
-                        errorAdapter?.onError(throwable)
+                        errorAdapter?.error(throwable)
                     }
                     errorAdapter -> {
-                        errorAdapter?.onError(throwable)
+                        errorAdapter?.error(throwable)
                     }
                     emptyAdapter -> {
                         concatAdapter.clear()
                         concatAdapter.add(errorAdapter)
-                        errorAdapter?.onError(throwable)
+                        errorAdapter?.error(throwable)
                     }
                 }
+                onError?.invoke(requestType, throwable)
             }
             is RequestType.After, is RequestType.Before -> {
+                onError?.invoke(requestType, throwable)
                 // 加载更多失败时，直接更新[loadMoreAdapter]
-                loadMoreAdapter.onError(throwable)
+                loadMoreAdapter.error(throwable)
             }
         }
-        onError?.invoke(requestType, throwable)
     }
     this.onSuccess = { requestType, resultType ->
         val res = transformer(requestType, resultType)
@@ -249,20 +251,26 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                             itemAdapter.addAllToStart(items)
                             concatAdapter.addAll(loadMoreAdapter, itemAdapter)
                         }
-                        loadMoreAdapter.onLoading()
                     }
                     if (isAfter) {
                         scrollToTop()
                     } else {
                         scrollToBottom()
                     }
+                    onSuccess?.invoke(requestType, resultType)
+                    if (!items.isNullOrEmpty()) {
+                        postDelayed(100) {
+                            loadMoreAdapter.loading()
+                        }
+                    }
                 }
             }
             is RequestType.After, is RequestType.Before -> {
                 val items = res?.getOrNull(1)
                 if (items.isNullOrEmpty()) {
+                    onSuccess?.invoke(requestType, resultType)
                     // 没有更多数据需要加载
-                    loadMoreAdapter.onEnd()
+                    loadMoreAdapter.end()
                 } else {
                     // 还有更多数据需要加载
                     if (isAfter) {
@@ -271,11 +279,16 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                         itemAdapter.addAllToStart(items)
                         keepPosition(items.size, 1)
                     }
-                    loadMoreAdapter.onLoading()
+                    // 这里必须使onSuccess方法的调用在loading()方法之前，确保调用loading()的时候，能及时结束任务，从而不影响ConcurrencyHelper的并发处理规则。
+                    // 否则连续触发加载更多的任务会被丢弃，造成错误。
+                    // 这里必须使用postDelayed()方法，也是基于以上原因。
+                    onSuccess?.invoke(requestType, resultType)
+                    postDelayed(100) {
+                        loadMoreAdapter.loading()
+                    }
                 }
             }
         }
-        onSuccess?.invoke(requestType, resultType)
     }
 }
 

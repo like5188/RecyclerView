@@ -5,9 +5,9 @@ import com.like.recyclerview.ui.databinding.ItemErrorBinding
 
 class ErrorAdapter : BaseErrorAdapter<ItemErrorBinding, ErrorItem>() {
 
-    override fun onError(throwable: Throwable) {
-        super.onError(throwable)
-        get(0)?.onError(throwable)
+    override fun error(throwable: Throwable) {
+        super.error(throwable)
+        get(0)?.error(throwable)
     }
 
 }

@@ -22,7 +22,7 @@ data class ErrorItem(
     override val variableId: Int = BR.errorItem
     val throwable: ObservableField<Throwable> = ObservableField(RuntimeException("unknown error"))
 
-    fun onError(throwable: Throwable) {
+    fun error(throwable: Throwable) {
         this.throwable.set(throwable)
     }
 }

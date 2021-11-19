@@ -11,6 +11,6 @@ open class BaseErrorAdapter<VB : ViewDataBinding, ValueInList> : BaseAdapter<VB,
     /**
      * 出错时调用此方法。子类可以重写此方法进行界面更新。
      */
-    open fun onError(throwable: Throwable) {}
+    open fun error(throwable: Throwable) {}
 
 }

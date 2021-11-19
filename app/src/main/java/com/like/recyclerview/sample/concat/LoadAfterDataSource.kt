@@ -16,9 +16,9 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRec
             i = 0
         }
         if (i == 0) {
-            delay(1000)
+            delay(2000)
         } else {
-            delay(1000)
+            delay(2000)
         }
         return getAfter(pageNo, pageSize)
     }

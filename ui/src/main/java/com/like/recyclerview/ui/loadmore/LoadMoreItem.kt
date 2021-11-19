@@ -32,15 +32,15 @@ data class LoadMoreItem(
     override val variableId: Int = BR.loadMoreItem
     val status: ObservableInt = ObservableInt(LOADING)
 
-    fun onLoading() {
+    fun loading() {
         status.set(LOADING)
     }
 
-    fun onEnd() {
+    fun end() {
         status.set(END)
     }
 
-    fun onError(throwable: Throwable) {
+    fun error(throwable: Throwable) {
         status.set(ERROR)
     }
 
