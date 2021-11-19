@@ -16,8 +16,8 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.bindFlow
-import com.like.recyclerview.utils.bindResultForAfter
-import com.like.recyclerview.utils.bindResultForBefore
+import com.like.recyclerview.utils.bindAfterPagingResult
+import com.like.recyclerview.utils.bindBeforePagingResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOn
@@ -77,7 +77,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initItems() {
-        val result = mAdapter.bindFlow(
+        val requestHandler = mAdapter.bindFlow(
             dataFlow = mViewModel::getItems.asFlow().map {
                 it?.take(3)
             }.retryWhen { cause, attempt ->
@@ -96,16 +96,16 @@ class ConcatActivity : AppCompatActivity() {
         )
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                result.refresh()
+                requestHandler.refresh()
             }
         }
         lifecycleScope.launch {
-            result.initial()
+            requestHandler.initial()
         }
     }
 
     private fun initHeadersAndItems() {
-        val result = mAdapter.bindFlow(
+        val requestHandler = mAdapter.bindFlow(
             dataFlow = mViewModel::getHeadersAndItems.asFlow(),
             recyclerView = mBinding.rv,
             headerAdapter = HeaderAdapter(),
@@ -121,17 +121,17 @@ class ConcatActivity : AppCompatActivity() {
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                result.refresh()
+                requestHandler.refresh()
             }
         }
 
         lifecycleScope.launch {
-            result.initial()
+            requestHandler.initial()
         }
     }
 
     private fun initLoadAfter() {
-        val request = mAdapter.bindResultForAfter(
+        val requestHandler = mAdapter.bindAfterPagingResult(
             pagingResult = mViewModel.loadAfterResult.apply {
                 flow = flow.map {
                     it?.take(4)
@@ -153,16 +153,16 @@ class ConcatActivity : AppCompatActivity() {
         )
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                request.refresh()
+                requestHandler.refresh()
             }
         }
         lifecycleScope.launch {
-            request.initial()
+            requestHandler.initial()
         }
     }
 
     private fun initLoadAfterWithHeaders() {
-        val request = mAdapter.bindResultForAfter(
+        val requestHandler = mAdapter.bindAfterPagingResult(
             pagingResult = mViewModel.LoadAfterWithHeadersResult,
             recyclerView = mBinding.rv,
             headerAdapter = HeaderAdapter(),
@@ -178,16 +178,16 @@ class ConcatActivity : AppCompatActivity() {
         )
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                request.refresh()
+                requestHandler.refresh()
             }
         }
         lifecycleScope.launch {
-            request.initial()
+            requestHandler.initial()
         }
     }
 
     private fun initLoadBefore() {
-        val request = mAdapter.bindResultForBefore(
+        val requestHandler = mAdapter.bindBeforePagingResult(
             pagingResult = mViewModel.loadBeforeResult.apply {
                 flow = flow.map {
                     it?.take(3)
@@ -209,11 +209,11 @@ class ConcatActivity : AppCompatActivity() {
         )
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                request.refresh()
+                requestHandler.refresh()
             }
         }
         lifecycleScope.launch {
-            request.initial()
+            requestHandler.initial()
         }
     }
 

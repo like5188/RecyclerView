@@ -88,7 +88,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): Result<ResultType> = Result(dataFlow).apply {
+): RequestHandler<ResultType> = RequestHandler(dataFlow).apply {
     this.show = show
     this.hide = hide
     this.onError = { requestType, throwable ->
@@ -136,7 +136,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindFlow(
 /**
  * 绑定往后分页数据并显示到 ConcatAdapter
  */
-fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
+fun <ResultType, ValueInList> ConcatAdapter.bindAfterPagingResult(
     pagingResult: PagingResult<ResultType>,
     recyclerView: RecyclerView,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
@@ -159,7 +159,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): Result<ResultType> = bindResultForPaging(
+): RequestHandler<ResultType> = bindPagingResult(
     true, pagingResult, recyclerView, headerAdapter, itemAdapter, loadMoreAdapter,
     emptyAdapter, errorAdapter, transformer, show, hide, onError, onSuccess
 ).apply {
@@ -169,7 +169,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForAfter(
 /**
  * 绑定往前分页数据并显示到 ConcatAdapter
  */
-fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
+fun <ResultType, ValueInList> ConcatAdapter.bindBeforePagingResult(
     pagingResult: PagingResult<ResultType>,
     recyclerView: RecyclerView,
     itemAdapter: BaseAdapter<*, ValueInList>,
@@ -183,7 +183,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): Result<ResultType> = bindResultForPaging(
+): RequestHandler<ResultType> = bindPagingResult(
     false, pagingResult, recyclerView, null, itemAdapter, loadMoreAdapter, emptyAdapter, errorAdapter,
     transformer = { requestType, resultType ->
         if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
@@ -217,7 +217,7 @@ fun <ResultType, ValueInList> ConcatAdapter.bindResultForBefore(
  * 加载更多失败时，直接更新[loadMoreAdapter]。
  * @param onSuccess         请求成功时回调。
  */
-private fun <ResultType, ValueInList> ConcatAdapter.bindResultForPaging(
+private fun <ResultType, ValueInList> ConcatAdapter.bindPagingResult(
     isAfter: Boolean,
     pagingResult: PagingResult<ResultType>,
     recyclerView: RecyclerView,
@@ -231,7 +231,7 @@ private fun <ResultType, ValueInList> ConcatAdapter.bindResultForPaging(
     hide: (() -> Unit)? = null,
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
-): Result<ResultType> = Result(pagingResult).apply {
+): RequestHandler<ResultType> = RequestHandler(pagingResult).apply {
     this.show = show
     this.hide = hide
     this.onError = { requestType, throwable ->
@@ -319,12 +319,13 @@ private fun <ResultType, ValueInList> ConcatAdapter.bindResultForPaging(
 }
 
 /**
- * 封装了初始化、刷新、往后加载更多、往前加载更多这四种操作。
+ * 请求处理者。
+ * 封装了初始化、刷新、往后加载更多、往前加载更多操作。
  * 请求并发处理规则：
  * 1、初始化、刷新：如果有操作正在执行，则取消正在执行的操作，执行新操作。
  * 2、往后加载更多、往前加载更多：如果有操作正在执行，则放弃新操作，否则执行新操作。
  */
-class Result<ResultType> {
+class RequestHandler<ResultType> {
     private val mConcurrencyHelper = ConcurrencyHelper()
 
     /**
