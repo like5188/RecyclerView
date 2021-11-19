@@ -195,8 +195,8 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
     this.show = show
     this.hide = hide
     this.onError = { requestType, throwable ->
-        when {
-            requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+        when (requestType) {
+            is RequestType.Initial, is RequestType.Refresh -> {
                 // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
                 when (concatAdapter.adapters.firstOrNull()) {
                     null -> {
@@ -213,7 +213,7 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                     }
                 }
             }
-            requestType is RequestType.After || requestType is RequestType.Before -> {
+            is RequestType.After, is RequestType.Before -> {
                 // 加载更多失败时，直接更新[loadMoreAdapter]
                 loadMoreAdapter.onError(throwable)
             }
@@ -222,8 +222,8 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
     }
     this.onSuccess = { requestType, resultType ->
         val res = transformer(requestType, resultType)
-        when {
-            requestType is RequestType.Initial || requestType is RequestType.Refresh -> {
+        when (requestType) {
+            is RequestType.Initial, is RequestType.Refresh -> {
                 concatAdapter.clear()
                 if (res.isNullOrEmpty()) {
                     // 显示空视图
@@ -255,7 +255,7 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                     }
                 }
             }
-            requestType is RequestType.After || requestType is RequestType.Before -> {
+            is RequestType.After, is RequestType.Before -> {
                 val items = res?.getOrNull(1)
                 if (items.isNullOrEmpty()) {
                     // 没有更多数据需要加载
