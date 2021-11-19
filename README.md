@@ -30,8 +30,8 @@
         implementation 'com.github.like5188.RecyclerView:ext:版本号'
         // 默认实现的 UI 视图，及 UI 相关的帮助类
         implementation 'com.github.like5188.RecyclerView:ui:版本号'
-        implementation 'com.github.like5188:Paging:0.0.2'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
+        implementation 'com.github.like5188:Paging:2.0.2'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.1'
     }
 ```
