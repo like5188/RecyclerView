@@ -5,6 +5,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.viewholder.BindingViewHolder
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -21,27 +22,7 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
         super.onBindViewHolder(holder, binding, position, item)
         mHolder = holder
-        load()
-    }
-
-    private fun load() {
-        val context = mHolder.itemView.context
-        if (context is LifecycleOwner) {
-            context.lifecycleScope.launch {
-                Log.v(TAG, "触发加载更多")
-                onLoadMore()
-            }
-        }
-    }
-
-    /**
-     * 重新加载数据，从而触发 onBindViewHolder 方法，触发加载更多逻辑。
-     * 因为在数据量太少时，比如 pagesize==1，不能多次触发加载更多。
-     */
-    private fun reload() {
-        val data = get(0) ?: return
-        clear()
-        addToEnd(data)
+        onLoading()
     }
 
     /**
@@ -50,7 +31,14 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     open fun onLoading() {
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener(null)
-        reload()
+        val context = mHolder.itemView.context
+        if (context is LifecycleOwner) {
+            context.lifecycleScope.launch {
+                Log.v(TAG, "触发加载更多")
+                delay(1000)
+                onLoadMore()
+            }
+        }
     }
 
     /**

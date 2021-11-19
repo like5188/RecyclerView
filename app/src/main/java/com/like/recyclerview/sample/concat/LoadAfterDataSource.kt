@@ -42,10 +42,10 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRec
                     }
                 }
             }
-            2 -> {
+            3 -> {
                 throw RuntimeException("load more error")
             }
-            4 -> {
+            5 -> {
                 emptyList()
             }
             else -> {
