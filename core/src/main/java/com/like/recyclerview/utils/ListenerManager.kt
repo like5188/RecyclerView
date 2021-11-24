@@ -22,11 +22,15 @@ open class ListenerManager<VB : ViewDataBinding> : IListenerManager<VB> {
     }
 
     override fun addOnItemClickListener(listener: OnItemClickListener<VB>) {
-        mOnItemClickListeners.add(listener)
+        if (!mOnItemClickListeners.contains(listener)) {
+            mOnItemClickListeners.add(listener)
+        }
     }
 
     override fun addOnItemLongClickListener(listener: OnItemLongClickListener<VB>) {
-        mOnItemLongClickListeners.add(listener)
+        if (!mOnItemLongClickListeners.contains(listener)) {
+            mOnItemLongClickListeners.add(listener)
+        }
     }
 
     override fun removeOnItemClickListener(listener: OnItemClickListener<VB>) {
