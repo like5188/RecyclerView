@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.previewPhotos
 import com.like.recyclerview.adapter.BaseAdapter
+import com.like.recyclerview.utils.ItemTouchHelperCallback
 import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.entity.LocalMedia
 
