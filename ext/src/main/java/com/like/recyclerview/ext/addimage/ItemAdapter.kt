@@ -26,6 +26,8 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
         super.onBindViewHolder(holder, binding, position, item)
         holder.binding.root.setOnClickListener {
+            // 这里不能直接用 position，因为有可能删除了某个 item，但是确不会触发 onBindViewHolder 方法，造成 position 参数没有更新，
+            // 所以只能用 holder.bindingAdapterPosition 重新获取。
             activity.previewPhotos(getSelectedLocalMedias(), holder.bindingAdapterPosition)
         }
     }
