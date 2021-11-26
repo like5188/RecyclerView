@@ -18,8 +18,8 @@ open class PlusAdapter<VB : ViewDataBinding, ValueInList>(
     lateinit var onSelected: (List<LocalMedia>) -> Unit
     lateinit var onPlusClicked: () -> Unit
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
-        super.onBindViewHolder(holder, binding, position, item)
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
+        super.onBindViewHolder(holder, item)
         holder.binding.root.setOnClickListener {
             activity.lifecycleScope.launch {
                 if (maxSelectNum == 1) {

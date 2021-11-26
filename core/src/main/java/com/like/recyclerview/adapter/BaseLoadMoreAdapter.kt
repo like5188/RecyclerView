@@ -18,8 +18,8 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
-        super.onBindViewHolder(holder, binding, position, item)
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
+        super.onBindViewHolder(holder, item)
         mHolder = holder
         loading()
     }

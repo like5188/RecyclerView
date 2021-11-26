@@ -90,25 +90,20 @@ class MyItemAdapter(maxSelectNum: Int = Int.MAX_VALUE) : ItemAdapter<ViewImageBi
     val showDeleteButton: ObservableBoolean = ObservableBoolean()
     var onItemChanged: (() -> Unit)? = null
 
-    override fun onBindViewHolder(
-        holder: BindingViewHolder<ViewImageBinding>,
-        binding: ViewImageBinding,
-        position: Int,
-        item: AddImageViewInfo
-    ) {
-        super.onBindViewHolder(holder, binding, position, item)
-        binding.iv.load(File(item.localMedia.compressPath))
-        binding.root.setOnLongClickListener {
+    override fun onBindViewHolder(holder: BindingViewHolder<ViewImageBinding>, item: AddImageViewInfo) {
+        super.onBindViewHolder(holder, item)
+        holder.binding.iv.load(File(item.localMedia.compressPath))
+        holder.binding.root.setOnLongClickListener {
             // 显示删除按钮
             if (!showDeleteButton.get()) {
                 showDeleteButton.set(true)
             }
             true
         }
-        binding.ivDelete.setOnClickListener {
+        holder.binding.ivDelete.setOnClickListener {
             removeItem(holder.bindingAdapterPosition)
         }
-        binding.showDeleteButton = showDeleteButton
+        holder.binding.showDeleteButton = showDeleteButton
     }
 
     override fun onAdded() {
@@ -129,14 +124,9 @@ class MyPlusAdapter(
         addToEnd(AddInfo(addImageResId))
     }
 
-    override fun onBindViewHolder(
-        holder: BindingViewHolder<ViewAddImageBinding>,
-        binding: ViewAddImageBinding,
-        position: Int,
-        item: AddInfo
-    ) {
-        super.onBindViewHolder(holder, binding, position, item)
-        binding.iv.setImageResource(item.addImageResId)
+    override fun onBindViewHolder(holder: BindingViewHolder<ViewAddImageBinding>, item: AddInfo) {
+        super.onBindViewHolder(holder, item)
+        holder.binding.iv.setImageResource(item.addImageResId)
     }
 
 }

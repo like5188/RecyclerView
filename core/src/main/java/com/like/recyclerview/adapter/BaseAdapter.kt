@@ -64,11 +64,13 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
                 }
             }
         }
-        onBindViewHolder(holder, holder.binding, holder.bindingAdapterPosition, item)
+        // 这里不能直接把 holder.bindingAdapterPosition 的值传递下去，因为有添加删除前面的 item 都会造成后面 item 的位置改变，
+        // 所以在使用的时候，需要随时使用 holder.bindingAdapterPosition 重新获取。
+        onBindViewHolder(holder, item)
     }
 
     open fun getItemViewType(position: Int, item: ValueInList): Int = -1
 
-    open fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {}
+    open fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {}
 
 }
