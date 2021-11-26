@@ -26,7 +26,7 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, binding: VB, position: Int, item: ValueInList) {
         super.onBindViewHolder(holder, binding, position, item)
         holder.binding.root.setOnClickListener {
-            activity.previewPhotos(getSelectedLocalMedias(), position)
+            activity.previewPhotos(getSelectedLocalMedias(), holder.bindingAdapterPosition)
         }
     }
 
