@@ -4,7 +4,7 @@ import com.like.recyclerview.adapter.BaseAdapter
 
 internal interface IAdapterDataManager<ValueInList> {
     val mList: List<ValueInList>
-    fun setAdapter(adapter: BaseAdapter<*, ValueInList>)
+    fun initAdapterDataManager(adapter: BaseAdapter<*, ValueInList>)
     fun get(position: Int): ValueInList?
     fun update(position: Int, newData: ValueInList)
     fun addToStart(data: ValueInList)

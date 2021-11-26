@@ -23,7 +23,7 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
     IListenerManager<VB> by ListenerManager(),
     IAdapterDataManager<ValueInList> by AdapterDataManager() {
     init {
-        setAdapter(this)
+        initAdapterDataManager(this)
     }
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {

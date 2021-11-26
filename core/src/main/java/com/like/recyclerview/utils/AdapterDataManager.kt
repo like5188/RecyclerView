@@ -10,7 +10,7 @@ internal class AdapterDataManager<ValueInList> : IAdapterDataManager<ValueInList
     private var mAdapter: BaseAdapter<*, ValueInList>? = null
     override val mList = mutableListOf<ValueInList>()
 
-    override fun setAdapter(adapter: BaseAdapter<*, ValueInList>) {
+    override fun initAdapterDataManager(adapter: BaseAdapter<*, ValueInList>) {
         mAdapter = adapter
     }
 
