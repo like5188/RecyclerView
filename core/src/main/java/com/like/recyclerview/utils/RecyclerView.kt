@@ -255,6 +255,7 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                             itemAdapter.addAllToStart(items)
                             concatAdapter.addAll(loadMoreAdapter, itemAdapter)
                         }
+                        loadMoreAdapter.canLoadMore.set(true)
                     }
                     if (isAfter) {
                         scrollToTop()
@@ -262,11 +263,11 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                         scrollToBottom()
                     }
                     onSuccess?.invoke(requestType, resultType)
-                    if (!items.isNullOrEmpty()) {
-                        postDelayed(100) {
-                            loadMoreAdapter.loading()
-                        }
-                    }
+//                    if (!items.isNullOrEmpty()) {
+//                        postDelayed(100) {
+//                            loadMoreAdapter.loading()
+//                        }
+//                    }
                 }
             }
             is RequestType.After, is RequestType.Before -> {
@@ -287,9 +288,10 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                     // 否则连续触发加载更多的任务会被丢弃，造成错误。
                     // 这里必须使用postDelayed()方法，也是基于以上原因。
                     onSuccess?.invoke(requestType, resultType)
-                    postDelayed(100) {
-                        loadMoreAdapter.loading()
-                    }
+                    loadMoreAdapter.canLoadMore.set(true)
+//                    postDelayed(100) {
+//                        loadMoreAdapter.loading()
+//                    }
                 }
             }
         }

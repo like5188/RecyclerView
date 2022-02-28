@@ -5,18 +5,15 @@ import com.like.recyclerview.ui.databinding.ItemLoadMoreBinding
 
 class LoadMoreAdapter : BaseLoadMoreAdapter<ItemLoadMoreBinding, LoadMoreItem>() {
 
-    override fun loading() {
-        super.loading()
+    override fun onLoading() {
         get(0)?.loading()
     }
 
-    override fun end() {
-        super.end()
+    override fun onEnd() {
         get(0)?.end()
     }
 
-    override fun error(throwable: Throwable) {
-        super.error(throwable)
+    override fun onError(throwable: Throwable) {
         get(0)?.error(throwable)
     }
 
