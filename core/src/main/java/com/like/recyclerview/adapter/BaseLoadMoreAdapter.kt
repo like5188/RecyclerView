@@ -1,8 +1,12 @@
 package com.like.recyclerview.adapter
 
+import androidx.core.view.doOnPreDraw
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
+import com.like.common.util.Logger
+import com.like.recyclerview.utils.findLastVisibleItemPosition
 import com.like.recyclerview.viewholder.BindingViewHolder
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
@@ -14,9 +18,16 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
     private val hasMore = AtomicBoolean(false)
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
+    private lateinit var recyclerView: RecyclerView
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        this.recyclerView = recyclerView
+        super.onAttachedToRecyclerView(recyclerView)
+    }
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
         super.onBindViewHolder(holder, item)
+        Logger.e("onBindViewHolder")
         mHolder = holder
         loading()
     }
@@ -24,8 +35,15 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
     /**
      * 如果还有更多数据时调用此方法。
      */
-    fun hasMore() {
+    fun hasMore(itemCount: Int) {
         hasMore.compareAndSet(false, true)
+        // 不满一屏时处理。此处必须延迟，否则 findLastVisibleItemPosition 方法获取不到准确的位置。
+        recyclerView.doOnPreDraw {
+            Logger.w("doOnPreDraw")
+            if (recyclerView.findLastVisibleItemPosition() == itemCount - 1) {
+                loading()
+            }
+        }
     }
 
     /**
