@@ -25,7 +25,7 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
      * 如果还有更多数据时调用此方法。
      */
     fun hasMore() {
-        hasMore.set(true)
+        hasMore.compareAndSet(false, true)
     }
 
     /**
