@@ -16,16 +16,22 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
     private val hasMore = AtomicBoolean(false)
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
+    private val onScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
+                loading()
+            }
+        }
+    }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-                    loading()
-                }
-            }
-        })
+        recyclerView.addOnScrollListener(onScrollListener)
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        recyclerView.removeOnScrollListener(onScrollListener)
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
