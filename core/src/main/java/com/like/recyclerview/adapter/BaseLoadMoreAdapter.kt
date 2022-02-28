@@ -21,7 +21,6 @@ open class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAda
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
         super.onBindViewHolder(holder, item)
         mHolder = holder
-        loading()
     }
 
     /**

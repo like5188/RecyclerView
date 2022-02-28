@@ -259,13 +259,13 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                     } else {
                         scrollToBottom()
                     }
-                    onSuccess?.invoke(requestType, resultType)
                     if (!items.isNullOrEmpty()) {
                         postDelayed(100) {
                             loadMoreAdapter.loading()
                         }
                     }
                 }
+                onSuccess?.invoke(requestType, resultType)
             }
             is RequestType.After, is RequestType.Before -> {
                 val items = res?.getOrNull(1)
