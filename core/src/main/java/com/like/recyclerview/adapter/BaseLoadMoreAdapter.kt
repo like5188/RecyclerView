@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
  */
 abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErrorAdapter<VB, ValueInList>() {
-    internal val canLoadMore = AtomicBoolean(true)
+    private val hasMore = AtomicBoolean(true)
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
 
@@ -22,11 +22,18 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
     }
 
     /**
+     * 如果还有更多数据时调用此方法。
+     */
+    fun hasMore() {
+        hasMore.set(true)
+    }
+
+    /**
      * 请求数据时调用此方法。
      */
     fun loading() {
         if (!::mHolder.isInitialized) return
-        if (canLoadMore.compareAndSet(true, false)) {
+        if (hasMore.compareAndSet(true, false)) {
             mHolder.binding.root.setOnClickListener(null)
             onLoading()
             val context = mHolder.itemView.context
@@ -55,7 +62,7 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
         super.error(throwable)
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener {
-            canLoadMore.set(true)
+            hasMore.set(true)
             loading()
         }
         onError(throwable)

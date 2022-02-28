@@ -1,6 +1,5 @@
 package com.like.recyclerview.utils
 
-import androidx.core.view.postDelayed
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -255,7 +254,6 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                             itemAdapter.addAllToStart(items)
                             concatAdapter.addAll(loadMoreAdapter, itemAdapter)
                         }
-                        loadMoreAdapter.canLoadMore.set(true)
                     }
                     if (isAfter) {
                         scrollToTop()
@@ -263,6 +261,9 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                         scrollToBottom()
                     }
                     onSuccess?.invoke(requestType, resultType)
+                    if (!items.isNullOrEmpty()) {
+                        loadMoreAdapter.hasMore()
+                    }
 //                    if (!items.isNullOrEmpty()) {
 //                        postDelayed(100) {
 //                            loadMoreAdapter.loading()
@@ -288,7 +289,7 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                     // 否则连续触发加载更多的任务会被丢弃，造成错误。
                     // 这里必须使用postDelayed()方法，也是基于以上原因。
                     onSuccess?.invoke(requestType, resultType)
-                    loadMoreAdapter.canLoadMore.set(true)
+                    loadMoreAdapter.hasMore()
 //                    postDelayed(100) {
 //                        loadMoreAdapter.loading()
 //                    }
