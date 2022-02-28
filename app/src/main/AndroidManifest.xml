@@ -18,16 +18,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.like.recyclerview.sample.MainActivity">
+        <activity
+            android:name="com.like.recyclerview.sample.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.like.recyclerview.sample.tree.TreeActivity" />
-        <activity android:name=".addimage.PictureSelectorActivity" />
-        <activity android:name=".concat.ConcatActivity" />
+        <activity
+            android:name="com.like.recyclerview.sample.tree.TreeActivity"
+            android:exported="true" />
+        <activity
+            android:name=".addimage.PictureSelectorActivity"
+            android:exported="true" />
+        <activity
+            android:name=".concat.ConcatActivity"
+            android:exported="true" />
     </application>
 
 </manifest>
