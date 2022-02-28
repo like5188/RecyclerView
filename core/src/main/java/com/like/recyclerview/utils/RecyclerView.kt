@@ -3,6 +3,7 @@ package com.like.recyclerview.utils
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.like.common.util.Logger
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
@@ -434,9 +435,26 @@ fun RecyclerView.keepPosition(insertedItemCount: Int, headerCount: Int) {
     }
 }
 
-fun RecyclerView.findFirstVisiblePosition(): Int {
-    //获取第一个可见item的position
-    val firstVisibleItem = layoutManager?.getChildAt(0)
-    val firstVisibleItemLayoutParams = firstVisibleItem?.layoutParams as? RecyclerView.LayoutParams
-    return firstVisibleItemLayoutParams?.viewLayoutPosition ?: -1
+fun RecyclerView.findFirstVisibleItemPosition(): Int {
+    return when (val lm = layoutManager) {
+        is LinearLayoutManager -> lm.findFirstVisibleItemPosition()
+        is StaggeredGridLayoutManager -> {
+            val intArray = IntArray(2)
+            lm.findFirstVisibleItemPositions(intArray)
+            Math.min(intArray[0], intArray[1])
+        }
+        else -> RecyclerView.NO_POSITION
+    }
+}
+
+fun RecyclerView.findLastVisibleItemPosition(): Int {
+    return when (val lm = layoutManager) {
+        is LinearLayoutManager -> lm.findLastVisibleItemPosition()
+        is StaggeredGridLayoutManager -> {
+            val intArray = IntArray(2)
+            lm.findLastVisibleItemPositions(intArray)
+            Math.max(intArray[0], intArray[1])
+        }
+        else -> RecyclerView.NO_POSITION
+    }
 }

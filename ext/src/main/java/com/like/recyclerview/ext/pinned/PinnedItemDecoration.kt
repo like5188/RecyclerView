@@ -11,7 +11,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.adapter.BaseAdapter
-import com.like.recyclerview.utils.findFirstVisiblePosition
+import com.like.recyclerview.utils.findFirstVisibleItemPosition
 
 /**
  * 配合[IPinnedItem]类型的数据来实现固定悬浮功能。对固定悬浮标签的操作和正常视图一样（包括动画、各种事件等等）
@@ -141,7 +141,7 @@ class PinnedItemDecoration(private val mItemAdapter: BaseAdapter<*, *>) : Recycl
      * 从第一个可见的item开始往前递减找出PinnedView的位置。包含第一个可见的item
      */
     private fun findPrePinnedPositionAndLayoutIdFromFirstVisibleItem(recyclerView: RecyclerView): PinnedItem? {
-        val firstVisiblePosition = recyclerView.findFirstVisiblePosition()
+        val firstVisiblePosition = recyclerView.findFirstVisibleItemPosition()
         if (firstVisiblePosition < mItemAdapter.itemCount && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition downTo 0) {
                 val item = mItemAdapter.get(position)
@@ -161,7 +161,7 @@ class PinnedItemDecoration(private val mItemAdapter: BaseAdapter<*, *>) : Recycl
      * 从第一个可见的item开始往后找出PinnedView的位置。不包含第一个可见的item
      */
     private fun findNextPinnedPositionAndLayoutIdFromFirstVisibleItem(recyclerView: RecyclerView): PinnedItem? {
-        val firstVisiblePosition = recyclerView.findFirstVisiblePosition()
+        val firstVisiblePosition = recyclerView.findFirstVisibleItemPosition()
         if (firstVisiblePosition < mItemAdapter.itemCount - 1 && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition + 1 until mItemAdapter.itemCount) {
                 val item = mItemAdapter.get(position)
