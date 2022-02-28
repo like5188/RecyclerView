@@ -18,6 +18,8 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
     private lateinit var mHolder: BindingViewHolder<VB>
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            // 此回调在添加 item 时也会触发
+            // 判断是否显示了 BaseLoadMoreAdapter
             if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
                 loading()
             }
