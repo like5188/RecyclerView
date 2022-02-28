@@ -4,6 +4,7 @@ import androidx.core.view.postDelayed
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.like.common.util.Logger
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
 import com.like.recyclerview.adapter.BaseAdapter
@@ -382,6 +383,7 @@ class RequestHandler<ResultType> {
         val flow = pagingResult?.flow ?: flow ?: return
         flow.flowOn(Dispatchers.IO)
             .onStart {
+                Logger.d("RecyclerView requestType=$requestType")
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
                     show?.invoke()
                 }
