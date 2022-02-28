@@ -19,11 +19,13 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        recyclerView.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-            if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-                loading()
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
+                    loading()
+                }
             }
-        }
+        })
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
