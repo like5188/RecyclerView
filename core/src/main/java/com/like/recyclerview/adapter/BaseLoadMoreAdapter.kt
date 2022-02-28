@@ -6,6 +6,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.utils.findLastVisibleItemPosition
 import com.like.recyclerview.viewholder.BindingViewHolder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -58,7 +59,7 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseErro
             onLoading()
             val context = mHolder.itemView.context
             if (context is LifecycleOwner) {
-                context.lifecycleScope.launch {
+                context.lifecycleScope.launch(Dispatchers.Main) {
                     onLoadMore()
                 }
             }
