@@ -19,10 +19,8 @@ import com.like.recyclerview.utils.bindAfterPagingResult
 import com.like.recyclerview.utils.bindBeforePagingResult
 import com.like.recyclerview.utils.bindFlow
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -60,10 +58,19 @@ class ConcatActivity : AppCompatActivity() {
 //                }.retryWhen { cause, attempt ->
 //                    Logger.v("retryWhen cause=$cause attempt=$attempt")
 //                    cause.message == "test error" && attempt == 0L
+//                }.onStart {
+//                    Logger.w("onStart")
 //                }.onCompletion {
 //                    Logger.w("onCompletion $it")
 //                }.catch {
 //                    Logger.e("catch $it")
+//                    throw it
+//                }.onStart {
+//                    Logger.w("1 onStart")
+//                }.onCompletion {
+//                    Logger.w("1 onCompletion $it")
+//                }.catch {
+//                    Logger.e("1 catch $it")
 //                }.collect {
 //                    Logger.e("collect $it")
 //                }
