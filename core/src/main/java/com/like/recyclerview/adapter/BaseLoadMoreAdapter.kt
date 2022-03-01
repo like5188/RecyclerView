@@ -17,18 +17,28 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseAdap
     private val hasMore = AtomicBoolean(false)
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
+    private lateinit var recyclerView: RecyclerView
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            // 此回调在添加 item 时也会触发
-            // 判断是否显示了 BaseLoadMoreAdapter
-            if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-                loading()
-            }
+            // 此回调在添加 item 时也会触发，但是重新清除所有并添加的 item 如果和上一次的一样，则不会触发（比如刷新时）
+            // 所以只靠此方法触发加载更多不行，在 hasMore() 方法中也必须触发。否则在上述情况下会不能触发加载更多。
+            isLoading()
+        }
+    }
+
+    /**
+     * 是否触发 [loading] 操作
+     */
+    private fun isLoading() {
+        // 判断是否显示了 BaseLoadMoreAdapter
+        if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
+            loading()
         }
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
         recyclerView.addOnScrollListener(onScrollListener)
     }
 
@@ -47,6 +57,7 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseAdap
      */
     fun hasMore() {
         hasMore.compareAndSet(false, true)
+        isLoading()
     }
 
     /**
