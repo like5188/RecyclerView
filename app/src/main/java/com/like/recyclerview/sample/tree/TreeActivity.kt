@@ -14,7 +14,6 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
-import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.bindFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
@@ -70,8 +69,6 @@ class TreeActivity : AppCompatActivity() {
             dataFlow = mViewModel::getItems.asFlow(),
             concatAdapter = mAdapter,
             itemAdapter = itemAdapter,
-            emptyAdapter = AdapterFactory.createEmptyAdapter(),
-            errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mBinding.swipeRefreshLayout.isRefreshing = true },
             hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
             onError = { requestType, throwable ->

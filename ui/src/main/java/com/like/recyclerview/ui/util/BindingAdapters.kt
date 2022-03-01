@@ -2,21 +2,13 @@ package com.like.recyclerview.ui.util
 
 import android.graphics.PorterDuff
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ContentLoadingProgressBar
 import androidx.databinding.BindingAdapter
 
 object BindingAdapters {
-
-    @BindingAdapter("showImage")
-    @JvmStatic
-    fun showImage(iv: ImageView, @DrawableRes resId: Int) {
-        iv.setImageResource(resId)
-    }
 
     @BindingAdapter("setBackgroundResource")
     @JvmStatic

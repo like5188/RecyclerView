@@ -9,18 +9,25 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import com.hjq.toast.ToastUtils
 import com.like.common.util.Logger
+import com.like.paging.RequestType
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
+import com.like.recyclerview.sample.databinding.ViewEmptyBinding
+import com.like.recyclerview.sample.databinding.ViewErrorBinding
+import com.like.recyclerview.sample.databinding.ViewLoadingBinding
 import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.bindAfterPagingResult
 import com.like.recyclerview.utils.bindBeforePagingResult
 import com.like.recyclerview.utils.bindFlow
+import com.like.uistatuscontroller.UiStatusController
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
@@ -39,6 +46,9 @@ class ConcatActivity : AppCompatActivity() {
     }
     private val mAdapter by lazy {
         ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
+    }
+    private val uiStatusController by lazy {
+        UiStatusController(mBinding.rv)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,8 +103,6 @@ class ConcatActivity : AppCompatActivity() {
             }.flowOn(Dispatchers.IO),
             concatAdapter = mAdapter,
             itemAdapter = ItemAdapter(),
-            emptyAdapter = AdapterFactory.createEmptyAdapter(),
-            errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
             onError = { requestType, throwable ->
@@ -117,8 +125,6 @@ class ConcatActivity : AppCompatActivity() {
             concatAdapter = mAdapter,
             headerAdapter = HeaderAdapter(),
             itemAdapter = ItemAdapter(),
-            emptyAdapter = AdapterFactory.createEmptyAdapter(),
-            errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
             onError = { requestType, throwable ->
@@ -138,6 +144,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadAfter() {
+        val itemAdapter = ItemAdapter()
         val requestHandler = mBinding.rv.bindAfterPagingResult(
             pagingResult = mViewModel.loadAfterResult.apply {
                 flow = flow.map {
@@ -148,16 +155,35 @@ class ConcatActivity : AppCompatActivity() {
                 }.flowOn(Dispatchers.IO)
             },
             concatAdapter = mAdapter,
-            itemAdapter = ItemAdapter(),
+            itemAdapter = itemAdapter,
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
-            emptyAdapter = AdapterFactory.createEmptyAdapter(),
-            errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
+                if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemAdapter.itemCount <= 0) {
+                    // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
+                    uiStatusController.showError<ViewErrorBinding>(R.layout.view_error).apply {
+                        tv.text = throwable.message
+                        btn.setOnClickListener {
+                            uiStatusController.showLoading<ViewLoadingBinding>(R.layout.view_loading)
+                            mBinding.btnRefresh.callOnClick()
+                        }
+                    }
+                } else {
+                    uiStatusController.showContent()
+                }
             }
-        )
+        ) { requestType, resultType ->
+            if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && resultType.isNullOrEmpty()) {
+                // 显示空视图
+                uiStatusController.showEmpty<ViewEmptyBinding>(R.layout.view_empty).apply {
+                    tv.text = "没有菜啦~快上菜！"
+                }
+            } else {
+                uiStatusController.showContent()
+            }
+        }
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
                 requestHandler.refresh()
@@ -175,8 +201,6 @@ class ConcatActivity : AppCompatActivity() {
             headerAdapter = HeaderAdapter(),
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
-            emptyAdapter = AdapterFactory.createEmptyAdapter(),
-            errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
             onError = { requestType, throwable ->
@@ -206,8 +230,6 @@ class ConcatActivity : AppCompatActivity() {
             concatAdapter = mAdapter,
             itemAdapter = ItemAdapter(),
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
-            emptyAdapter = AdapterFactory.createEmptyAdapter(),
-            errorAdapter = AdapterFactory.createErrorAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
             onError = { requestType, throwable ->

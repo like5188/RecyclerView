@@ -29,12 +29,12 @@ class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRec
         return when (i++) {
             0 -> {
                 when (j++) {
-//                    0 -> throw RuntimeException("load error 0")
-//                    1 -> throw RuntimeException("load error 1")
-//                    2 -> throw RuntimeException("load error 2")
-//                    3 -> emptyList()
-//                    4 -> throw RuntimeException("load error 4")
-//                    6 -> throw RuntimeException("load error 6")
+                    0 -> throw RuntimeException("load error 0")
+                    1 -> throw RuntimeException("load error 1")
+                    2 -> throw RuntimeException("load error 2")
+                    3 -> emptyList()
+                    4 -> throw RuntimeException("load error 4")
+                    6 -> throw RuntimeException("load error 6")
                     else -> {
                         (start until end).map {
                             DataFactory.createItem(it)

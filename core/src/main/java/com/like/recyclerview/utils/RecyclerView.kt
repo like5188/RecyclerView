@@ -8,7 +8,6 @@ import com.like.common.util.Logger
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
 import com.like.recyclerview.adapter.BaseAdapter
-import com.like.recyclerview.adapter.BaseErrorAdapter
 import com.like.recyclerview.adapter.BaseLoadMoreAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -20,14 +19,10 @@ import kotlinx.coroutines.flow.*
  * @param concatAdapter     合并的 adapter
  * @param headerAdapter     header 的 adapter
  * @param itemAdapter       列表的 adapter
- * @param emptyAdapter      空视图 的 adapter
- * @param errorAdapter      错误视图 的 adapter
  * @param transformer       在这里进行数据转换，返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param show              请求开始时显示进度条
  * @param hide              请求完成时隐藏进度条
  * @param onError           请求失败时回调。
- * 在这里进行额外错误处理：
- * 如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
  * @param onSuccess         请求成功时回调
  */
 fun <ResultType, ValueInList> RecyclerView.bindFlow(
@@ -35,8 +30,6 @@ fun <ResultType, ValueInList> RecyclerView.bindFlow(
     concatAdapter: ConcatAdapter,
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
-    emptyAdapter: BaseAdapter<*, *>? = null,
-    errorAdapter: BaseErrorAdapter<*, *>? = null,
     transformer: suspend (ResultType) -> List<List<ValueInList>?>? = { resultType ->
         @Suppress("UNCHECKED_CAST")
         if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
@@ -57,29 +50,12 @@ fun <ResultType, ValueInList> RecyclerView.bindFlow(
     this.show = show
     this.hide = hide
     this.onError = { requestType, throwable ->
-        when (concatAdapter.adapters.firstOrNull()) {
-            null -> {
-                concatAdapter.add(errorAdapter)
-                errorAdapter?.error(throwable)
-            }
-            errorAdapter -> {
-                errorAdapter?.error(throwable)
-            }
-            emptyAdapter -> {
-                concatAdapter.clear()
-                concatAdapter.add(errorAdapter)
-                errorAdapter?.error(throwable)
-            }
-        }
         onError?.invoke(requestType, throwable)
     }
     this.onSuccess = { requestType, resultType ->
         val res = transformer(resultType)
         concatAdapter.clear()
-        if (res.isNullOrEmpty()) {
-            // 显示空视图
-            concatAdapter.add(emptyAdapter)
-        } else {
+        if (!res.isNullOrEmpty()) {
             val headers = res.getOrNull(0)
             val items = res.getOrNull(1)
             if (!headers.isNullOrEmpty() && headerAdapter != null) {
@@ -107,8 +83,6 @@ fun <ResultType, ValueInList> RecyclerView.bindAfterPagingResult(
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
-    emptyAdapter: BaseAdapter<*, *>? = null,
-    errorAdapter: BaseErrorAdapter<*, *>? = null,
     transformer: suspend (RequestType, ResultType) -> List<List<ValueInList>?>? = { requestType, resultType ->
         @Suppress("UNCHECKED_CAST")
         if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
@@ -127,7 +101,7 @@ fun <ResultType, ValueInList> RecyclerView.bindAfterPagingResult(
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ): RequestHandler<ResultType> = bindPagingResult(
     true, pagingResult, concatAdapter, headerAdapter, itemAdapter, loadMoreAdapter,
-    emptyAdapter, errorAdapter, transformer, show, hide, onError, onSuccess
+    transformer, show, hide, onError, onSuccess
 ).apply {
     loadMoreAdapter.onLoadMore = ::after
 }
@@ -140,8 +114,6 @@ fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
     concatAdapter: ConcatAdapter,
     itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
-    emptyAdapter: BaseAdapter<*, *>? = null,
-    errorAdapter: BaseErrorAdapter<*, *>? = null,
     transformer: suspend (RequestType, ResultType) -> List<ValueInList>? = { requestType, resultType ->
         @Suppress("UNCHECKED_CAST")
         resultType as? List<ValueInList>
@@ -151,7 +123,7 @@ fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
     onError: (suspend (RequestType, Throwable) -> Unit)? = null,
     onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
 ): RequestHandler<ResultType> = bindPagingResult(
-    false, pagingResult, concatAdapter, null, itemAdapter, loadMoreAdapter, emptyAdapter, errorAdapter,
+    false, pagingResult, concatAdapter, null, itemAdapter, loadMoreAdapter,
     transformer = { requestType, resultType ->
         if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
             listOf(emptyList(), transformer(requestType, resultType))
@@ -173,15 +145,12 @@ fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
  * @param headerAdapter     header 的 adapter
  * @param itemAdapter       列表的 adapter
  * @param loadMoreAdapter   加载更多视图 的 adapter
- * @param emptyAdapter      空视图 的 adapter
- * @param errorAdapter      错误视图 的 adapter
  * @param transformer       在这里进行数据转换，返回值为一个集合，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
  * @param show              初始化或者刷新开始时显示进度条
  * @param hide              初始化或者刷新完成时隐藏进度条
  * @param onError           请求失败时回调。
  * 在这里进行额外错误处理：
- * 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]；
- * 加载更多失败时，直接更新[loadMoreAdapter]。
+ * 加载更多失败时，更新了[loadMoreAdapter]。
  * @param onSuccess         请求成功时回调。
  */
 private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
@@ -191,8 +160,6 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
     headerAdapter: BaseAdapter<*, ValueInList>? = null,
     itemAdapter: BaseAdapter<*, ValueInList>,
     loadMoreAdapter: BaseLoadMoreAdapter<*, *>,
-    emptyAdapter: BaseAdapter<*, *>? = null,
-    errorAdapter: BaseErrorAdapter<*, *>? = null,
     transformer: suspend (RequestType, ResultType) -> List<List<ValueInList>?>?,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
@@ -202,42 +169,18 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
     this.show = show
     this.hide = hide
     this.onError = { requestType, throwable ->
-        when (requestType) {
-            is RequestType.Initial, is RequestType.Refresh -> {
-                // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
-                when (concatAdapter.adapters.firstOrNull()) {
-                    null -> {
-                        concatAdapter.add(errorAdapter)
-                        errorAdapter?.error(throwable)
-                    }
-                    errorAdapter -> {
-                        errorAdapter?.error(throwable)
-                    }
-                    emptyAdapter -> {
-                        concatAdapter.clear()
-                        concatAdapter.add(errorAdapter)
-                        errorAdapter?.error(throwable)
-                    }
-                }
-                onError?.invoke(requestType, throwable)
-            }
-            is RequestType.After, is RequestType.Before -> {
-                onError?.invoke(requestType, throwable)
-                // 加载更多失败时，直接更新[loadMoreAdapter]
-                loadMoreAdapter.error(throwable)
-            }
+        if (requestType is RequestType.After || requestType is RequestType.Before) {
+            // 加载更多失败时，直接更新[loadMoreAdapter]
+            loadMoreAdapter.error(throwable)
         }
+        onError?.invoke(requestType, throwable)
     }
     this.onSuccess = { requestType, resultType ->
         val res = transformer(requestType, resultType)
         when (requestType) {
             is RequestType.Initial, is RequestType.Refresh -> {
                 concatAdapter.clear()
-                if (res.isNullOrEmpty()) {
-                    onSuccess?.invoke(requestType, resultType)
-                    // 显示空视图
-                    concatAdapter.add(emptyAdapter)
-                } else {
+                if (!res.isNullOrEmpty()) {
                     val headers = res.getOrNull(0)
                     val items = res.getOrNull(1)
                     // 往后加载更多时，才添加 header
@@ -261,7 +204,6 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                     } else {
                         scrollToBottom()
                     }
-                    onSuccess?.invoke(requestType, resultType)
                     if (!items.isNullOrEmpty()) {
                         loadMoreAdapter.hasMore()
                     }
@@ -270,7 +212,6 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
             is RequestType.After, is RequestType.Before -> {
                 val items = res?.getOrNull(1)
                 if (items.isNullOrEmpty()) {
-                    onSuccess?.invoke(requestType, resultType)
                     // 没有更多数据需要加载
                     loadMoreAdapter.end()
                 } else {
@@ -281,14 +222,11 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                         itemAdapter.addAllToStart(items)
                         keepPosition(items.size, 1)
                     }
-                    // 这里必须使onSuccess方法的调用在loading()方法之前，确保调用loading()的时候，能及时结束任务，从而不影响ConcurrencyHelper的并发处理规则。
-                    // 否则连续触发加载更多的任务会被丢弃，造成错误。
-                    // 这里必须使用postDelayed()方法，也是基于以上原因。
-                    onSuccess?.invoke(requestType, resultType)
                     loadMoreAdapter.hasMore()
                 }
             }
         }
+        onSuccess?.invoke(requestType, resultType)
     }
 }
 
