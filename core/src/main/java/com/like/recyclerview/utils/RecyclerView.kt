@@ -44,13 +44,13 @@ fun <ResultType, ValueInList> RecyclerView.bindFlow(
     },
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+    onError: (suspend (RequestType, Throwable, RequestHandler<ResultType>) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType, RequestHandler<ResultType>) -> Unit)? = null,
 ): RequestHandler<ResultType> = RequestHandler(dataFlow).apply {
     this.show = show
     this.hide = hide
     this.onError = { requestType, throwable ->
-        onError?.invoke(requestType, throwable)
+        onError?.invoke(requestType, throwable, this)
     }
     this.onSuccess = { requestType, resultType ->
         val res = transformer(resultType)
@@ -70,7 +70,7 @@ fun <ResultType, ValueInList> RecyclerView.bindFlow(
             }
             scrollToTop()
         }
-        onSuccess?.invoke(requestType, resultType)
+        onSuccess?.invoke(requestType, resultType, this)
     }
 }
 
@@ -97,8 +97,8 @@ fun <ResultType, ValueInList> RecyclerView.bindAfterPagingResult(
     },
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+    onError: (suspend (RequestType, Throwable, RequestHandler<ResultType>) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType, RequestHandler<ResultType>) -> Unit)? = null,
 ): RequestHandler<ResultType> = bindPagingResult(
     true, pagingResult, concatAdapter, headerAdapter, itemAdapter, loadMoreAdapter,
     transformer, show, hide, onError, onSuccess
@@ -120,8 +120,8 @@ fun <ResultType, ValueInList> RecyclerView.bindBeforePagingResult(
     },
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+    onError: (suspend (RequestType, Throwable, RequestHandler<ResultType>) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType, RequestHandler<ResultType>) -> Unit)? = null,
 ): RequestHandler<ResultType> = bindPagingResult(
     false, pagingResult, concatAdapter, null, itemAdapter, loadMoreAdapter,
     transformer = { requestType, resultType ->
@@ -163,8 +163,8 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
     transformer: suspend (RequestType, ResultType) -> List<List<ValueInList>?>?,
     show: (() -> Unit)? = null,
     hide: (() -> Unit)? = null,
-    onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-    onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
+    onError: (suspend (RequestType, Throwable, RequestHandler<ResultType>) -> Unit)? = null,
+    onSuccess: (suspend (RequestType, ResultType, RequestHandler<ResultType>) -> Unit)? = null,
 ): RequestHandler<ResultType> = RequestHandler(pagingResult).apply {
     this.show = show
     this.hide = hide
@@ -173,7 +173,7 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
             // 加载更多失败时，直接更新[loadMoreAdapter]
             loadMoreAdapter.error(throwable)
         }
-        onError?.invoke(requestType, throwable)
+        onError?.invoke(requestType, throwable, this)
     }
     this.onSuccess = { requestType, resultType ->
         val res = transformer(requestType, resultType)
@@ -226,7 +226,7 @@ private fun <ResultType, ValueInList> RecyclerView.bindPagingResult(
                 }
             }
         }
-        onSuccess?.invoke(requestType, resultType)
+        onSuccess?.invoke(requestType, resultType, this)
     }
 }
 

@@ -7,7 +7,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
-import com.hjq.toast.ToastUtils
 import com.like.common.util.Logger
 import com.like.paging.RequestType
 import com.like.recyclerview.decoration.ColorLineItemDecoration
@@ -105,9 +104,6 @@ class ConcatActivity : AppCompatActivity() {
             itemAdapter = ItemAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
-            onError = { requestType, throwable ->
-                ToastUtils.show(throwable.message)
-            }
         )
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -127,9 +123,6 @@ class ConcatActivity : AppCompatActivity() {
             itemAdapter = ItemAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
-            onError = { requestType, throwable ->
-                ToastUtils.show(throwable.message)
-            }
         )
 
         mBinding.btnRefresh.setOnClickListener {
@@ -144,6 +137,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadAfter() {
+        var clickRefreshBtn = false
         val itemAdapter = ItemAdapter()
         val requestHandler = mBinding.rv.bindAfterPagingResult(
             pagingResult = mViewModel.loadAfterResult.apply {
@@ -157,24 +151,32 @@ class ConcatActivity : AppCompatActivity() {
             concatAdapter = mAdapter,
             itemAdapter = itemAdapter,
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
-            show = { mProgressDialog.show() },
+            show = {
+                if (clickRefreshBtn) {
+                    uiStatusController.showLoading<ViewLoadingBinding>(R.layout.view_loading)
+                } else {
+                    mProgressDialog.show()
+                }
+            },
             hide = { mProgressDialog.hide() },
-            onError = { requestType, throwable ->
-                ToastUtils.show(throwable.message)
+            onError = { requestType, throwable, requestHandler ->
                 if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemAdapter.itemCount <= 0) {
                     // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
                     uiStatusController.showError<ViewErrorBinding>(R.layout.view_error).apply {
                         tv.text = throwable.message
                         btn.setOnClickListener {
-                            uiStatusController.showLoading<ViewLoadingBinding>(R.layout.view_loading)
-                            mBinding.btnRefresh.callOnClick()
+                            clickRefreshBtn = true
+                            lifecycleScope.launch {
+                                requestHandler.refresh()
+                                clickRefreshBtn = false
+                            }
                         }
                     }
                 } else {
                     uiStatusController.showContent()
                 }
             }
-        ) { requestType, resultType ->
+        ) { requestType, resultType, requestHandler ->
             if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && resultType.isNullOrEmpty()) {
                 // 显示空视图
                 uiStatusController.showEmpty<ViewEmptyBinding>(R.layout.view_empty).apply {
@@ -203,9 +205,6 @@ class ConcatActivity : AppCompatActivity() {
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
-            onError = { requestType, throwable ->
-                ToastUtils.show(throwable.message)
-            }
         )
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -232,9 +231,6 @@ class ConcatActivity : AppCompatActivity() {
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
             show = { mProgressDialog.show() },
             hide = { mProgressDialog.hide() },
-            onError = { requestType, throwable ->
-                ToastUtils.show(throwable.message)
-            }
         )
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {

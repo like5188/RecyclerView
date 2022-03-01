@@ -71,7 +71,7 @@ class TreeActivity : AppCompatActivity() {
             itemAdapter = itemAdapter,
             show = { mBinding.swipeRefreshLayout.isRefreshing = true },
             hide = { mBinding.swipeRefreshLayout.isRefreshing = false },
-            onError = { requestType, throwable ->
+            onError = { requestType, throwable, requestHandler ->
                 ToastUtils.show(throwable.message)
             }
         )
