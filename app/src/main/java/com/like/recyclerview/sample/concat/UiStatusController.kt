@@ -72,11 +72,11 @@ class UiStatusController(private val content: View) {
     }
 
     private fun <T : ViewDataBinding> getViewDataBinding(@LayoutRes layoutResource: Int): T {
-        addRootToParent()
+        initRoot()
         return DataBindingUtil.inflate(LayoutInflater.from(context), layoutResource, root, true)
     }
 
-    private fun addRootToParent() {
+    private fun initRoot() {
         if (root.parent != null) return
         (content.parent as? ViewGroup)?.let {
             it.removeView(content)
