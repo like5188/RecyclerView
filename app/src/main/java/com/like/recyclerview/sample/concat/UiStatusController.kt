@@ -9,7 +9,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 
 class UiStatusController(
-    private val contentView: View
+    private val contentView: View,
+    @LayoutRes private val emptyLayoutRes: Int = 0,
+    @LayoutRes private val errorLayoutRes: Int = 0,
+    @LayoutRes private val networkErrorLayoutRes: Int = 0,
+    @LayoutRes private val loadingLayoutRes: Int = 0,
 ) {
     private val context = contentView.context
     private val root: FrameLayout by lazy {
@@ -17,37 +21,40 @@ class UiStatusController(
             layoutParams = contentView.layoutParams
         }
     }
-    private var emptyBinding: ViewDataBinding? = null
-    private var errorBinding: ViewDataBinding? = null
-    private var networkErrorBinding: ViewDataBinding? = null
-    private var loadingBinding: ViewDataBinding? = null
+    var emptyBinding: ViewDataBinding? = null
+        private set
+    var errorBinding: ViewDataBinding? = null
+        private set
+    var networkErrorBinding: ViewDataBinding? = null
+        private set
+    var loadingBinding: ViewDataBinding? = null
+        private set
 
     fun showContent() {
         setVisibility(content = View.VISIBLE)
     }
 
-    fun <T : ViewDataBinding> showEmpty(@LayoutRes layoutResource: Int): T {
-        emptyBinding = emptyBinding ?: getViewDataBinding(layoutResource)
+    fun showEmpty() {
+        emptyBinding = (emptyBinding ?: getViewDataBinding(emptyLayoutRes)) ?: return
         setVisibility(empty = View.VISIBLE)
-        return emptyBinding as T
     }
 
-    fun <T : ViewDataBinding> showError(@LayoutRes layoutResource: Int): T {
-        errorBinding = errorBinding ?: getViewDataBinding(layoutResource)
+    fun showError() {
+        if (errorLayoutRes == 0) return
+        errorBinding = (errorBinding ?: getViewDataBinding(errorLayoutRes)) ?: return
         setVisibility(error = View.VISIBLE)
-        return errorBinding as T
     }
 
-    fun <T : ViewDataBinding> showNetworkError(@LayoutRes layoutResource: Int): T {
-        networkErrorBinding = networkErrorBinding ?: getViewDataBinding(layoutResource)
+    fun showNetworkError() {
+        if (networkErrorLayoutRes == 0) return
+        networkErrorBinding = (networkErrorBinding ?: getViewDataBinding(networkErrorLayoutRes)) ?: return
         setVisibility(netWorkError = View.VISIBLE)
-        return networkErrorBinding as T
     }
 
-    fun <T : ViewDataBinding> showLoading(@LayoutRes layoutResource: Int): T {
-        loadingBinding = loadingBinding ?: getViewDataBinding(layoutResource)
+    fun showLoading() {
+        if (loadingLayoutRes == 0) return
+        loadingBinding = (loadingBinding ?: getViewDataBinding(loadingLayoutRes)) ?: return
         setVisibility(loading = View.VISIBLE)
-        return loadingBinding as T
     }
 
     fun hideAll() {
@@ -73,11 +80,17 @@ class UiStatusController(
             this.contentView.visibility = content
     }
 
-    private fun <T : ViewDataBinding> getViewDataBinding(@LayoutRes layoutResource: Int): T {
+    private fun <T : ViewDataBinding> getViewDataBinding(@LayoutRes layoutResource: Int): T? {
+        if (layoutResource == 0) return null
+        val binding = DataBindingUtil.inflate<T>(LayoutInflater.from(context), layoutResource, root, true)
+        binding ?: return null
         initRoot()
-        return DataBindingUtil.inflate(LayoutInflater.from(context), layoutResource, root, true)
+        return binding
     }
 
+    /**
+     * 把[root]添加到[contentView]和其 parent 的中间
+     */
     private fun initRoot() {
         if (root.parent != null) return
         (contentView.parent as? ViewGroup)?.let {

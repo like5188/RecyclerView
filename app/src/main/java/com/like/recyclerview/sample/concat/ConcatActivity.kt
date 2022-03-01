@@ -16,7 +16,6 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewEmptyBinding
 import com.like.recyclerview.sample.databinding.ViewErrorBinding
-import com.like.recyclerview.sample.databinding.ViewLoadingBinding
 import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.bindAfterPagingResult
 import com.like.recyclerview.utils.bindBeforePagingResult
@@ -46,7 +45,12 @@ class ConcatActivity : AppCompatActivity() {
         ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
     }
     private val uiStatusController by lazy {
-        UiStatusController(mBinding.rv)
+        UiStatusController(
+            mBinding.rv,
+            emptyLayoutRes = R.layout.view_empty,
+            errorLayoutRes = R.layout.view_error,
+            loadingLayoutRes = R.layout.view_loading,
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,7 +156,7 @@ class ConcatActivity : AppCompatActivity() {
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
             show = {
                 if (clickRefreshBtn) {
-                    uiStatusController.showLoading<ViewLoadingBinding>(R.layout.view_loading)
+                    uiStatusController.showLoading()
                 } else {
                     mProgressDialog.show()
                 }
@@ -161,7 +165,8 @@ class ConcatActivity : AppCompatActivity() {
             onError = { requestType, throwable, requestHandler ->
                 if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemAdapter.itemCount <= 0) {
                     // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
-                    uiStatusController.showError<ViewErrorBinding>(R.layout.view_error).apply {
+                    uiStatusController.showError()
+                    (uiStatusController.errorBinding as? ViewErrorBinding)?.apply {
                         tv.text = throwable.message
                         btn.setOnClickListener {
                             clickRefreshBtn = true
@@ -178,7 +183,8 @@ class ConcatActivity : AppCompatActivity() {
         ) { requestType, resultType, requestHandler ->
             if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && resultType.isNullOrEmpty()) {
                 // 显示空视图
-                uiStatusController.showEmpty<ViewEmptyBinding>(R.layout.view_empty).apply {
+                uiStatusController.showEmpty()
+                (uiStatusController.emptyBinding as? ViewEmptyBinding)?.apply {
                     tv.text = "没有菜啦~快上菜！"
                 }
             } else {
