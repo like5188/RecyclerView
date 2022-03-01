@@ -90,9 +90,9 @@ class UiStatusController(
      */
     private fun initRoot() {
         if (root.parent != null) return
-        (contentView.parent as? ViewGroup)?.let {
-            it.removeView(contentView)
-            it.addView(root)
+        (contentView.parent as? ViewGroup)?.apply {
+            removeView(contentView)
+            addView(root)
             root.addView(contentView)
             contentView.visibility = View.GONE
         }
