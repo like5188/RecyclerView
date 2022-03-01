@@ -8,6 +8,12 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 
+/**
+ * 界面状态控制器。包括空状态、错误状态、无网络状态、加载状态
+ *
+ * @author like 2022-03-01
+ * @param contentView   需要显示的内容视图
+ */
 class UiStatusController(
     private val contentView: View,
     @LayoutRes private val emptyLayoutRes: Int = 0,
