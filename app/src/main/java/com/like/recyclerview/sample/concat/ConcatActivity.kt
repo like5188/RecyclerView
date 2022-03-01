@@ -20,6 +20,7 @@ import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.bindAfterPagingResult
 import com.like.recyclerview.utils.bindBeforePagingResult
 import com.like.recyclerview.utils.bindFlow
+import com.like.uistatuscontroller.BaseUiStatus
 import com.like.uistatuscontroller.UiStatusController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
@@ -31,6 +32,10 @@ import kotlinx.coroutines.launch
 class ConcatActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "ConcatActivity"
+        const val TAG_UI_STATUS_EMPTY = "tag_ui_status_empty"
+        const val TAG_UI_STATUS_ERROR = "tag_ui_status_error"
+        const val TAG_UI_STATUS_NETWORK_ERROR = "tag_ui_status_network_error"
+        const val TAG_UI_STATUS_LOADING = "tag_ui_status_loading"
     }
 
     private val mBinding by lazy {
@@ -46,12 +51,12 @@ class ConcatActivity : AppCompatActivity() {
         ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
     }
     private val uiStatusController by lazy {
-        UiStatusController(
-            mBinding.rv,
-            emptyLayoutRes = R.layout.view_empty,
-            errorLayoutRes = R.layout.view_error,
-            loadingLayoutRes = R.layout.view_loading,
-        )
+        UiStatusController(mBinding.rv).apply {
+            addUiStatus(TAG_UI_STATUS_EMPTY, BaseUiStatus(R.layout.view_empty))
+            addUiStatus(TAG_UI_STATUS_ERROR, BaseUiStatus(R.layout.view_error))
+            addUiStatus(TAG_UI_STATUS_NETWORK_ERROR, BaseUiStatus(R.layout.view_network_error))
+            addUiStatus(TAG_UI_STATUS_LOADING, BaseUiStatus(R.layout.view_loading))
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -157,7 +162,7 @@ class ConcatActivity : AppCompatActivity() {
             loadMoreAdapter = AdapterFactory.createLoadMoreAdapter(),
             show = {
                 if (clickRefreshBtn) {
-                    uiStatusController.showLoading()
+                    uiStatusController.showUiStatus(TAG_UI_STATUS_LOADING)
                 } else {
                     mProgressDialog.show()
                 }
@@ -166,8 +171,8 @@ class ConcatActivity : AppCompatActivity() {
             onError = { requestType, throwable, requestHandler ->
                 if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemAdapter.itemCount <= 0) {
                     // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
-                    uiStatusController.showError()
-                    (uiStatusController.errorBinding as? ViewErrorBinding)?.apply {
+                    uiStatusController.showUiStatus(TAG_UI_STATUS_ERROR)
+                    uiStatusController.getDataBinding<ViewErrorBinding>(TAG_UI_STATUS_ERROR)?.apply {
                         tv.text = throwable.message
                         btn.setOnClickListener {
                             clickRefreshBtn = true
@@ -184,8 +189,8 @@ class ConcatActivity : AppCompatActivity() {
         ) { requestType, resultType, requestHandler ->
             if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && resultType.isNullOrEmpty()) {
                 // 显示空视图
-                uiStatusController.showEmpty()
-                (uiStatusController.emptyBinding as? ViewEmptyBinding)?.apply {
+                uiStatusController.showUiStatus(TAG_UI_STATUS_EMPTY)
+                uiStatusController.getDataBinding<ViewEmptyBinding>(TAG_UI_STATUS_EMPTY)?.apply {
                     tv.text = "没有菜啦~快上菜！"
                 }
             } else {
