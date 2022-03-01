@@ -40,19 +40,16 @@ class UiStatusController(
     }
 
     fun showError() {
-        if (errorLayoutRes == 0) return
         errorBinding = (errorBinding ?: getViewDataBinding(errorLayoutRes)) ?: return
         setVisibility(error = View.VISIBLE)
     }
 
     fun showNetworkError() {
-        if (networkErrorLayoutRes == 0) return
         networkErrorBinding = (networkErrorBinding ?: getViewDataBinding(networkErrorLayoutRes)) ?: return
         setVisibility(netWorkError = View.VISIBLE)
     }
 
     fun showLoading() {
-        if (loadingLayoutRes == 0) return
         loadingBinding = (loadingBinding ?: getViewDataBinding(loadingLayoutRes)) ?: return
         setVisibility(loading = View.VISIBLE)
     }
