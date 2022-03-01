@@ -8,44 +8,46 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 
-class UiStatusController(private val content: View) {
-    private val context = content.context
+class UiStatusController(
+    private val contentView: View
+) {
+    private val context = contentView.context
     private val root: FrameLayout by lazy {
-        FrameLayout(content.context).apply {
-            layoutParams = content.layoutParams
+        FrameLayout(contentView.context).apply {
+            layoutParams = contentView.layoutParams
         }
     }
-    private var empty: ViewDataBinding? = null
-    private var error: ViewDataBinding? = null
-    private var networkError: ViewDataBinding? = null
-    private var loading: ViewDataBinding? = null
+    private var emptyBinding: ViewDataBinding? = null
+    private var errorBinding: ViewDataBinding? = null
+    private var networkErrorBinding: ViewDataBinding? = null
+    private var loadingBinding: ViewDataBinding? = null
 
     fun showContent() {
         setVisibility(content = View.VISIBLE)
     }
 
     fun <T : ViewDataBinding> showEmpty(@LayoutRes layoutResource: Int): T {
-        empty = empty ?: getViewDataBinding(layoutResource)
+        emptyBinding = emptyBinding ?: getViewDataBinding(layoutResource)
         setVisibility(empty = View.VISIBLE)
-        return empty as T
+        return emptyBinding as T
     }
 
     fun <T : ViewDataBinding> showError(@LayoutRes layoutResource: Int): T {
-        error = error ?: getViewDataBinding(layoutResource)
+        errorBinding = errorBinding ?: getViewDataBinding(layoutResource)
         setVisibility(error = View.VISIBLE)
-        return error as T
+        return errorBinding as T
     }
 
     fun <T : ViewDataBinding> showNetworkError(@LayoutRes layoutResource: Int): T {
-        networkError = networkError ?: getViewDataBinding(layoutResource)
+        networkErrorBinding = networkErrorBinding ?: getViewDataBinding(layoutResource)
         setVisibility(netWorkError = View.VISIBLE)
-        return networkError as T
+        return networkErrorBinding as T
     }
 
     fun <T : ViewDataBinding> showLoading(@LayoutRes layoutResource: Int): T {
-        loading = loading ?: getViewDataBinding(layoutResource)
+        loadingBinding = loadingBinding ?: getViewDataBinding(layoutResource)
         setVisibility(loading = View.VISIBLE)
-        return loading as T
+        return loadingBinding as T
     }
 
     fun hideAll() {
@@ -59,16 +61,16 @@ class UiStatusController(private val content: View) {
         loading: Int = View.GONE,
         content: Int = View.GONE,
     ) {
-        if (this.empty?.root?.visibility != empty)
-            this.empty?.root?.visibility = empty
-        if (this.error?.root?.visibility != error)
-            this.error?.root?.visibility = error
-        if (this.networkError?.root?.visibility != netWorkError)
-            this.networkError?.root?.visibility = netWorkError
-        if (this.loading?.root?.visibility != loading)
-            this.loading?.root?.visibility = loading
-        if (this.content.visibility != content)
-            this.content.visibility = content
+        if (this.emptyBinding?.root?.visibility != empty)
+            this.emptyBinding?.root?.visibility = empty
+        if (this.errorBinding?.root?.visibility != error)
+            this.errorBinding?.root?.visibility = error
+        if (this.networkErrorBinding?.root?.visibility != netWorkError)
+            this.networkErrorBinding?.root?.visibility = netWorkError
+        if (this.loadingBinding?.root?.visibility != loading)
+            this.loadingBinding?.root?.visibility = loading
+        if (this.contentView.visibility != content)
+            this.contentView.visibility = content
     }
 
     private fun <T : ViewDataBinding> getViewDataBinding(@LayoutRes layoutResource: Int): T {
@@ -78,11 +80,11 @@ class UiStatusController(private val content: View) {
 
     private fun initRoot() {
         if (root.parent != null) return
-        (content.parent as? ViewGroup)?.let {
-            it.removeView(content)
+        (contentView.parent as? ViewGroup)?.let {
+            it.removeView(contentView)
             it.addView(root)
-            root.addView(content)
-            content.visibility = View.GONE
+            root.addView(contentView)
+            contentView.visibility = View.GONE
         }
     }
 }
