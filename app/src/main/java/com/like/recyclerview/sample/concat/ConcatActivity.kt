@@ -10,7 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import com.hjq.toast.ToastUtils
-import com.like.common.util.*
+import com.like.common.util.Logger
+import com.like.common.util.gone
+import com.like.common.util.visible
 import com.like.paging.RequestType
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
@@ -173,6 +175,9 @@ class ConcatActivity : AppCompatActivity() {
                     if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemAdapter.itemCount <= 0) {
                         // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
                         showUiStatus(TAG_UI_STATUS_ERROR)
+                        getDataBinding<ViewUiStatusBinding>(TAG_UI_STATUS_ERROR)?.apply {
+                            tvDes.text = throwable.message
+                        }
                     } else {
                         showContent()
                     }
