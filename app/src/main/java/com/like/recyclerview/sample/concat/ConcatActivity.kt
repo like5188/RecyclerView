@@ -7,7 +7,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
+import com.hjq.toast.ToastUtils
 import com.like.common.util.Logger
+import com.like.common.util.UiStatus
+import com.like.common.util.UiStatusController
 import com.like.paging.RequestType
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
@@ -20,8 +23,6 @@ import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.bindAfterPagingResult
 import com.like.recyclerview.utils.bindBeforePagingResult
 import com.like.recyclerview.utils.bindFlow
-import com.like.uistatuscontroller.BaseUiStatus
-import com.like.uistatuscontroller.UiStatusController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOn
@@ -52,10 +53,10 @@ class ConcatActivity : AppCompatActivity() {
     }
     private val uiStatusController by lazy {
         UiStatusController(mBinding.rv).apply {
-            addUiStatus(TAG_UI_STATUS_EMPTY, BaseUiStatus(R.layout.view_empty))
-            addUiStatus(TAG_UI_STATUS_ERROR, BaseUiStatus(R.layout.view_error))
-            addUiStatus(TAG_UI_STATUS_NETWORK_ERROR, BaseUiStatus(R.layout.view_network_error))
-            addUiStatus(TAG_UI_STATUS_LOADING, BaseUiStatus(R.layout.view_loading))
+            addUiStatus(TAG_UI_STATUS_EMPTY, UiStatus(R.layout.view_empty))
+            addUiStatus(TAG_UI_STATUS_ERROR, UiStatus(R.layout.view_error))
+            addUiStatus(TAG_UI_STATUS_NETWORK_ERROR, UiStatus(R.layout.view_network_error))
+            addUiStatus(TAG_UI_STATUS_LOADING, UiStatus(R.layout.view_loading))
         }
     }
 
@@ -169,6 +170,7 @@ class ConcatActivity : AppCompatActivity() {
             },
             hide = { mProgressDialog.hide() },
             onError = { requestType, throwable, requestHandler ->
+                ToastUtils.show(throwable.message)
                 if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemAdapter.itemCount <= 0) {
                     // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
                     uiStatusController.showUiStatus(TAG_UI_STATUS_ERROR)
