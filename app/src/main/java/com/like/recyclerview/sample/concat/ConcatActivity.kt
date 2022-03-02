@@ -10,9 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import com.hjq.toast.ToastUtils
-import com.like.common.util.Logger
-import com.like.common.util.gone
-import com.like.common.util.visible
+import com.like.common.util.*
 import com.like.paging.RequestType
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
