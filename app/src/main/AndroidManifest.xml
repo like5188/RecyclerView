@@ -36,6 +36,7 @@
         <activity
             android:name=".concat.ConcatActivity"
             android:exported="true" />
+        <activity android:name=".paging3.PagingActivity" />
     </application>
 
 </manifest>
