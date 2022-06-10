@@ -24,12 +24,15 @@ class PagingActivity : AppCompatActivity() {
     private val mAdapter by lazy {
         ItemPagingDataAdapter()
     }
+    private val mFooterAdapter by lazy {
+        FooterAdapter()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        mBinding.rv.adapter = mAdapter.withLoadStateFooter(FooterAdapter())
+        mBinding.rv.adapter = mAdapter.withLoadStateFooter(mFooterAdapter)
 
         mBinding.btnRefresh.setOnClickListener {
             mAdapter.refresh()
@@ -40,6 +43,7 @@ class PagingActivity : AppCompatActivity() {
                 mAdapter.submitData(it)
             }
         }
+
     }
 
 }
