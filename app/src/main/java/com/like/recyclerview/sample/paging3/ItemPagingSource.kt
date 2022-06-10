@@ -1,8 +1,8 @@
 package com.like.recyclerview.sample.paging3
 
-import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.like.common.util.Logger
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.concat.DataFactory
 import kotlinx.coroutines.delay
@@ -29,7 +29,7 @@ class ItemPagingSource : PagingSource<Int, IRecyclerViewItem>() {
             delay(1000)
             val start = key * loadSize
             val end = start + loadSize
-            Log.d("TAG", "ItemPagingSource key=$key loadSize=$loadSize start=$start end=$end")
+            Logger.d("ItemPagingSource key=$key loadSize=$loadSize start=$start end=$end")
             val data = (start until end).map {
                 DataFactory.createItem(it)
             }

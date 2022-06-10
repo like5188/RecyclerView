@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
+import com.like.common.util.Logger
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val layoutId: Int) :
@@ -20,14 +21,19 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
         when (loadState) {
             is LoadState.Error -> {
                 onError(holder, loadState.error)
+                Logger.e("onError")
             }
             is LoadState.NotLoading -> {
                 if (loadState.endOfPaginationReached) {
                     onEnd(holder)
+                    Logger.w("onEnd")
+                } else {
+                    Logger.v("onIdle")
                 }
             }
             is LoadState.Loading -> {
                 onLoading(holder)
+                Logger.i("onLoading")
             }
         }
     }
