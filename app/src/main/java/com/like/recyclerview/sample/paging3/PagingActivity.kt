@@ -10,6 +10,7 @@ import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
+import com.like.recyclerview.ui.footer.FooterAdapter
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -28,7 +29,7 @@ class PagingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        mBinding.rv.adapter = mAdapter
+        mBinding.rv.adapter = mAdapter.withLoadStateFooter(FooterAdapter())
 
         mBinding.btnRefresh.setOnClickListener {
             mAdapter.refresh()

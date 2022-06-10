@@ -16,6 +16,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     }
 
     final override fun onBindViewHolder(holder: BindingViewHolder<VB>, loadState: LoadState) {
+        onBindViewHolder(holder)
         when (loadState) {
             is LoadState.Error -> {
                 onError(holder, loadState.error)
@@ -41,5 +42,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     abstract fun onLoading(holder: BindingViewHolder<VB>)
     abstract fun onEnd(holder: BindingViewHolder<VB>)
     abstract fun onError(holder: BindingViewHolder<VB>, throwable: Throwable)
+    abstract fun onBindViewHolder(holder: BindingViewHolder<VB>)
 
 }
