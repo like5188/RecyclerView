@@ -11,7 +11,8 @@ class PagingViewModel : ViewModel() {
         const val PAGE_SIZE = 20
     }
 
-    val itemFlow = Pager(PagingConfig(PAGE_SIZE)) {
+    // initialLoadSize 默认为 PAGE_SIZE*3，所以这里需要设置一下。
+    val itemFlow = Pager(PagingConfig(PAGE_SIZE, initialLoadSize = PAGE_SIZE)) {
         ItemPagingSource()
     }.flow.cachedIn(viewModelScope)
 }

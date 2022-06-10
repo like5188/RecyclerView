@@ -26,9 +26,11 @@ class ItemPagingSource : PagingSource<Int, IRecyclerViewItem>() {
         return try {
             val key = params.key ?: 0
             val loadSize = params.loadSize
-            Log.d("tag", "ItemDataSource")
             delay(1000)
-            val data = (key * loadSize until (key * loadSize + loadSize)).map {
+            val start = key * loadSize
+            val end = start + loadSize
+            Log.d("TAG", "ItemPagingSource key=$key loadSize=$loadSize start=$start end=$end")
+            val data = (start until end).map {
                 DataFactory.createItem(it)
             }
             val nextPage = if (data.size < loadSize) {
