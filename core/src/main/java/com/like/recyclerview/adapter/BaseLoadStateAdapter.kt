@@ -24,17 +24,17 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
 
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     super.onItemRangeInserted(positionStart, itemCount)
-                    Logger.i("onItemRangeInserted")
+                    Logger.d("onItemRangeInserted")
                 }
 
                 override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
                     super.onItemRangeChanged(positionStart, itemCount)
-                    Logger.i("onItemRangeChanged")
+                    Logger.d("onItemRangeChanged")
                 }
 
                 override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
                     super.onItemRangeRemoved(positionStart, itemCount)
-                    Logger.i("onItemRangeRemoved")
+                    Logger.d("onItemRangeRemoved")
                 }
             }
         )
@@ -49,19 +49,19 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
         when (loadState) {
             is LoadState.Error -> {
                 onError(holder, loadState.error)
-                Logger.i("onError")
+                Logger.d("onError")
             }
             is LoadState.NotLoading -> {
                 if (loadState.endOfPaginationReached) {
                     onEnd(holder)
-                    Logger.i("onEnd")
+                    Logger.d("onEnd")
                 } else {
-                    Logger.i("onIdle")
+                    Logger.d("onIdle")
                 }
             }
             is LoadState.Loading -> {
                 onLoading(holder)
-                Logger.i("onLoading")
+                Logger.d("onLoading")
             }
         }
     }
