@@ -16,7 +16,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     LoadStateAdapter<BindingViewHolder<VB>>() {
     // 是否第一次加载
     private val isFirstLoad = AtomicBoolean(true)
-    private var showByRefresh = false
+    private var refreshLoadState: LoadState? = null
 
     init {
         this.registerAdapterDataObserver(
@@ -77,7 +77,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     // 把 refresh 状态添加进来。因为 displayLoadStateAsItem() 方法中的参数只是针对 append。
     fun handRefreshLoadState(loadState: LoadState) {
         Logger.w("refresh loadState=$loadState")
-        showByRefresh = true
+        refreshLoadState = loadState
     }
 
     abstract fun onLoading(holder: BindingViewHolder<VB>)
