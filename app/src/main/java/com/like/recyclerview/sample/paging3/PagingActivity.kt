@@ -46,7 +46,7 @@ class PagingActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             mAdapter.loadStateFlow.collectLatest {
-                mFooterAdapter.handRefreshLoadState(it.refresh)
+                mFooterAdapter.updateLoadState(it)
             }
         }
 

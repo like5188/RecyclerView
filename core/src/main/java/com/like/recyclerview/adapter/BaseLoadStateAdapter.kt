@@ -5,39 +5,17 @@ import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.Logger
 import com.like.recyclerview.viewholder.BindingViewHolder
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val layoutId: Int) :
     LoadStateAdapter<BindingViewHolder<VB>>() {
+    // 是否第一次刷新完成
     private var isFirstRefreshCompleted = AtomicBoolean(true)
-    private var refreshLoadState: LoadState? = null
-
-    init {
-        this.registerAdapterDataObserver(
-            object : RecyclerView.AdapterDataObserver() {
-
-                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                    super.onItemRangeInserted(positionStart, itemCount)
-                    Logger.d("onItemRangeInserted")
-                }
-
-                override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
-                    super.onItemRangeChanged(positionStart, itemCount)
-                    Logger.d("onItemRangeChanged")
-                }
-
-                override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-                    super.onItemRangeRemoved(positionStart, itemCount)
-                    Logger.d("onItemRangeRemoved")
-                }
-            }
-        )
-    }
 
     final override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): BindingViewHolder<VB> {
         return BindingViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), layoutId, parent, false))
@@ -66,19 +44,20 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     }
 
     /**
-     * 判断是否显示item
+     * 判断是否显示item，这里不显示，在 [updateLoadState] 方法中自己判断。
+     *
+     * @param loadState     append 的状态
      */
     override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
-        Logger.e("append loadState=$loadState refreshLoadState=$refreshLoadState")
-        return refreshLoadState != null
+        return false
     }
 
-    // 把 refresh 状态添加进来。因为 displayLoadStateAsItem() 方法中的参数只是针对 append。
-    fun handRefreshLoadState(loadState: LoadState) {
-        Logger.v("refresh loadState=$loadState")
-        refreshLoadState = loadState
-        if (loadState is LoadState.NotLoading && isFirstRefreshCompleted.compareAndSet(true, false)) {
+    fun updateLoadState(states: CombinedLoadStates) {
+        // 第一次刷新完成时添加 Footer，以后都是更新 Footer，不存在删除 Footer 的时候。
+        if (states.refresh is LoadState.NotLoading && isFirstRefreshCompleted.compareAndSet(true, false)) {
             notifyItemInserted(0)
+        } else {
+            notifyItemChanged(0)
         }
     }
 

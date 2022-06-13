@@ -8,7 +8,7 @@ import androidx.paging.cachedIn
 
 class PagingViewModel : ViewModel() {
     companion object {
-        const val PAGE_SIZE = 2
+        const val PAGE_SIZE = 10
     }
 
     // initialLoadSize 默认为 PAGE_SIZE*3，所以这里需要设置一下。
