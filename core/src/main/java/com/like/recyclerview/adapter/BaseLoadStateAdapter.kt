@@ -18,7 +18,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     private var outLoadStates: CombinedLoadStates? = null
 
     //记录自身是否被添加进RecycleView
-    var hasInserted = false
+    private var hasInserted = false
 
     init {
         //注册监听，记录是否被添加
