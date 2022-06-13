@@ -90,8 +90,9 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     }
 
     override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
+        // 是否显示 Footer
         val result = super.displayLoadStateAsItem(loadState) || refreshLoadState is LoadState.NotLoading
-        if (result && !hasInserted) {
+        if (result && !hasInserted) {// 插入 Footer
             notifyItemInserted(0)
         }
         return result
