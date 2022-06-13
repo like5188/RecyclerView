@@ -14,8 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val layoutId: Int) :
     LoadStateAdapter<BindingViewHolder<VB>>() {
-    // 是否第一次加载
-    private val isFirstLoad = AtomicBoolean(true)
+    private var isFirstRefreshCompleted = AtomicBoolean(true)
     private var refreshLoadState: LoadState? = null
 
     init {
@@ -71,16 +70,16 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
      */
     override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
         Logger.e("append loadState=$loadState refreshLoadState=$refreshLoadState")
-        if (refreshLoadState is LoadState.NotLoading) {
-            return true
-        }
-        return loadState is LoadState.Loading || loadState is LoadState.Error || (loadState is LoadState.NotLoading && loadState.endOfPaginationReached)
+        return refreshLoadState != null
     }
 
     // 把 refresh 状态添加进来。因为 displayLoadStateAsItem() 方法中的参数只是针对 append。
     fun handRefreshLoadState(loadState: LoadState) {
         Logger.v("refresh loadState=$loadState")
         refreshLoadState = loadState
+        if (loadState is LoadState.NotLoading && isFirstRefreshCompleted.compareAndSet(true, false)) {
+            notifyItemInserted(0)
+        }
     }
 
     abstract fun onLoading(holder: BindingViewHolder<VB>)
