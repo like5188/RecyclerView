@@ -49,14 +49,14 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
         when (loadState) {
             is LoadState.Error -> {
                 onError(holder, loadState.error)
-                Logger.e("onError")
+                Logger.i("onError")
             }
             is LoadState.NotLoading -> {
                 if (loadState.endOfPaginationReached) {
                     onEnd(holder)
-                    Logger.w("onEnd")
+                    Logger.i("onEnd")
                 } else {
-                    Logger.v("onIdle")
+                    Logger.i("onIdle")
                 }
             }
             is LoadState.Loading -> {

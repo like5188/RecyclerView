@@ -26,7 +26,7 @@ class ItemPagingSource : PagingSource<Int, IRecyclerViewItem>() {
         return try {
             val key = params.key ?: 0
             val loadSize = params.loadSize
-            delay(1000)
+            delay(3000)
             val start = key * loadSize
             val end = start + loadSize
             Logger.d("ItemPagingSource load key=$key loadSize=$loadSize start=$start end=$end")
