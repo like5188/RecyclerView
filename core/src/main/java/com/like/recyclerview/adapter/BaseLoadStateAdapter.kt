@@ -79,7 +79,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
 
     // 把 refresh 状态添加进来。因为 displayLoadStateAsItem() 方法中的参数只是针对 append。
     fun handRefreshLoadState(loadState: LoadState) {
-        Logger.w("refresh loadState=$loadState")
+        Logger.v("refresh loadState=$loadState")
         refreshLoadState = loadState
     }
 
