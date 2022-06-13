@@ -70,7 +70,10 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
      * 判断是否显示item
      */
     override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
-        Logger.e("append loadState=$loadState")
+        Logger.e("append loadState=$loadState refreshLoadState=$refreshLoadState")
+        if (refreshLoadState is LoadState.Loading) {
+            return !isFirstLoad.compareAndSet(true, false)
+        }
         return loadState is LoadState.Loading || loadState is LoadState.Error || (loadState is LoadState.NotLoading && loadState.endOfPaginationReached)
     }
 
