@@ -8,14 +8,36 @@ import androidx.databinding.ViewDataBinding
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.Logger
 import com.like.recyclerview.viewholder.BindingViewHolder
-import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val layoutId: Int) :
     LoadStateAdapter<BindingViewHolder<VB>>() {
-    // 是否第一次刷新完成
-    private var isFirstRefreshCompleted = AtomicBoolean(true)
+    //记录列表adapter的loadState
+    private var outLoadStates: CombinedLoadStates? = null
+
+    //记录自身是否被添加进RecycleView
+    var hasInserted = false
+
+    init {
+        //注册监听，记录是否被添加
+        this.registerAdapterDataObserver(
+            object : RecyclerView.AdapterDataObserver() {
+
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    super.onItemRangeInserted(positionStart, itemCount)
+                    Logger.e("onItemRangeInserted")
+                    hasInserted = true
+                }
+
+                override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                    super.onItemRangeRemoved(positionStart, itemCount)
+                    hasInserted = false
+                }
+            }
+        )
+    }
 
     final override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): BindingViewHolder<VB> {
         return BindingViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), layoutId, parent, false))
@@ -43,22 +65,20 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
         }
     }
 
-    /**
-     * 判断是否显示item，这里不显示，在 [updateLoadState] 方法中自己判断。
-     *
-     * @param loadState     append 的状态
-     */
-    override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
-        return false
+    //更新外部LoadState
+    fun updateLoadState(loadState: CombinedLoadStates) {
+        outLoadStates = loadState
     }
 
-    fun updateLoadState(states: CombinedLoadStates) {
-        // 第一次刷新完成时添加 Footer，以后都是更新 Footer，不存在删除 Footer 的时候。
-        if (states.refresh is LoadState.NotLoading && isFirstRefreshCompleted.compareAndSet(true, false)) {
+    //重写，增加判断逻辑
+    override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
+        //新增逻辑，refresh状态为NotLoading之后，NotLoading再显示footer
+        val resultB = (loadState is LoadState.NotLoading && outLoadStates?.refresh is LoadState.NotLoading)
+        val result = super.displayLoadStateAsItem(loadState) || resultB
+        if (result && !hasInserted) {
             notifyItemInserted(0)
-        } else {
-            notifyItemChanged(0)
         }
+        return result
     }
 
     abstract fun onLoading(holder: BindingViewHolder<VB>)
