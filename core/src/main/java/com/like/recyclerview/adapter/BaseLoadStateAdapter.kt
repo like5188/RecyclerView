@@ -5,12 +5,18 @@ import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.paging.CombinedLoadStates
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.Logger
 import com.like.recyclerview.viewholder.BindingViewHolder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val layoutId: Int) :
     LoadStateAdapter<BindingViewHolder<VB>>() {
@@ -32,6 +38,29 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
                 }
             }
         )
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        // 获取 refreshLoadState 状态，用于 Footer 显示的判断。
+        val pagingDataAdapter: PagingDataAdapter<*, *>? = when (val adapter = recyclerView.adapter) {
+            is PagingDataAdapter<*, *> -> adapter
+            is ConcatAdapter -> adapter.adapters.firstOrNull {
+                it is PagingDataAdapter<*, *>
+            } as? PagingDataAdapter<*, *>
+            else -> null
+        }
+        val lifecycleScope: CoroutineScope? = when (val owner = recyclerView.context) {
+            is LifecycleOwner -> owner.lifecycleScope
+            else -> null
+        }
+        if (lifecycleScope != null && pagingDataAdapter != null) {
+            lifecycleScope.launch {
+                pagingDataAdapter.loadStateFlow.collectLatest {
+                    this@BaseLoadStateAdapter.refreshLoadState = it.refresh
+                }
+            }
+        }
     }
 
     final override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): BindingViewHolder<VB> {
@@ -58,10 +87,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
                 Logger.d("onLoading")
             }
         }
-    }
-
-    fun updateLoadState(states: CombinedLoadStates) {
-        this.refreshLoadState = states.refresh
     }
 
     override fun displayLoadStateAsItem(loadState: LoadState): Boolean {

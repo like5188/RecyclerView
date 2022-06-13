@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.like.common.util.Logger
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
@@ -41,14 +40,7 @@ class PagingActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             mViewModel.itemFlow.collectLatest {
-                Logger.w("submitData")
                 mAdapter.submitData(it)
-            }
-        }
-
-        lifecycleScope.launch {
-            mAdapter.loadStateFlow.collectLatest {
-                mFooterAdapter.updateLoadState(it)
             }
         }
 
