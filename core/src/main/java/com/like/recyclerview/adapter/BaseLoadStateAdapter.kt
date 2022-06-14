@@ -6,21 +6,15 @@ import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
-import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.viewholder.BindingViewHolder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val layoutId: Int) :
     LoadStateAdapter<BindingViewHolder<VB>>() {
-    private var refreshLoadState: LoadState? = null
+    private val isFirstLoad = AtomicBoolean(true)
     private var hasInserted = false
     private var preLoadState: LoadState? = null
     private var curLoadState: LoadState? = null
@@ -56,36 +50,13 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     }
 
     override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
-        if (refreshLoadState == null) {// 首次刷新时不显示
+        if (isFirstLoad.compareAndSet(true, false)) {// 首次加载时不显示
             return false
         }
         if (!hasInserted) {// 通过 notifyItemInserted 方法插入
             notifyItemInserted(0)
         }
-        return true// 只触发 notifyItemChanged
-    }
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        // 获取 refreshLoadState 状态，用于 Footer 显示的判断。
-        val pagingDataAdapter: PagingDataAdapter<*, *>? = when (val adapter = recyclerView.adapter) {
-            is PagingDataAdapter<*, *> -> adapter
-            is ConcatAdapter -> adapter.adapters.firstOrNull {
-                it is PagingDataAdapter<*, *>
-            } as? PagingDataAdapter<*, *>
-            else -> null
-        }
-        val lifecycleScope: CoroutineScope? = when (val owner = recyclerView.context) {
-            is LifecycleOwner -> owner.lifecycleScope
-            else -> null
-        }
-        if (lifecycleScope != null && pagingDataAdapter != null) {
-            lifecycleScope.launch {
-                pagingDataAdapter.loadStateFlow.collectLatest {
-                    this@BaseLoadStateAdapter.refreshLoadState = it.refresh
-                }
-            }
-        }
+        return true// 只触发 notifyItemChanged，具体逻辑查看父类的 set(loadState) 代码
     }
 
     abstract fun onBindViewHolder(holder: BindingViewHolder<VB>)
