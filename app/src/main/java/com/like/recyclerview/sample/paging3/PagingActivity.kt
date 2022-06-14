@@ -39,7 +39,10 @@ class PagingActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            mViewModel.itemFlow.collectLatest {
+//            mViewModel.afterFlow.collectLatest {
+//                mAdapter.submitData(it)
+//            }
+            mViewModel.beforeFlow.collectLatest {
                 mAdapter.submitData(it)
             }
         }

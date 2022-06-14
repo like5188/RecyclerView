@@ -7,7 +7,7 @@ import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.concat.DataFactory
 import kotlinx.coroutines.delay
 
-class AfterPagingSource : PagingSource<Int, IRecyclerViewItem>() {
+class BeforePagingSource : PagingSource<Int, IRecyclerViewItem>() {
     override fun getRefreshKey(state: PagingState<Int, IRecyclerViewItem>): Int? {
         // Try to find the page key of the closest page to anchorPosition, from
         // either the prevKey or the nextKey, but you need to handle nullability
@@ -24,26 +24,26 @@ class AfterPagingSource : PagingSource<Int, IRecyclerViewItem>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, IRecyclerViewItem> {
         return try {
-            val key = params.key ?: 0
+            val key = params.key ?: 10
             val loadSize = params.loadSize
             delay(3000)
-            val start = key * loadSize + 1
-            val end = start + loadSize
+            val start = key * loadSize - 1
+            val end = start - loadSize + 1
             Logger.i("ItemPagingSource load key=$key loadSize=$loadSize start=$start end=$end")
-            val data = (start until end).map {
+            val data = (end..start).map {
                 DataFactory.createItem(it)
             }
-            val nextPage = if (data.size < loadSize || key >= 2) {
+            val prePage = if (data.size < loadSize || key < 9) {
                 //没有更多数据
                 null
             } else {
-                key + 1
+                key - 1
             }
 
             LoadResult.Page(
                 data = data,
-                prevKey = null,
-                nextKey = nextPage
+                prevKey = prePage,
+                nextKey = null
             )
         } catch (e: Exception) {
             LoadResult.Error(e)
