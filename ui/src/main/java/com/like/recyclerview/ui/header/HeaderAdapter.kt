@@ -1,4 +1,4 @@
-package com.like.recyclerview.ui.footer
+package com.like.recyclerview.ui.header
 
 import android.graphics.PorterDuff
 import android.view.View
@@ -8,7 +8,7 @@ import com.like.recyclerview.ui.R
 import com.like.recyclerview.ui.databinding.ItemLoadStateBinding
 import com.like.recyclerview.viewholder.BindingViewHolder
 
-class FooterAdapter : BaseLoadStateAdapter<ItemLoadStateBinding>(R.layout.item_load_state) {
+class HeaderAdapter : BaseLoadStateAdapter<ItemLoadStateBinding>(R.layout.item_load_state) {
 
     override fun onBindViewHolder(holder: BindingViewHolder<ItemLoadStateBinding>) {
         val context = holder.itemView.context
@@ -24,7 +24,7 @@ class FooterAdapter : BaseLoadStateAdapter<ItemLoadStateBinding>(R.layout.item_l
                 textSize = 16f
             }
             tvNoMore.apply {
-                text = "到底啦"
+                text = "到顶啦"
                 setTextColor(ContextCompat.getColor(context, R.color.recyclerview_text_gray_0))
                 textSize = 16f
             }

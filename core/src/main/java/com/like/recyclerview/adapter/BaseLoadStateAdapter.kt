@@ -53,8 +53,8 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
             }
             is LoadState.NotLoading -> {
                 if (loadState.endOfPaginationReached) {
-                    onEnd(holder)
-                    Logger.d("BaseLoadStateAdapter onEnd")
+                    onNoMore(holder)
+                    Logger.d("BaseLoadStateAdapter onNoMore")
                 } else {
                     Logger.d("BaseLoadStateAdapter onIdle")
                 }
@@ -99,7 +99,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     }
 
     abstract fun onLoading(holder: BindingViewHolder<VB>)
-    abstract fun onEnd(holder: BindingViewHolder<VB>)
+    abstract fun onNoMore(holder: BindingViewHolder<VB>)
     abstract fun onError(holder: BindingViewHolder<VB>, throwable: Throwable)
     abstract fun onBindViewHolder(holder: BindingViewHolder<VB>)
 
