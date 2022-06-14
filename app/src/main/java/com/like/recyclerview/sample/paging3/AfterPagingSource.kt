@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.like.common.util.Logger
 import com.like.recyclerview.model.IRecyclerViewItem
-import com.like.recyclerview.sample.concat.DataFactory
 import kotlinx.coroutines.delay
 
 class AfterPagingSource : PagingSource<Int, IRecyclerViewItem>() {

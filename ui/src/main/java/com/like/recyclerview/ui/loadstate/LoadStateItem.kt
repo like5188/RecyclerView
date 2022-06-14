@@ -1,4 +1,4 @@
-package com.like.recyclerview.ui.loadmore
+package com.like.recyclerview.ui.loadstate
 
 import androidx.annotation.ColorRes
 import androidx.databinding.ObservableInt
@@ -7,13 +7,13 @@ import com.like.recyclerview.ui.BR
 import com.like.recyclerview.ui.R
 
 /**
- * 用于 RecyclerView 的往后加载更多的视图
+ * 用于 RecyclerView 的加载更多的视图
  *
  * @param loadingTip        加载中的描述
  * @param endTip            没有数据了的描述
  * @param errorTip          加载失败的描述
  */
-data class LoadMoreItem(
+data class LoadStateItem(
     val loadingTip: String = "加载中……",
     val endTip: String = "没有数据啦",
     val errorTip: String = "加载失败，点击重试！",
@@ -24,20 +24,20 @@ data class LoadMoreItem(
 ) : IRecyclerViewItem {
     companion object {
         const val LOADING = 0
-        const val END = 1
+        const val NO_MORE = 1
         const val ERROR = 2
     }
 
-    override val layoutId: Int = R.layout.item_load_more
-    override val variableId: Int = BR.loadMoreItem
+    override val layoutId: Int = R.layout.item_load_state
+    override val variableId: Int = BR.loadStateItem
     val status: ObservableInt = ObservableInt(LOADING)
 
     fun loading() {
         status.set(LOADING)
     }
 
-    fun end() {
-        status.set(END)
+    fun noMore() {
+        status.set(NO_MORE)
     }
 
     fun error(throwable: Throwable) {

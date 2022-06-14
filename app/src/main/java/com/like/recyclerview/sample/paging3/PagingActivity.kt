@@ -9,14 +9,14 @@ import androidx.lifecycle.lifecycleScope
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
-import com.like.recyclerview.sample.databinding.ActivityConcatBinding
+import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class PagingActivity : AppCompatActivity() {
     private val mBinding by lazy {
-        DataBindingUtil.setContentView<ActivityConcatBinding>(this, R.layout.activity_concat)
+        DataBindingUtil.setContentView<ActivityPagingBinding>(this, R.layout.activity_paging)
     }
     private val mViewModel by lazy {
         ViewModelProvider(this).get(PagingViewModel::class.java)

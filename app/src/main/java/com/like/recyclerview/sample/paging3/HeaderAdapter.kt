@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.concat
+package com.like.recyclerview.sample.paging3
 
 import androidx.databinding.ViewDataBinding
 import com.like.recyclerview.adapter.BaseAdapter

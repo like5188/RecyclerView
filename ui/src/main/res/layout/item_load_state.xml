@@ -7,14 +7,14 @@
         <import type="android.view.View" />
 
         <variable
-            name="loadMoreItem"
-            type="com.like.recyclerview.ui.loadmore.LoadMoreItem" />
+            name="loadStateItem"
+            type="com.like.recyclerview.ui.loadstate.LoadStateItem" />
     </data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        app:setBackgroundResource="@{loadMoreItem.bgColor}">
+        app:setBackgroundResource="@{loadStateItem.bgColor}">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -22,20 +22,20 @@
             android:layout_gravity="center"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:visibility="@{loadMoreItem.status==0?View.VISIBLE:View.GONE}">
+            android:visibility="@{loadStateItem.status==0?View.VISIBLE:View.GONE}">
 
             <androidx.core.widget.ContentLoadingProgressBar
                 style="?android:attr/progressBarStyleInverse"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:setContentLoadingProgressBarBgColor="@{loadMoreItem.progressBarBgColor}" />
+                app:setContentLoadingProgressBarBgColor="@{loadStateItem.progressBarBgColor}" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{loadMoreItem.loadingTip}"
-                app:setTextColor="@{loadMoreItem.textColor}"
-                app:setTextSize="@{loadMoreItem.textSize}" />
+                android:text="@{loadStateItem.loadingTip}"
+                app:setTextColor="@{loadStateItem.textColor}"
+                app:setTextSize="@{loadStateItem.textSize}" />
         </LinearLayout>
 
         <LinearLayout
@@ -44,7 +44,7 @@
             android:layout_gravity="center"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:visibility="@{loadMoreItem.status==1?View.VISIBLE:View.GONE}">
+            android:visibility="@{loadStateItem.status==1?View.VISIBLE:View.GONE}">
 
             <View
                 android:layout_width="20dp"
@@ -56,9 +56,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:text="@{loadMoreItem.endTip}"
-                app:setTextColor="@{loadMoreItem.textColor}"
-                app:setTextSize="@{loadMoreItem.textSize}" />
+                android:text="@{loadStateItem.endTip}"
+                app:setTextColor="@{loadStateItem.textColor}"
+                app:setTextSize="@{loadStateItem.textSize}" />
 
             <View
                 android:layout_width="20dp"
@@ -70,10 +70,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@{loadMoreItem.errorTip}"
-            android:visibility="@{loadMoreItem.status==2?View.VISIBLE:View.GONE}"
-            app:setTextColor="@{loadMoreItem.textColor}"
-            app:setTextSize="@{loadMoreItem.textSize}" />
+            android:text="@{loadStateItem.errorTip}"
+            android:visibility="@{loadStateItem.status==2?View.VISIBLE:View.GONE}"
+            app:setTextColor="@{loadStateItem.textColor}"
+            app:setTextSize="@{loadStateItem.textSize}" />
 
     </FrameLayout>
 </layout>

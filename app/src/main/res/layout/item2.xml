@@ -4,7 +4,7 @@
 
         <variable
             name="item2"
-            type="com.like.recyclerview.sample.concat.Item2" />
+            type="com.like.recyclerview.sample.paging3.Item2" />
     </data>
 
     <LinearLayout

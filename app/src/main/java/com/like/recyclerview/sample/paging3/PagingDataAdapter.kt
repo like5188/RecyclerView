@@ -4,8 +4,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import com.like.recyclerview.adapter.BasePagingDataAdapter
 import com.like.recyclerview.model.IRecyclerViewItem
-import com.like.recyclerview.sample.concat.Item1
-import com.like.recyclerview.sample.concat.Item2
 
 class PagingDataAdapter : BasePagingDataAdapter<IRecyclerViewItem, ViewDataBinding>(
     object : DiffUtil.ItemCallback<IRecyclerViewItem>() {

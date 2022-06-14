@@ -21,13 +21,6 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="startConcatActivity"
-        android:text="启动ConcatActivity"
-        android:textAllCaps="false" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:onClick="startPagingActivity"
         android:text="启动PagingActivity"
         android:textAllCaps="false" />

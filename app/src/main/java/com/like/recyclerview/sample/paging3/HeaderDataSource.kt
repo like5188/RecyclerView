@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.concat
+package com.like.recyclerview.sample.paging3
 
 import android.util.Log
 import com.like.recyclerview.model.IRecyclerViewItem

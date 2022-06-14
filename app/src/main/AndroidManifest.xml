@@ -29,14 +29,13 @@
         </activity>
         <activity
             android:name="com.like.recyclerview.sample.tree.TreeActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".addimage.PictureSelectorActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
-            android:name=".concat.ConcatActivity"
-            android:exported="true" />
-        <activity android:name=".paging3.PagingActivity" />
+            android:name=".paging3.PagingActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

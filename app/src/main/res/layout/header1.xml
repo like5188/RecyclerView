@@ -4,7 +4,7 @@
 
         <variable
             name="header1"
-            type="com.like.recyclerview.sample.concat.Header1" />
+            type="com.like.recyclerview.sample.paging3.Header1" />
     </data>
 
     <LinearLayout
