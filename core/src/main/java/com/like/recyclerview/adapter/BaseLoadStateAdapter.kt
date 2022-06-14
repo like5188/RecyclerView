@@ -56,12 +56,13 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     }
 
     override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
-        // 是否显示 Footer
-        val result = super.displayLoadStateAsItem(loadState) || refreshLoadState is LoadState.NotLoading
-        if (result && !hasInserted) {// 插入 Footer
+        if (refreshLoadState == null) {// 首次刷新时不显示
+            return false
+        }
+        if (!hasInserted) {// 通过 notifyItemInserted 方法插入
             notifyItemInserted(0)
         }
-        return result
+        return true// 只触发 notifyItemChanged
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
