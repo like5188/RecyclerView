@@ -32,21 +32,32 @@ class PagingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        mBinding.rv.adapter = mAdapter.withLoadStateHeader(mLoadStateAdapter)
 
         mBinding.btnRefresh.setOnClickListener {
             mAdapter.refresh()
         }
 
+        initAfter()
+    }
+
+    private fun initAfter() {
+        mBinding.rv.adapter = mAdapter.withLoadStateFooter(mLoadStateAdapter)
+
         lifecycleScope.launch {
-//            mViewModel.afterFlow.collectLatest {
-//                mAdapter.submitData(it)
-//            }
+            mViewModel.afterFlow.collectLatest {
+                mAdapter.submitData(it)
+            }
+        }
+    }
+
+    private fun initBefore() {
+        mBinding.rv.adapter = mAdapter.withLoadStateHeader(mLoadStateAdapter)
+
+        lifecycleScope.launch {
             mViewModel.beforeFlow.collectLatest {
                 mAdapter.submitData(it)
             }
         }
-
     }
 
 }
