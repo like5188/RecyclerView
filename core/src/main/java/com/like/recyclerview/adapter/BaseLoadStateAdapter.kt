@@ -17,7 +17,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     private val isFirstLoad = AtomicBoolean(true)
     private var hasInserted = false
     private var preLoadState: LoadState? = null
-    private var curLoadState: LoadState? = null
 
     init {
         this.registerAdapterDataObserver(
@@ -42,10 +41,36 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
 
     final override fun onBindViewHolder(holder: BindingViewHolder<VB>, @SuppressLint("RecyclerView") loadState: LoadState) {
         onBindViewHolder(holder)
-        if (curLoadState != loadState) {
-            preLoadState = curLoadState
-            curLoadState = loadState
-            onLoadStateChange(preLoadState, curLoadState, holder)
+        val pre = preLoadState
+        if (pre != loadState) {
+            when (loadState) {
+                is LoadState.Loading -> {
+                    onLoading(holder)
+                }
+                is LoadState.Error -> {
+                    onError(holder, loadState.error)
+                }
+                is LoadState.NotLoading -> {
+                    if (loadState.endOfPaginationReached) {
+                        onNoMore(holder)
+                    } else {// 空闲状态时，根据 preState 来显示，也就是保持前一个状态不变。
+                        when (pre) {
+                            is LoadState.Loading -> {
+                                onLoading(holder)
+                            }
+                            is LoadState.Error -> {
+                                onError(holder, pre.error)
+                            }
+                            is LoadState.NotLoading -> {
+                                if (pre.endOfPaginationReached) {
+                                    onNoMore(holder)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            preLoadState = loadState
         }
     }
 
@@ -60,6 +85,8 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     }
 
     abstract fun onBindViewHolder(holder: BindingViewHolder<VB>)
-    abstract fun onLoadStateChange(preState: LoadState?, curState: LoadState?, holder: BindingViewHolder<VB>)
+    abstract fun onLoading(holder: BindingViewHolder<VB>)
+    abstract fun onNoMore(holder: BindingViewHolder<VB>)
+    abstract fun onError(holder: BindingViewHolder<VB>, throwable: Throwable)
 
 }
