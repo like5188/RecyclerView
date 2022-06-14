@@ -7,7 +7,7 @@ import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.concat.Item1
 import com.like.recyclerview.sample.concat.Item2
 
-class ItemPagingDataAdapter : BasePagingDataAdapter<IRecyclerViewItem, ViewDataBinding>(
+class PagingDataAdapter : BasePagingDataAdapter<IRecyclerViewItem, ViewDataBinding>(
     object : DiffUtil.ItemCallback<IRecyclerViewItem>() {
         // 比对新旧条目是否是同一个条目
         override fun areItemsTheSame(oldItem: IRecyclerViewItem, newItem: IRecyclerViewItem): Boolean {

@@ -7,7 +7,7 @@ import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.concat.DataFactory
 import kotlinx.coroutines.delay
 
-class ItemPagingSource : PagingSource<Int, IRecyclerViewItem>() {
+class AfterPagingSource : PagingSource<Int, IRecyclerViewItem>() {
     override fun getRefreshKey(state: PagingState<Int, IRecyclerViewItem>): Int? {
         // Try to find the page key of the closest page to anchorPosition, from
         // either the prevKey or the nextKey, but you need to handle nullability

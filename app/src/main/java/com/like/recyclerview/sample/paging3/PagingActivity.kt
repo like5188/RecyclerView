@@ -22,7 +22,7 @@ class PagingActivity : AppCompatActivity() {
         ViewModelProvider(this).get(PagingViewModel::class.java)
     }
     private val mAdapter by lazy {
-        ItemPagingDataAdapter()
+        PagingDataAdapter()
     }
     private val mLoadStateAdapter by lazy {
         LoadStateAdapter()
@@ -32,7 +32,7 @@ class PagingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        mBinding.rv.adapter = mAdapter.withLoadStateFooter(mLoadStateAdapter)
+        mBinding.rv.adapter = mAdapter.withLoadStateHeader(mLoadStateAdapter)
 
         mBinding.btnRefresh.setOnClickListener {
             mAdapter.refresh()
