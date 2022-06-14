@@ -29,7 +29,7 @@ class AfterPagingSource : PagingSource<Int, IRecyclerViewItem>() {
             delay(3000)
             val start = key * loadSize + 1
             val end = start + loadSize
-            Logger.i("ItemPagingSource load key=$key loadSize=$loadSize start=$start end=$end")
+            Logger.i("AfterPagingSource load key=$key loadSize=$loadSize start=$start end=$end")
             val data = (start until end).map {
                 DataFactory.createItem(it)
             }
