@@ -98,9 +98,9 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
         }
     }
 
+    abstract fun onBindViewHolder(holder: BindingViewHolder<VB>)
     abstract fun onLoading(holder: BindingViewHolder<VB>)
     abstract fun onNoMore(holder: BindingViewHolder<VB>)
     abstract fun onError(holder: BindingViewHolder<VB>, throwable: Throwable)
-    abstract fun onBindViewHolder(holder: BindingViewHolder<VB>)
 
 }
