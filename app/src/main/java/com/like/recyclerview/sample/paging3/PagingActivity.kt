@@ -6,8 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
+import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter
@@ -27,6 +29,9 @@ class PagingActivity : AppCompatActivity() {
     private val mLoadStateAdapter by lazy {
         LoadStateAdapter()
     }
+    private val mProgressDialog by lazy {
+        ProgressDialog(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +40,15 @@ class PagingActivity : AppCompatActivity() {
 
         mBinding.btnRefresh.setOnClickListener {
             mAdapter.refresh()
+        }
+
+        lifecycleScope.launch {
+            mAdapter.loadStateFlow.collectLatest {
+                when (it.refresh) {
+                    is LoadState.NotLoading -> mProgressDialog.dismiss()
+                    is LoadState.Loading -> mProgressDialog.show()
+                }
+            }
         }
 
         initAfter()

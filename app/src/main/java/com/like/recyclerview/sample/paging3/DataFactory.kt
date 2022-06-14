@@ -3,17 +3,6 @@ package com.like.recyclerview.sample.paging3
 import com.like.recyclerview.model.IRecyclerViewItem
 
 object DataFactory {
-    fun createHeader(index: Int): IRecyclerViewItem {
-        return if (index % 3 == 0) {
-            Header1(
-                name = "Header1 $index",
-            )
-        } else {
-            Header2(
-                name = "Header2 $index",
-            )
-        }
-    }
 
     fun createItem(index: Int): IRecyclerViewItem {
         return if (index % 3 == 0) {
