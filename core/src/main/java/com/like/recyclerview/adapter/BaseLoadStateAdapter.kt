@@ -40,6 +40,41 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
         )
     }
 
+    final override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): BindingViewHolder<VB> {
+        return BindingViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), layoutId, parent, false))
+    }
+
+    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, loadState: LoadState) {
+        onBindViewHolder(holder)
+        when (loadState) {
+            is LoadState.Error -> {
+                onError(holder, loadState.error)
+                Logger.d("BaseLoadStateAdapter onError")
+            }
+            is LoadState.NotLoading -> {
+                if (loadState.endOfPaginationReached) {
+                    onEnd(holder)
+                    Logger.d("BaseLoadStateAdapter onEnd")
+                } else {
+                    Logger.d("BaseLoadStateAdapter onIdle")
+                }
+            }
+            is LoadState.Loading -> {
+                onLoading(holder)
+                Logger.d("BaseLoadStateAdapter onLoading")
+            }
+        }
+    }
+
+    override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
+        // 是否显示 Footer
+        val result = super.displayLoadStateAsItem(loadState) || refreshLoadState is LoadState.NotLoading
+        if (result && !hasInserted) {// 插入 Footer
+            notifyItemInserted(0)
+        }
+        return result
+    }
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         // 获取 refreshLoadState 状态，用于 Footer 显示的判断。
@@ -61,41 +96,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
                 }
             }
         }
-    }
-
-    final override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): BindingViewHolder<VB> {
-        return BindingViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), layoutId, parent, false))
-    }
-
-    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, loadState: LoadState) {
-        onBindViewHolder(holder)
-        when (loadState) {
-            is LoadState.Error -> {
-                onError(holder, loadState.error)
-                Logger.d("onError")
-            }
-            is LoadState.NotLoading -> {
-                if (loadState.endOfPaginationReached) {
-                    onEnd(holder)
-                    Logger.d("onEnd")
-                } else {
-                    Logger.d("onIdle")
-                }
-            }
-            is LoadState.Loading -> {
-                onLoading(holder)
-                Logger.d("onLoading")
-            }
-        }
-    }
-
-    override fun displayLoadStateAsItem(loadState: LoadState): Boolean {
-        // 是否显示 Footer
-        val result = super.displayLoadStateAsItem(loadState) || refreshLoadState is LoadState.NotLoading
-        if (result && !hasInserted) {// 插入 Footer
-            notifyItemInserted(0)
-        }
-        return result
     }
 
     abstract fun onLoading(holder: BindingViewHolder<VB>)
