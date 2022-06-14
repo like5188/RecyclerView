@@ -3,6 +3,7 @@ package com.like.recyclerview.ui.header
 import android.graphics.PorterDuff
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.paging.LoadState
 import com.like.recyclerview.adapter.BaseLoadStateAdapter
 import com.like.recyclerview.ui.R
 import com.like.recyclerview.ui.databinding.ItemLoadStateBinding
@@ -36,22 +37,52 @@ class HeaderAdapter : BaseLoadStateAdapter<ItemLoadStateBinding>(R.layout.item_l
         }
     }
 
-    override fun onLoading(holder: BindingViewHolder<ItemLoadStateBinding>) {
+    override fun onLoadStateChange(preState: LoadState?, curState: LoadState?, holder: BindingViewHolder<ItemLoadStateBinding>) {
+        when (curState) {
+            is LoadState.Loading -> {
+                showLoadingView(holder)
+            }
+            is LoadState.Error -> {
+                showErrorView(holder)
+            }
+            is LoadState.NotLoading -> {
+                if (curState.endOfPaginationReached) {
+                    showNoMoreView(holder)
+                } else {
+                    when (preState) {
+                        is LoadState.Loading -> {
+                            showLoadingView(holder)
+                        }
+                        is LoadState.Error -> {
+                            showErrorView(holder)
+                        }
+                        is LoadState.NotLoading -> {
+                            if (curState.endOfPaginationReached) {
+                                showNoMoreView(holder)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showLoadingView(holder: BindingViewHolder<ItemLoadStateBinding>) {
         holder.binding.llLoading.visibility = View.VISIBLE
         holder.binding.llNoMore.visibility = View.GONE
         holder.binding.tvError.visibility = View.GONE
     }
 
-    override fun onNoMore(holder: BindingViewHolder<ItemLoadStateBinding>) {
-        holder.binding.llLoading.visibility = View.GONE
-        holder.binding.llNoMore.visibility = View.VISIBLE
-        holder.binding.tvError.visibility = View.GONE
-    }
-
-    override fun onError(holder: BindingViewHolder<ItemLoadStateBinding>, throwable: Throwable) {
+    private fun showErrorView(holder: BindingViewHolder<ItemLoadStateBinding>) {
         holder.binding.llLoading.visibility = View.GONE
         holder.binding.llNoMore.visibility = View.GONE
         holder.binding.tvError.visibility = View.VISIBLE
+    }
+
+    private fun showNoMoreView(holder: BindingViewHolder<ItemLoadStateBinding>) {
+        holder.binding.llLoading.visibility = View.GONE
+        holder.binding.llNoMore.visibility = View.VISIBLE
+        holder.binding.tvError.visibility = View.GONE
     }
 
 }

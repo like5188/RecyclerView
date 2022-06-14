@@ -1,5 +1,6 @@
 package com.like.recyclerview.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
@@ -12,7 +13,6 @@ import androidx.paging.LoadStateAdapter
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.like.common.util.Logger
 import com.like.recyclerview.viewholder.BindingViewHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -22,6 +22,8 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     LoadStateAdapter<BindingViewHolder<VB>>() {
     private var refreshLoadState: LoadState? = null
     private var hasInserted = false
+    private var preLoadState: LoadState? = null
+    private var curLoadState: LoadState? = null
 
     init {
         this.registerAdapterDataObserver(
@@ -44,25 +46,12 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
         return BindingViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), layoutId, parent, false))
     }
 
-    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, loadState: LoadState) {
+    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, @SuppressLint("RecyclerView") loadState: LoadState) {
         onBindViewHolder(holder)
-        when (loadState) {
-            is LoadState.Error -> {
-                onError(holder, loadState.error)
-                Logger.d("BaseLoadStateAdapter onError")
-            }
-            is LoadState.NotLoading -> {
-                if (loadState.endOfPaginationReached) {
-                    onNoMore(holder)
-                    Logger.d("BaseLoadStateAdapter onNoMore")
-                } else {
-                    Logger.d("BaseLoadStateAdapter onIdle")
-                }
-            }
-            is LoadState.Loading -> {
-                onLoading(holder)
-                Logger.d("BaseLoadStateAdapter onLoading")
-            }
+        if (curLoadState != loadState) {
+            preLoadState = curLoadState
+            curLoadState = loadState
+            onLoadStateChange(preLoadState, curLoadState, holder)
         }
     }
 
@@ -99,8 +88,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding>(@LayoutRes private val
     }
 
     abstract fun onBindViewHolder(holder: BindingViewHolder<VB>)
-    abstract fun onLoading(holder: BindingViewHolder<VB>)
-    abstract fun onNoMore(holder: BindingViewHolder<VB>)
-    abstract fun onError(holder: BindingViewHolder<VB>, throwable: Throwable)
+    abstract fun onLoadStateChange(preState: LoadState?, curState: LoadState?, holder: BindingViewHolder<VB>)
 
 }

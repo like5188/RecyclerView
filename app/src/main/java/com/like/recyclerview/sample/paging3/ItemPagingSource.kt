@@ -33,7 +33,7 @@ class ItemPagingSource : PagingSource<Int, IRecyclerViewItem>() {
             val data = (start until end).map {
                 DataFactory.createItem(it)
             }
-            val nextPage = if (data.size < loadSize || key >= 2) {
+            val nextPage = if (data.size < loadSize || key >= 0) {
                 //没有更多数据
                 null
             } else {
