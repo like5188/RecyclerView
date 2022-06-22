@@ -14,7 +14,7 @@ class BannerAdapter : LoadStateAdapter<BindingViewHolder<ItemBannerBinding>>() {
     var bannerInfo: BannerInfo? = null
         set(value) {
             field = value
-            notifyDataSetChanged()
+            notifyItemChanged(0)
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): BindingViewHolder<ItemBannerBinding> {
