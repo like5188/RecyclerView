@@ -17,6 +17,11 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.sample.paging3.adapter.PagingDataAdapter
 import com.like.recyclerview.sample.paging3.data.db.Db
+import com.like.recyclerview.sample.paging3.dataSource.BannerDataSource
+import com.like.recyclerview.sample.paging3.dataSource.PagingDataSource
+import com.like.recyclerview.sample.paging3.dataSource.PagingRemoteMediator
+import com.like.recyclerview.sample.paging3.dataSource.TopArticleDataSource
+import com.like.recyclerview.sample.paging3.repository.PagingRepository
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter
 import kotlinx.coroutines.Dispatchers
@@ -31,8 +36,14 @@ class PagingActivity : AppCompatActivity() {
         ViewModelProvider(this, object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(PagingViewModel::class.java)) {
+                    val bannerDataSource = BannerDataSource()
+                    val topArticleDataSource = TopArticleDataSource()
+                    val pagingDataSource = PagingDataSource(bannerDataSource, topArticleDataSource)
+                    val db = Db.getInstance(application)
+                    val pagingRemoteMediator = PagingRemoteMediator(db, bannerDataSource, topArticleDataSource)
+                    val pagingRepository = PagingRepository(db, pagingDataSource, pagingRemoteMediator)
                     @Suppress("UNCHECKED_CAST")
-                    return PagingViewModel(this@PagingActivity.application) as T
+                    return PagingViewModel(pagingRepository) as T
                 }
                 throw IllegalArgumentException("Unknown ViewModel class")
             }
