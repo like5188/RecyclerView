@@ -3,9 +3,10 @@ package com.like.recyclerview.sample.paging3.view
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import com.like.common.util.Logger
@@ -26,7 +27,17 @@ class PagingActivity : AppCompatActivity() {
     private val mBinding by lazy {
         DataBindingUtil.setContentView<ActivityPagingBinding>(this, R.layout.activity_paging)
     }
-    private val mViewModel: PagingViewModel by viewModels()
+    private val mViewModel by lazy {
+        ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(PagingViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return PagingViewModel(this@PagingActivity.application) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }).get(PagingViewModel::class.java)
+    }
 
     private val mAdapter by lazy {
         PagingDataAdapter()

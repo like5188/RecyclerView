@@ -1,5 +1,6 @@
 package com.like.recyclerview.sample.paging3.data.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
 import com.like.recyclerview.sample.paging3.data.model.ArticleEntity
@@ -15,4 +16,8 @@ interface ArticleEntityDao : BaseDao<ArticleEntity> {
 
     @Query("SELECT * FROM ArticleEntity ORDER BY id ASC limit :pageSize offset :offset")
     suspend fun getPage(offset: Int, pageSize: Int): List<ArticleEntity>
+
+    @Query("SELECT * FROM ArticleEntity ORDER BY id ASC")
+    fun pagingSource(): PagingSource<Int, ArticleEntity>
+
 }

@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.like.recyclerview.sample.paging3.data.db.Db
+import com.like.recyclerview.sample.paging3.data.model.ArticleEntity
 import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
 import retrofit2.HttpException
 import java.io.IOException
@@ -15,12 +16,12 @@ class PagingRemoteMediator(
     private val db: Db,
     private val bannerDataSource: BannerDataSource,
     private val topArticleDataSource: TopArticleDataSource
-) : RemoteMediator<Int, Any>() {
+) : RemoteMediator<Int, ArticleEntity>() {
     private val bannerEntityDao = db.bannerEntityDao()
     private val topArticleEntityDao = db.topArticleEntityDao()
     private val articleEntityDao = db.articleEntityDao()
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, Any>): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, ArticleEntity>): MediatorResult {
         return try {
             // The network load method takes an optional after=<user.id>
             // parameter. For every page after the first, pass the last user
