@@ -5,15 +5,14 @@ import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
 
 class BannerDataSource {
 
-    suspend fun load(): List<BannerInfo>? {
+    suspend fun load(): BannerInfo? {
         val result = RetrofitUtils.retrofitApi.getBanner().getDataIfSuccess()
         return if (result.isNullOrEmpty()) {
             null
         } else {
-            val bannerInfo = BannerInfo().apply {
+            BannerInfo().apply {
                 bannerEntities = result
             }
-            listOf(bannerInfo)
         }
     }
 

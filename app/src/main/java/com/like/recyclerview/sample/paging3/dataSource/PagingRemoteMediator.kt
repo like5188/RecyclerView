@@ -13,8 +13,8 @@ import java.io.IOException
 @OptIn(ExperimentalPagingApi::class)
 class PagingRemoteMediator(
     private val db: Db,
-    private val bannerDbDataSource: BannerDbDataSource,
-    private val topArticleDbDataSource: TopArticleDbDataSource
+    private val bannerDataSource: BannerDataSource,
+    private val topArticleDataSource: TopArticleDataSource
 ) : RemoteMediator<Int, Any>() {
     private val bannerEntityDao = db.bannerEntityDao()
     private val topArticleEntityDao = db.topArticleEntityDao()
@@ -55,23 +55,38 @@ class PagingRemoteMediator(
             // wrapped in a withContext(Dispatcher.IO) { ... } block since
             // Retrofit's Coroutine CallAdapter dispatches on a worker
             // thread.
-            val bannerInfoList = bannerDbDataSource.load(loadType == LoadType.REFRESH) ?: emptyList()
-            val topArticleEntityList = topArticleDbDataSource.load(loadType == LoadType.REFRESH) ?: emptyList()
-            val articleEntityList = RetrofitUtils.retrofitApi.getArticle(loadKey).getDataIfSuccess()?.datas ?: emptyList()
+            val articleEntityList = RetrofitUtils.retrofitApi.getArticle(loadKey).getDataIfSuccess()?.datas
 
-            db.withTransaction {
-                if (loadType == LoadType.REFRESH) {
+            if (loadType == LoadType.REFRESH) {
+                val bannerInfo = bannerDataSource.load()
+                val topArticleEntityList = topArticleDataSource.load()
+                db.withTransaction {
+                    bannerEntityDao.clear()
+                    topArticleEntityDao.clear()
                     articleEntityDao.clear()
+                    // Insert new users into database, which invalidates the
+                    // current PagingData, allowing Paging to present the updates
+                    // in the DB.
+                    val bannerEntities = bannerInfo?.bannerEntities
+                    if (!bannerEntities.isNullOrEmpty()) {
+                        bannerEntityDao.insert(*bannerEntities.toTypedArray())
+                    }
+                    if (!topArticleEntityList.isNullOrEmpty()) {
+                        topArticleEntityDao.insert(*topArticleEntityList.toTypedArray())
+                    }
+                    if (!articleEntityList.isNullOrEmpty()) {
+                        articleEntityDao.insert(*articleEntityList.toTypedArray())
+                    }
                 }
-
-                // Insert new users into database, which invalidates the
-                // current PagingData, allowing Paging to present the updates
-                // in the DB.
-                articleEntityDao.insert(*articleEntityList.toTypedArray())
+            } else {
+                db.withTransaction {
+                    if (!articleEntityList.isNullOrEmpty()) {
+                        articleEntityDao.insert(*articleEntityList.toTypedArray())
+                    }
+                }
             }
-
             MediatorResult.Success(
-                endOfPaginationReached = articleEntityList.size < state.config.pageSize
+                endOfPaginationReached = (articleEntityList?.size ?: 0) < state.config.pageSize
             )
         } catch (e: IOException) {
             MediatorResult.Error(e)

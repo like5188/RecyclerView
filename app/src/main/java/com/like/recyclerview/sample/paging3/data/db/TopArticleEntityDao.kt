@@ -3,6 +3,7 @@ package com.like.recyclerview.sample.paging3.data.db
 import androidx.room.Dao
 import androidx.room.Query
 import com.like.recyclerview.sample.paging3.data.model.TopArticleEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TopArticleEntityDao : BaseDao<TopArticleEntity> {
@@ -11,5 +12,5 @@ interface TopArticleEntityDao : BaseDao<TopArticleEntity> {
     suspend fun clear()
 
     @Query("SELECT * FROM TopArticleEntity ORDER BY id ASC")
-    suspend fun getAll(): List<TopArticleEntity>
+    fun getAll(): Flow<List<TopArticleEntity>>
 }

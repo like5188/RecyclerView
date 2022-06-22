@@ -22,7 +22,7 @@ class PagingDataSource(
             val data: List<Any> = if (key == 0) {
                 val mergedList = mutableListOf<Any>()
                 bannerDataSource.load()?.apply {
-                    mergedList.addAll(this)
+                    mergedList.add(this)
                 }
                 topArticleDataSource.load()?.apply {
                     mergedList.addAll(this)

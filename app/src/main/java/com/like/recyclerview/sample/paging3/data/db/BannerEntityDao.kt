@@ -1,10 +1,9 @@
 package com.like.recyclerview.sample.paging3.data.db
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.like.recyclerview.sample.paging3.data.model.BannerInfo
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BannerEntityDao : BaseDao<BannerInfo.BannerEntity> {
@@ -12,5 +11,5 @@ interface BannerEntityDao : BaseDao<BannerInfo.BannerEntity> {
     suspend fun clear()
 
     @Query("SELECT * FROM BannerEntity ORDER BY id ASC")
-    suspend fun getAll(): List<BannerInfo.BannerEntity>
+    fun getAll(): Flow<List<BannerInfo.BannerEntity>>
 }
