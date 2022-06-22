@@ -4,12 +4,12 @@
 
         <variable
             name="item"
-            type="com.like.recyclerview.sample.paging3.data.model.BannerInfo" />
+            type="com.like.recyclerview.sample.paging3.data.model.BannerInfo.Banner" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="#55a755"
         android:orientation="vertical"
         android:padding="10dp">
@@ -17,13 +17,13 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="BannerInfo" />
+            android:text="@{`Banner `+item.id}" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="@{item.banners.size()+`条数据`}" />
+            android:text="@{item.imagePath}" />
 
     </LinearLayout>
 

@@ -16,7 +16,7 @@ import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.sample.paging3.adapter.ArticleAdapter
-import com.like.recyclerview.sample.paging3.adapter.BannerAdapter
+import com.like.recyclerview.sample.paging3.adapter.HeaderAdapter
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.dataSource.BannerDataSource
 import com.like.recyclerview.sample.paging3.dataSource.TopArticleDataSource
@@ -51,7 +51,7 @@ class PagingActivity : AppCompatActivity() {
         ArticleAdapter()
     }
     private val mBannerAdapter by lazy {
-        BannerAdapter()
+        HeaderAdapter()
     }
     private val mFooterAdapter by lazy {
         LoadStateAdapter()
@@ -67,7 +67,6 @@ class PagingActivity : AppCompatActivity() {
 
         mBinding.btnRefresh.setOnClickListener {
             mArticleAdapter.refresh()
-            getBannerInfo()
         }
 
         lifecycleScope.launch {
@@ -87,12 +86,21 @@ class PagingActivity : AppCompatActivity() {
             }
         }
         getBannerInfo()
+        getTopArticle()
     }
 
     private fun getBannerInfo() {
         lifecycleScope.launch {
             mViewModel.bannerInfoFlow.collectLatest {
                 mBannerAdapter.bannerInfo = it
+            }
+        }
+    }
+
+    private fun getTopArticle() {
+        lifecycleScope.launch {
+            mViewModel.topArticleFlow.collectLatest {
+                mBannerAdapter.topArticleList = it
             }
         }
     }
