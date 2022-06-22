@@ -4,7 +4,7 @@
 
         <variable
             name="item"
-            type="com.like.recyclerview.sample.paging3.data.model.TopArticleEntity" />
+            type="com.like.recyclerview.sample.paging3.data.model.TopArticle" />
     </data>
 
     <LinearLayout
@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{`TopArticleEntity `+item.id}" />
+            android:text="@{`TopArticle `+item.id}" />
 
         <TextView
             android:layout_width="wrap_content"

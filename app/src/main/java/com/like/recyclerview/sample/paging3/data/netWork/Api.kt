@@ -7,11 +7,11 @@ import retrofit2.http.Path
 interface Api {
 
     @GET("/banner/json")
-    suspend fun getBanner(): ResultModel<List<BannerInfo.BannerEntity>?>
+    suspend fun getBanner(): ResultModel<List<BannerInfo.Banner>?>
 
     @GET("/article/top/json")
-    suspend fun getTopArticle(): ResultModel<List<TopArticleEntity>?>
+    suspend fun getTopArticle(): ResultModel<List<TopArticle>?>
 
     @GET("/article/list/{page}/json")
-    suspend fun getArticle(@Path("page") page: Int): ResultModel<PagingModel<ArticleEntity>?>
+    suspend fun getArticle(@Path("page") page: Int): ResultModel<PagingModel<Article>?>
 }

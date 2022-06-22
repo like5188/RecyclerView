@@ -13,25 +13,26 @@ import com.like.recyclerview.sample.R
 class BannerInfo : IRecyclerViewItem {
     @Ignore
     override val layoutId: Int = R.layout.item_banner
+
     @Ignore
     override val variableId: Int = BR.item
 
-    var bannerEntities: List<BannerEntity>? = null
+    var banners: List<Banner>? = null
 
     @Entity
-    class BannerEntity {
+    class Banner {
         @PrimaryKey
         var id: Int? = null
 
         var imagePath: String? = null
 
         override fun toString(): String {
-            return "BannerEntity(id=$id)"
+            return "Banner(id=$id)"
         }
     }
 
     override fun toString(): String {
-        return "BannerInfo(bannerEntities=$bannerEntities)"
+        return "BannerInfo(banners=$banners)"
     }
 
 }

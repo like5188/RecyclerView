@@ -7,12 +7,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.like.recyclerview.sample.paging3.data.model.ArticleEntity
+import com.like.recyclerview.sample.paging3.data.model.Article
 import com.like.recyclerview.sample.paging3.data.model.BannerInfo
-import com.like.recyclerview.sample.paging3.data.model.TopArticleEntity
+import com.like.recyclerview.sample.paging3.data.model.TopArticle
 
 @Database(
-    entities = [BannerInfo.BannerEntity::class, TopArticleEntity::class, ArticleEntity::class],
+    entities = [BannerInfo.Banner::class, TopArticle::class, Article::class],
     version = 1,
     exportSchema = false
 )
@@ -79,9 +79,9 @@ abstract class Db : RoomDatabase() {
         }
     }
 
-    abstract fun bannerEntityDao(): BannerEntityDao
-    abstract fun topArticleEntityDao(): TopArticleEntityDao
-    abstract fun articleEntityDao(): ArticleEntityDao
+    abstract fun bannerDao(): BannerDao
+    abstract fun topArticleDao(): TopArticleDao
+    abstract fun articleDao(): ArticleDao
 
     /**
      * Check whether the database already exists and expose it via [.getDatabaseCreated]

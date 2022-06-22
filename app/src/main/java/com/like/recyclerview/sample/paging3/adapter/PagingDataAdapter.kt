@@ -3,18 +3,18 @@ package com.like.recyclerview.sample.paging3.adapter
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import com.like.recyclerview.adapter.BasePagingDataAdapter
-import com.like.recyclerview.sample.paging3.data.model.ArticleEntity
-import com.like.recyclerview.sample.paging3.data.model.TopArticleEntity
+import com.like.recyclerview.sample.paging3.data.model.Article
+import com.like.recyclerview.sample.paging3.data.model.TopArticle
 
 class PagingDataAdapter : BasePagingDataAdapter<Any, ViewDataBinding>(
     object : DiffUtil.ItemCallback<Any>() {
         // 比对新旧条目是否是同一个条目
         override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
             return when {
-                oldItem is ArticleEntity && newItem is ArticleEntity -> {
+                oldItem is Article && newItem is Article -> {
                     oldItem.id == newItem.id
                 }
-                oldItem is TopArticleEntity && newItem is TopArticleEntity -> {
+                oldItem is TopArticle && newItem is TopArticle -> {
                     oldItem.id == newItem.id
                 }
                 else -> false
@@ -25,10 +25,10 @@ class PagingDataAdapter : BasePagingDataAdapter<Any, ViewDataBinding>(
         // 建议这里的比对把UI展示的数据都写上，写漏了会导致UI不更新对应字段；
         override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
             return when {
-                oldItem is ArticleEntity && newItem is ArticleEntity -> {
+                oldItem is Article && newItem is Article -> {
                     oldItem.title == newItem.title
                 }
-                oldItem is TopArticleEntity && newItem is TopArticleEntity -> {
+                oldItem is TopArticle && newItem is TopArticle -> {
                     oldItem.title == newItem.title
                 }
                 else -> false

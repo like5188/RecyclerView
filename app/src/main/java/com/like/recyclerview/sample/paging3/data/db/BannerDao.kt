@@ -6,10 +6,10 @@ import com.like.recyclerview.sample.paging3.data.model.BannerInfo
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface BannerEntityDao : BaseDao<BannerInfo.BannerEntity> {
-    @Query("DELETE FROM BannerEntity")
+interface BannerDao : BaseDao<BannerInfo.Banner> {
+    @Query("DELETE FROM Banner")
     suspend fun clear()
 
-    @Query("SELECT * FROM BannerEntity ORDER BY id ASC")
-    fun getAll(): Flow<List<BannerInfo.BannerEntity>>
+    @Query("SELECT * FROM Banner ORDER BY id ASC")
+    fun getAll(): Flow<List<BannerInfo.Banner>>
 }

@@ -1,7 +1,7 @@
 package com.like.recyclerview.sample.paging3.data.local
 
 import androidx.annotation.IntRange
-import com.like.recyclerview.sample.paging3.data.model.ArticleEntity
+import com.like.recyclerview.sample.paging3.data.model.Article
 import com.like.recyclerview.sample.paging3.data.model.ResultModel
 
 object DataFactory {
@@ -18,7 +18,7 @@ object DataFactory {
     fun getBeforeResultById(
         @IntRange(from = (MIN_ID + 1).toLong(), to = (MAX_ID + 1).toLong()) id: Int?,
         @IntRange(from = 1) loadSize: Int
-    ): ResultModel<List<ArticleEntity>> {
+    ): ResultModel<List<Article>> {
         val start = if (id == null) {
             MAX_ID
         } else {
@@ -28,7 +28,7 @@ object DataFactory {
         if (end < MIN_ID) {
             end = MIN_ID
         }
-        val list = (end..start).map { createArticleEntity(it) }
+        val list = (end..start).map { createArticle(it) }
         return ResultModel(0, null, list)
     }
 
@@ -41,7 +41,7 @@ object DataFactory {
     fun getAfterResultById(
         @IntRange(from = (MIN_ID - 1).toLong(), to = (MAX_ID - 1).toLong()) id: Int?,
         @IntRange(from = 1) loadSize: Int
-    ): ResultModel<List<ArticleEntity>> {
+    ): ResultModel<List<Article>> {
         val start = if (id == null) {
             MIN_ID
         } else {
@@ -51,12 +51,12 @@ object DataFactory {
         if (end > MAX_ID) {
             end = MAX_ID
         }
-        val list = (start..end).map { createArticleEntity(it) }
+        val list = (start..end).map { createArticle(it) }
         return ResultModel(0, null, list)
     }
 
-    private fun createArticleEntity(id: Int) =
-        ArticleEntity().apply {
+    private fun createArticle(id: Int) =
+        Article().apply {
             this.id = id
             title = "title $id"
         }

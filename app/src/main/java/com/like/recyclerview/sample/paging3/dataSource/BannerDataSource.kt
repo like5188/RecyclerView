@@ -11,7 +11,7 @@ class BannerDataSource {
             null
         } else {
             BannerInfo().apply {
-                bannerEntities = result
+                banners = result
             }
         }
     }

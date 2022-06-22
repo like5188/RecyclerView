@@ -18,8 +18,6 @@ import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.sample.paging3.adapter.PagingDataAdapter
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.dataSource.BannerDataSource
-import com.like.recyclerview.sample.paging3.dataSource.PagingDataSource
-import com.like.recyclerview.sample.paging3.dataSource.PagingRemoteMediator
 import com.like.recyclerview.sample.paging3.dataSource.TopArticleDataSource
 import com.like.recyclerview.sample.paging3.repository.PagingRepository
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
@@ -36,12 +34,10 @@ class PagingActivity : AppCompatActivity() {
         ViewModelProvider(this, object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(PagingViewModel::class.java)) {
+                    val db = Db.getInstance(application)
                     val bannerDataSource = BannerDataSource()
                     val topArticleDataSource = TopArticleDataSource()
-                    val pagingDataSource = PagingDataSource(bannerDataSource, topArticleDataSource)
-                    val db = Db.getInstance(application)
-                    val pagingRemoteMediator = PagingRemoteMediator(db, bannerDataSource, topArticleDataSource)
-                    val pagingRepository = PagingRepository(db, pagingDataSource, pagingRemoteMediator)
+                    val pagingRepository = PagingRepository(db, bannerDataSource, topArticleDataSource)
                     @Suppress("UNCHECKED_CAST")
                     return PagingViewModel(pagingRepository) as T
                 }
@@ -89,21 +85,21 @@ class PagingActivity : AppCompatActivity() {
 
     fun clearDb(view: View) {
         lifecycleScope.launch(Dispatchers.IO) {
-            Db.getInstance(application).bannerEntityDao().clear()
-            Db.getInstance(application).topArticleEntityDao().clear()
-            Db.getInstance(application).articleEntityDao().clear()
+            Db.getInstance(application).bannerDao().clear()
+            Db.getInstance(application).topArticleDao().clear()
+            Db.getInstance(application).articleDao().clear()
         }
     }
 
     fun queryDb(view: View) {
         lifecycleScope.launch(Dispatchers.IO) {
-            Db.getInstance(application).bannerEntityDao().getAll().collectLatest {
+            Db.getInstance(application).bannerDao().getAll().collectLatest {
                 Logger.i(it.toString())
             }
-            Db.getInstance(application).topArticleEntityDao().getAll().collectLatest {
+            Db.getInstance(application).topArticleDao().getAll().collectLatest {
                 Logger.i(it.toString())
             }
-            Db.getInstance(application).articleEntityDao().getAll().collectLatest {
+            Db.getInstance(application).articleDao().getAll().collectLatest {
                 Logger.i(it.toString())
             }
         }

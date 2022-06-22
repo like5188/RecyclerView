@@ -6,7 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.like.recyclerview.sample.paging3.data.db.Db
-import com.like.recyclerview.sample.paging3.data.model.ArticleEntity
+import com.like.recyclerview.sample.paging3.data.model.Article
 import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
 import retrofit2.HttpException
 import java.io.IOException
@@ -16,12 +16,12 @@ class PagingRemoteMediator(
     private val db: Db,
     private val bannerDataSource: BannerDataSource,
     private val topArticleDataSource: TopArticleDataSource
-) : RemoteMediator<Int, ArticleEntity>() {
-    private val bannerEntityDao = db.bannerEntityDao()
-    private val topArticleEntityDao = db.topArticleEntityDao()
-    private val articleEntityDao = db.articleEntityDao()
+) : RemoteMediator<Int, Article>() {
+    private val bannerDao = db.bannerDao()
+    private val topArticleDao = db.topArticleDao()
+    private val articleDao = db.articleDao()
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, ArticleEntity>): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
         return try {
             // The network load method takes an optional after=<user.id>
             // parameter. For every page after the first, pass the last user
@@ -56,38 +56,38 @@ class PagingRemoteMediator(
             // wrapped in a withContext(Dispatcher.IO) { ... } block since
             // Retrofit's Coroutine CallAdapter dispatches on a worker
             // thread.
-            val articleEntityList = RetrofitUtils.retrofitApi.getArticle(loadKey).getDataIfSuccess()?.datas
+            val articleList = RetrofitUtils.retrofitApi.getArticle(loadKey).getDataIfSuccess()?.datas
 
             if (loadType == LoadType.REFRESH) {
                 val bannerInfo = bannerDataSource.load()
-                val topArticleEntityList = topArticleDataSource.load()
+                val topArticleList = topArticleDataSource.load()
                 db.withTransaction {
-                    bannerEntityDao.clear()
-                    topArticleEntityDao.clear()
-                    articleEntityDao.clear()
+                    bannerDao.clear()
+                    topArticleDao.clear()
+                    articleDao.clear()
                     // Insert new users into database, which invalidates the
                     // current PagingData, allowing Paging to present the updates
                     // in the DB.
-                    val bannerEntities = bannerInfo?.bannerEntities
-                    if (!bannerEntities.isNullOrEmpty()) {
-                        bannerEntityDao.insert(*bannerEntities.toTypedArray())
+                    val banners = bannerInfo?.banners
+                    if (!banners.isNullOrEmpty()) {
+                        bannerDao.insert(*banners.toTypedArray())
                     }
-                    if (!topArticleEntityList.isNullOrEmpty()) {
-                        topArticleEntityDao.insert(*topArticleEntityList.toTypedArray())
+                    if (!topArticleList.isNullOrEmpty()) {
+                        topArticleDao.insert(*topArticleList.toTypedArray())
                     }
-                    if (!articleEntityList.isNullOrEmpty()) {
-                        articleEntityDao.insert(*articleEntityList.toTypedArray())
+                    if (!articleList.isNullOrEmpty()) {
+                        articleDao.insert(*articleList.toTypedArray())
                     }
                 }
             } else {
                 db.withTransaction {
-                    if (!articleEntityList.isNullOrEmpty()) {
-                        articleEntityDao.insert(*articleEntityList.toTypedArray())
+                    if (!articleList.isNullOrEmpty()) {
+                        articleDao.insert(*articleList.toTypedArray())
                     }
                 }
             }
             MediatorResult.Success(
-                endOfPaginationReached = (articleEntityList?.size ?: 0) < state.config.pageSize
+                endOfPaginationReached = (articleList?.size ?: 0) < state.config.pageSize
             )
         } catch (e: IOException) {
             MediatorResult.Error(e)
