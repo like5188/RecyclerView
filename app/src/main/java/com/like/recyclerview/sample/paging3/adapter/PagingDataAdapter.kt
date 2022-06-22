@@ -1,19 +1,20 @@
-package com.like.recyclerview.sample.paging3
+package com.like.recyclerview.sample.paging3.adapter
 
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import com.like.recyclerview.adapter.BasePagingDataAdapter
-import com.like.recyclerview.model.IRecyclerViewItem
+import com.like.recyclerview.sample.paging3.data.model.ArticleEntity
+import com.like.recyclerview.sample.paging3.data.model.TopArticleEntity
 
-class PagingDataAdapter : BasePagingDataAdapter<IRecyclerViewItem, ViewDataBinding>(
-    object : DiffUtil.ItemCallback<IRecyclerViewItem>() {
+class PagingDataAdapter : BasePagingDataAdapter<Any, ViewDataBinding>(
+    object : DiffUtil.ItemCallback<Any>() {
         // 比对新旧条目是否是同一个条目
-        override fun areItemsTheSame(oldItem: IRecyclerViewItem, newItem: IRecyclerViewItem): Boolean {
+        override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
             return when {
-                oldItem is Item1 && newItem is Item1 -> {
+                oldItem is ArticleEntity && newItem is ArticleEntity -> {
                     oldItem.id == newItem.id
                 }
-                oldItem is Item2 && newItem is Item2 -> {
+                oldItem is TopArticleEntity && newItem is TopArticleEntity -> {
                     oldItem.id == newItem.id
                 }
                 else -> false
@@ -22,13 +23,13 @@ class PagingDataAdapter : BasePagingDataAdapter<IRecyclerViewItem, ViewDataBindi
 
         // 当上面的方法确定是同一个条目之后，这里比对条目的内容是否一样，不一样则会更新条目UI
         // 建议这里的比对把UI展示的数据都写上，写漏了会导致UI不更新对应字段；
-        override fun areContentsTheSame(oldItem: IRecyclerViewItem, newItem: IRecyclerViewItem): Boolean {
+        override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
             return when {
-                oldItem is Item1 && newItem is Item1 -> {
-                    oldItem.name == newItem.name
+                oldItem is ArticleEntity && newItem is ArticleEntity -> {
+                    oldItem.title == newItem.title
                 }
-                oldItem is Item2 && newItem is Item2 -> {
-                    oldItem.name == newItem.name
+                oldItem is TopArticleEntity && newItem is TopArticleEntity -> {
+                    oldItem.title == newItem.title
                 }
                 else -> false
             }
@@ -39,7 +40,7 @@ class PagingDataAdapter : BasePagingDataAdapter<IRecyclerViewItem, ViewDataBindi
         // 所以可以在getChangePayload()中封装一个Object来告诉RecyclerView进行局部的刷新。
         // 返回的这个对象会在什么地方收到呢？实际上在RecyclerView.Adapter中有两个onBindViewHolder方法，一个是我们必须要重写的，而另一个的第三个参数就是一个payload的列表(onBindViewHolder(RecyclerView.ViewHolder holder, int position, List payloads))。
         // 通常通过返回Bundle来传递数据
-        override fun getChangePayload(oldItem: IRecyclerViewItem, newItem: IRecyclerViewItem): Any? {
+        override fun getChangePayload(oldItem: Any, newItem: Any): Any? {
             return super.getChangePayload(oldItem, newItem)
         }
     }

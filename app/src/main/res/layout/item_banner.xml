@@ -3,28 +3,27 @@
     <data>
 
         <variable
-            name="item2"
-            type="com.like.recyclerview.sample.paging3.Item2" />
+            name="item"
+            type="com.like.recyclerview.sample.paging3.data.model.BannerInfo" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#55a755"
-        android:onClick="@{item2.onClick}"
         android:orientation="vertical"
         android:padding="10dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{item2.name}" />
+            android:text="BannerInfo" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="@{item2.des}" />
+            android:text="@{String.valueOf(item.bannerEntities.size())}" />
 
     </LinearLayout>
 

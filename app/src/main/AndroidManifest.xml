@@ -34,7 +34,7 @@
             android:name=".addimage.PictureSelectorActivity"
             android:exported="false" />
         <activity
-            android:name=".paging3.PagingActivity"
+            android:name=".paging3.view.PagingActivity"
             android:exported="false" />
     </application>
 

@@ -6,7 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.hjq.toast.ToastUtils
 import com.like.recyclerview.sample.addimage.PictureSelectorActivity
-import com.like.recyclerview.sample.paging3.PagingActivity
+import com.like.recyclerview.sample.paging3.view.PagingActivity
 import com.like.recyclerview.sample.tree.TreeActivity
 
 class MainActivity : AppCompatActivity() {
