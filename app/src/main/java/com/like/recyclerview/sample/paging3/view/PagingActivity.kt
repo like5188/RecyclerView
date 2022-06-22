@@ -67,9 +67,9 @@ class PagingActivity : AppCompatActivity() {
 
     fun clearDb(view: View) {
         lifecycleScope.launch(Dispatchers.IO) {
-            Db.getInstance(application).bannerEntityDao().deleteAll()
-            Db.getInstance(application).topArticleEntityDao().deleteAll()
-            Db.getInstance(application).articleEntityDao().deleteAll()
+            Db.getInstance(application).bannerEntityDao().clear()
+            Db.getInstance(application).topArticleEntityDao().clear()
+            Db.getInstance(application).articleEntityDao().clear()
         }
     }
 

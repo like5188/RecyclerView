@@ -2,10 +2,11 @@ package com.like.recyclerview.sample.paging3.data.db
 
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Update
 
 interface BaseDao<T> {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(vararg objects: T)
 
     @Update

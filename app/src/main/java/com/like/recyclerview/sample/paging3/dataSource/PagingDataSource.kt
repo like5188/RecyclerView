@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.dataSource.inMemory
+package com.like.recyclerview.sample.paging3.dataSource
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

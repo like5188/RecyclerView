@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.like.recyclerview.sample.paging3.dataSource.inMemory.BannerDataSource
-import com.like.recyclerview.sample.paging3.dataSource.inMemory.PagingDataSource
-import com.like.recyclerview.sample.paging3.dataSource.inMemory.TopArticleDataSource
+import com.like.recyclerview.sample.paging3.dataSource.BannerDataSource
+import com.like.recyclerview.sample.paging3.dataSource.PagingDataSource
+import com.like.recyclerview.sample.paging3.dataSource.TopArticleDataSource
 
 class PagingViewModel : ViewModel() {
     companion object {

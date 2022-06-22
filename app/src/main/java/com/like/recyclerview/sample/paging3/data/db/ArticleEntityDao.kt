@@ -8,11 +8,8 @@ import com.like.recyclerview.sample.paging3.data.model.ArticleEntity
 
 @Dao
 interface ArticleEntityDao : BaseDao<ArticleEntity> {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(items: List<ArticleEntity>)
-
     @Query("DELETE FROM ArticleEntity")
-    suspend fun deleteAll()
+    suspend fun clear()
 
     @Query("SELECT * FROM ArticleEntity ORDER BY id ASC")
     suspend fun getAll(): List<ArticleEntity>

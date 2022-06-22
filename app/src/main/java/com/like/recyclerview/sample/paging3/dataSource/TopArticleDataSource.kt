@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.dataSource.inMemory
+package com.like.recyclerview.sample.paging3.dataSource
 
 import com.like.recyclerview.sample.paging3.data.model.TopArticleEntity
 import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
