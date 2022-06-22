@@ -15,7 +15,8 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
-import com.like.recyclerview.sample.paging3.adapter.PagingDataAdapter
+import com.like.recyclerview.sample.paging3.adapter.ArticleAdapter
+import com.like.recyclerview.sample.paging3.adapter.BannerAdapter
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.dataSource.BannerDataSource
 import com.like.recyclerview.sample.paging3.dataSource.TopArticleDataSource
@@ -46,10 +47,13 @@ class PagingActivity : AppCompatActivity() {
         }).get(PagingViewModel::class.java)
     }
 
-    private val mAdapter by lazy {
-        PagingDataAdapter()
+    private val mArticleAdapter by lazy {
+        ArticleAdapter()
     }
-    private val mLoadStateAdapter by lazy {
+    private val mBannerAdapter by lazy {
+        BannerAdapter()
+    }
+    private val mFooterAdapter by lazy {
         LoadStateAdapter()
     }
     private val mProgressDialog by lazy {
@@ -62,11 +66,12 @@ class PagingActivity : AppCompatActivity() {
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
 
         mBinding.btnRefresh.setOnClickListener {
-            mAdapter.refresh()
+            mArticleAdapter.refresh()
+            getBannerInfo()
         }
 
         lifecycleScope.launch {
-            mAdapter.loadStateFlow.collectLatest {
+            mArticleAdapter.loadStateFlow.collectLatest {
                 when (it.refresh) {
                     is LoadState.NotLoading -> mProgressDialog.dismiss()
                     is LoadState.Loading -> mProgressDialog.show()
@@ -74,11 +79,20 @@ class PagingActivity : AppCompatActivity() {
             }
         }
 
-        mBinding.rv.adapter = mAdapter.withLoadStateFooter(mLoadStateAdapter)
+        mBinding.rv.adapter = mArticleAdapter.withLoadStateHeaderAndFooter(mBannerAdapter, mFooterAdapter)
 
         lifecycleScope.launch {
-            mViewModel.pagingFlow.collectLatest {
-                mAdapter.submitData(it)
+            mViewModel.articleFlow.collectLatest {
+                mArticleAdapter.submitData(it)
+            }
+        }
+        getBannerInfo()
+    }
+
+    private fun getBannerInfo() {
+        lifecycleScope.launch {
+            mViewModel.bannerInfoFlow.collectLatest {
+                mBannerAdapter.bannerInfo = it
             }
         }
     }
