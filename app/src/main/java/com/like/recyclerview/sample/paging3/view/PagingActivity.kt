@@ -49,10 +49,6 @@ class PagingActivity : AppCompatActivity() {
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
 
-        mBinding.btnRefresh.setOnClickListener {
-            mArticleAdapter.refresh()
-        }
-
         lifecycleScope.launch {
             mArticleAdapter.loadStateFlow.collectLatest {
                 when (it.refresh) {
@@ -89,12 +85,8 @@ class PagingActivity : AppCompatActivity() {
         }
     }
 
-    fun clearDb(view: View) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            db.bannerDao().clear()
-            db.topArticleDao().clear()
-            db.articleDao().clear()
-        }
+    fun refresh(view: View) {
+        mArticleAdapter.refresh()
     }
 
     fun queryDb(view: View) {
@@ -102,6 +94,14 @@ class PagingActivity : AppCompatActivity() {
             Logger.i(db.bannerDao().getAll().toString())
             Logger.i(db.topArticleDao().getAll().toString())
             Logger.i(db.articleDao().getAll().toString())
+        }
+    }
+
+    fun clearDb(view: View) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            db.bannerDao().clear()
+            db.topArticleDao().clear()
+            db.articleDao().clear()
         }
     }
 }
