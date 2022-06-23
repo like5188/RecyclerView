@@ -5,6 +5,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.dataSource.db.ArticleRemoteMediator
+import com.like.recyclerview.sample.paging3.dataSource.db.BannerDbDataSource
+import com.like.recyclerview.sample.paging3.dataSource.db.TopArticleDbDataSource
 import com.like.recyclerview.sample.paging3.dataSource.memory.ArticlePagingSource
 import com.like.recyclerview.sample.paging3.dataSource.memory.BannerDataSource
 import com.like.recyclerview.sample.paging3.dataSource.memory.TopArticleDataSource
@@ -16,7 +18,9 @@ import org.koin.core.component.get
 class PagingRepository(
     private val db: Db,
     private val bannerDataSource: BannerDataSource,
-    private val topArticleDataSource: TopArticleDataSource
+    private val bannerDbDataSource: BannerDbDataSource,
+    private val topArticleDataSource: TopArticleDataSource,
+    private val topArticleDbDataSource: TopArticleDbDataSource
 ) : KoinComponent {
     companion object {
         const val PAGE_SIZE = 10
@@ -36,4 +40,6 @@ class PagingRepository(
 
     suspend fun getBanner() = bannerDataSource.load()
     suspend fun getTopArticle() = topArticleDataSource.load()
+    suspend fun getDbBanner() = bannerDbDataSource.load()
+    suspend fun getDbTopArticle() = topArticleDbDataSource.load()
 }

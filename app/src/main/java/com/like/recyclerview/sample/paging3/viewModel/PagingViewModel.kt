@@ -13,11 +13,11 @@ class PagingViewModel(pagingRepository: PagingRepository) : ViewModel() {
     val dbArticleFlowFlow = pagingRepository.dbArticleFlowFlow.cachedIn(viewModelScope)
 
     val bannerInfoFlow = flow {
-        emit(pagingRepository.getBanner())
+        emit(pagingRepository.getDbBanner())
     }
 
     val topArticleFlow = flow {
-        emit(pagingRepository.getTopArticle())
+        emit(pagingRepository.getDbTopArticle())
     }
 
 }

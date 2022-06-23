@@ -51,7 +51,7 @@ val myModule = module {
 
     //Repository
     factory {
-        PagingRepository(get(), get(), get())
+        PagingRepository(get(), get(), get(), get(), get())
     }
 
     //viewModel
