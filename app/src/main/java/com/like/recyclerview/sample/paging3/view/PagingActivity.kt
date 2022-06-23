@@ -18,8 +18,8 @@ import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.sample.paging3.adapter.ArticleAdapter
 import com.like.recyclerview.sample.paging3.adapter.HeaderAdapter
 import com.like.recyclerview.sample.paging3.data.db.Db
-import com.like.recyclerview.sample.paging3.dataSource.BannerDataSource
-import com.like.recyclerview.sample.paging3.dataSource.TopArticleDataSource
+import com.like.recyclerview.sample.paging3.dataSource.memory.BannerDataSource
+import com.like.recyclerview.sample.paging3.dataSource.memory.TopArticleDataSource
 import com.like.recyclerview.sample.paging3.repository.PagingRepository
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter

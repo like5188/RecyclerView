@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.dataSource
+package com.like.recyclerview.sample.paging3.dataSource.db
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
@@ -8,6 +8,8 @@ import androidx.room.withTransaction
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.data.model.Article
 import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
+import com.like.recyclerview.sample.paging3.dataSource.memory.BannerDataSource
+import com.like.recyclerview.sample.paging3.dataSource.memory.TopArticleDataSource
 import retrofit2.HttpException
 import java.io.IOException
 

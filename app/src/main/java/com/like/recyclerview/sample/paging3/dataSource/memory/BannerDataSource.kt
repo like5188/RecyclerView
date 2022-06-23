@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.dataSource
+package com.like.recyclerview.sample.paging3.dataSource.memory
 
 import com.like.recyclerview.sample.paging3.data.model.BannerInfo
 import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils

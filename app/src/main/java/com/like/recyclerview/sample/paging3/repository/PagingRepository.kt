@@ -4,10 +4,10 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import com.like.recyclerview.sample.paging3.data.db.Db
-import com.like.recyclerview.sample.paging3.dataSource.ArticlePagingSource
-import com.like.recyclerview.sample.paging3.dataSource.BannerDataSource
-import com.like.recyclerview.sample.paging3.dataSource.PagingRemoteMediator
-import com.like.recyclerview.sample.paging3.dataSource.TopArticleDataSource
+import com.like.recyclerview.sample.paging3.dataSource.memory.ArticlePagingSource
+import com.like.recyclerview.sample.paging3.dataSource.memory.BannerDataSource
+import com.like.recyclerview.sample.paging3.dataSource.db.PagingRemoteMediator
+import com.like.recyclerview.sample.paging3.dataSource.memory.TopArticleDataSource
 
 class PagingRepository(
     private val db: Db,
