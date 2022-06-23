@@ -17,8 +17,8 @@ class ArticlePagingSource : PagingSource<Int, Article>() {
             val key = params.key ?: 0
             val loadSize = params.loadSize
             Logger.d("ArticlePagingSource key=$key loadSize=$loadSize")
-            val data = RetrofitUtils.retrofitApi.getArticle(key).getDataIfSuccess()?.datas ?: emptyList()
-            val nextPage = if (data.size < loadSize) {
+            val pagingModel = RetrofitUtils.retrofitApi.getArticle(key, loadSize).getDataIfSuccess()
+            val nextPage = if ((pagingModel?.curPage ?: 0) >= (pagingModel?.pageCount ?: 0)) {
                 //没有更多数据
                 null
             } else {
@@ -26,7 +26,7 @@ class ArticlePagingSource : PagingSource<Int, Article>() {
             }
 
             LoadResult.Page(
-                data = data,
+                data = pagingModel?.datas ?: emptyList(),
                 prevKey = null,
                 nextKey = nextPage
             )

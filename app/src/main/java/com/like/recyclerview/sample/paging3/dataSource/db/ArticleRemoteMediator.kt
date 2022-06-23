@@ -50,19 +50,18 @@ class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>()
             // wrapped in a withContext(Dispatcher.IO) { ... } block since
             // Retrofit's Coroutine CallAdapter dispatches on a worker
             // thread.
-            val articleList = RetrofitUtils.retrofitApi.getArticle(loadKey).getDataIfSuccess()?.datas
-
+            val pagingModel = RetrofitUtils.retrofitApi.getArticle(loadKey, state.config.pageSize).getDataIfSuccess()
             db.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     articleDao.clear()
                 }
+                val articleList = pagingModel?.datas
                 if (!articleList.isNullOrEmpty()) {
                     articleDao.insert(*articleList.toTypedArray())
                 }
             }
-
             MediatorResult.Success(
-                endOfPaginationReached = (articleList?.size ?: 0) < state.config.pageSize
+                endOfPaginationReached = (pagingModel?.curPage ?: 0) >= (pagingModel?.pageCount ?: 0)
             )
         } catch (e: IOException) {
             MediatorResult.Error(e)

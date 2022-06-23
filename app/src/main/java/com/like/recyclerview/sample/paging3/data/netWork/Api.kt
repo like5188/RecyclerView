@@ -3,6 +3,7 @@ package com.like.recyclerview.sample.paging3.data.netWork
 import com.like.recyclerview.sample.paging3.data.model.*
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface Api {
 
@@ -13,5 +14,5 @@ interface Api {
     suspend fun getTopArticle(): ResultModel<List<TopArticle>?>
 
     @GET("/article/list/{page}/json")
-    suspend fun getArticle(@Path("page") page: Int): ResultModel<PagingModel<Article>?>
+    suspend fun getArticle(@Path("page") page: Int, @Query("page_size") pageSize: Int): ResultModel<PagingModel<Article>?>
 }

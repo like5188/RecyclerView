@@ -7,7 +7,7 @@ data class ResultModel<T>(
 ) {
 
     /**
-     * 成功就返回数据，否则抛异常出来，由 [com.like.datasource.Result.liveState] 抓取并发射出来。
+     * 成功就返回数据，否则抛异常出来。
      */
     fun getDataIfSuccess(): T? {
         if (errorCode != 0) {

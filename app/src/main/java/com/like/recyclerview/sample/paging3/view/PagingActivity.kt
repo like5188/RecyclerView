@@ -58,7 +58,7 @@ class PagingActivity : AppCompatActivity() {
             }
         }
 
-        mBinding.rv.adapter = mArticleAdapter.withLoadStateHeaderAndFooter(mBannerAdapter, mFooterAdapter)
+        mBinding.rv.adapter = mArticleAdapter
 
         lifecycleScope.launch {
             mViewModel.dbArticleFlowFlow.collectLatest {
