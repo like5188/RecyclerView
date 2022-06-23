@@ -11,7 +11,7 @@ object RetrofitUtils {
             .baseUrl("https://www.wanandroid.com/")
             .client(
                 OkHttpClient.Builder()
-                    .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))// 添加日志打印
+                    .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))// 添加日志打印
                     .build()
             )
             .addConverterFactory(GsonConverterFactory.create())
