@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import com.like.common.util.Logger
@@ -18,34 +16,20 @@ import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.sample.paging3.adapter.ArticleAdapter
 import com.like.recyclerview.sample.paging3.adapter.HeaderAdapter
 import com.like.recyclerview.sample.paging3.data.db.Db
-import com.like.recyclerview.sample.paging3.dataSource.memory.BannerDataSource
-import com.like.recyclerview.sample.paging3.dataSource.memory.TopArticleDataSource
-import com.like.recyclerview.sample.paging3.repository.PagingRepository
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PagingActivity : AppCompatActivity() {
     private val mBinding by lazy {
         DataBindingUtil.setContentView<ActivityPagingBinding>(this, R.layout.activity_paging)
     }
-    private val mViewModel by lazy {
-        ViewModelProvider(this, object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                if (modelClass.isAssignableFrom(PagingViewModel::class.java)) {
-                    val db = Db.getInstance(application)
-                    val bannerDataSource = BannerDataSource()
-                    val topArticleDataSource = TopArticleDataSource()
-                    val pagingRepository = PagingRepository(db, bannerDataSource, topArticleDataSource)
-                    @Suppress("UNCHECKED_CAST")
-                    return PagingViewModel(pagingRepository) as T
-                }
-                throw IllegalArgumentException("Unknown ViewModel class")
-            }
-        }).get(PagingViewModel::class.java)
-    }
+    private val mViewModel: PagingViewModel by viewModel()
+    private val db: Db by inject()
 
     private val mArticleAdapter by lazy {
         ArticleAdapter()
@@ -107,23 +91,17 @@ class PagingActivity : AppCompatActivity() {
 
     fun clearDb(view: View) {
         lifecycleScope.launch(Dispatchers.IO) {
-            Db.getInstance(application).bannerDao().clear()
-            Db.getInstance(application).topArticleDao().clear()
-            Db.getInstance(application).articleDao().clear()
+            db.bannerDao().clear()
+            db.topArticleDao().clear()
+            db.articleDao().clear()
         }
     }
 
     fun queryDb(view: View) {
         lifecycleScope.launch(Dispatchers.IO) {
-            Db.getInstance(application).bannerDao().getAll().collectLatest {
-                Logger.i(it.toString())
-            }
-            Db.getInstance(application).topArticleDao().getAll().collectLatest {
-                Logger.i(it.toString())
-            }
-            Db.getInstance(application).articleDao().getAll().collectLatest {
-                Logger.i(it.toString())
-            }
+            Logger.i(db.bannerDao().getAll().toString())
+            Logger.i(db.topArticleDao().getAll().toString())
+            Logger.i(db.articleDao().getAll().toString())
         }
     }
 }

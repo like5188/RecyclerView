@@ -8,19 +8,11 @@ import androidx.room.withTransaction
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.data.model.Article
 import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
-import com.like.recyclerview.sample.paging3.dataSource.memory.BannerDataSource
-import com.like.recyclerview.sample.paging3.dataSource.memory.TopArticleDataSource
 import retrofit2.HttpException
 import java.io.IOException
 
 @OptIn(ExperimentalPagingApi::class)
-class PagingRemoteMediator(
-    private val db: Db,
-    private val bannerDataSource: BannerDataSource,
-    private val topArticleDataSource: TopArticleDataSource
-) : RemoteMediator<Int, Article>() {
-    private val bannerDao = db.bannerDao()
-    private val topArticleDao = db.topArticleDao()
+class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>() {
     private val articleDao = db.articleDao()
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
@@ -60,34 +52,15 @@ class PagingRemoteMediator(
             // thread.
             val articleList = RetrofitUtils.retrofitApi.getArticle(loadKey).getDataIfSuccess()?.datas
 
-            if (loadType == LoadType.REFRESH) {
-                val bannerInfo = bannerDataSource.load()
-                val topArticleList = topArticleDataSource.load()
-                db.withTransaction {
-                    bannerDao.clear()
-                    topArticleDao.clear()
+            db.withTransaction {
+                if (loadType == LoadType.REFRESH) {
                     articleDao.clear()
-                    // Insert new users into database, which invalidates the
-                    // current PagingData, allowing Paging to present the updates
-                    // in the DB.
-                    val banners = bannerInfo?.banners
-                    if (!banners.isNullOrEmpty()) {
-                        bannerDao.insert(*banners.toTypedArray())
-                    }
-                    if (!topArticleList.isNullOrEmpty()) {
-                        topArticleDao.insert(*topArticleList.toTypedArray())
-                    }
-                    if (!articleList.isNullOrEmpty()) {
-                        articleDao.insert(*articleList.toTypedArray())
-                    }
                 }
-            } else {
-                db.withTransaction {
-                    if (!articleList.isNullOrEmpty()) {
-                        articleDao.insert(*articleList.toTypedArray())
-                    }
+                if (!articleList.isNullOrEmpty()) {
+                    articleDao.insert(*articleList.toTypedArray())
                 }
             }
+
             MediatorResult.Success(
                 endOfPaginationReached = (articleList?.size ?: 0) < state.config.pageSize
             )

@@ -12,7 +12,7 @@ interface ArticleDao : BaseDao<Article> {
     suspend fun clear()
 
     @Query("SELECT * FROM Article ORDER BY id ASC")
-    fun getAll(): Flow<List<Article>>
+    suspend fun getAll(): List<Article>
 
     @Query("SELECT * FROM Article ORDER BY id ASC limit :pageSize offset :offset")
     suspend fun getPage(offset: Int, pageSize: Int): List<Article>
