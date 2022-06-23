@@ -6,18 +6,18 @@ import androidx.paging.cachedIn
 import com.like.recyclerview.sample.paging3.repository.PagingRepository
 import kotlinx.coroutines.flow.flow
 
-class PagingViewModel(pagingRepository: PagingRepository) : ViewModel() {
+class PagingViewModel(private val pagingRepository: PagingRepository) : ViewModel() {
 
     val articleFlow = pagingRepository.articleFlow.cachedIn(viewModelScope)
 
     val dbArticleFlowFlow = pagingRepository.dbArticleFlowFlow.cachedIn(viewModelScope)
 
-    val bannerInfoFlow = flow {
-        emit(pagingRepository.getDbBanner())
+    fun getBannerInfoFlow(isRefresh: Boolean) = flow {
+        emit(pagingRepository.getDbBanner(isRefresh))
     }
 
-    val topArticleFlow = flow {
-        emit(pagingRepository.getDbTopArticle())
+    fun getTopArticleFlow(isRefresh: Boolean) = flow {
+        emit(pagingRepository.getDbTopArticle(isRefresh))
     }
 
 }

@@ -40,6 +40,6 @@ class PagingRepository(
 
     suspend fun getBanner() = bannerDataSource.load()
     suspend fun getTopArticle() = topArticleDataSource.load()
-    suspend fun getDbBanner() = bannerDbDataSource.load()
-    suspend fun getDbTopArticle() = topArticleDbDataSource.load()
+    suspend fun getDbBanner(isRefresh: Boolean) = bannerDbDataSource.load(isRefresh)
+    suspend fun getDbTopArticle(isRefresh: Boolean) = topArticleDbDataSource.load(isRefresh)
 }

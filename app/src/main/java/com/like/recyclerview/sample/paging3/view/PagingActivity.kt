@@ -71,7 +71,7 @@ class PagingActivity : AppCompatActivity() {
 
     private fun getBannerInfo() {
         lifecycleScope.launch {
-            mViewModel.bannerInfoFlow.collectLatest {
+            mViewModel.getBannerInfoFlow(true).collectLatest {
                 mBannerAdapter.bannerInfo = it
             }
         }
@@ -79,13 +79,15 @@ class PagingActivity : AppCompatActivity() {
 
     private fun getTopArticle() {
         lifecycleScope.launch {
-            mViewModel.topArticleFlow.collectLatest {
+            mViewModel.getTopArticleFlow(true).collectLatest {
                 mBannerAdapter.topArticleList = it
             }
         }
     }
 
     fun refresh(view: View) {
+        getBannerInfo()
+        getTopArticle()
         mArticleAdapter.refresh()
     }
 
