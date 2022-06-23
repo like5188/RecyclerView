@@ -65,8 +65,8 @@ class PagingActivity : AppCompatActivity() {
                 mArticleAdapter.submitData(it)
             }
         }
-        getBannerInfo()
-        getTopArticle()
+//        getBannerInfo()
+//        getTopArticle()
     }
 
     private fun getBannerInfo() {
@@ -86,8 +86,8 @@ class PagingActivity : AppCompatActivity() {
     }
 
     fun refresh(view: View) {
-        getBannerInfo()
-        getTopArticle()
+//        getBannerInfo()
+//        getTopArticle()
         mArticleAdapter.refresh()
     }
 
