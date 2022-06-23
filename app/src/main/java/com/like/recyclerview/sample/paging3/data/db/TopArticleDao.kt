@@ -10,6 +10,6 @@ interface TopArticleDao : BaseDao<TopArticle> {
     @Query("DELETE FROM TopArticle")
     suspend fun clear()
 
-    @Query("SELECT * FROM TopArticle ORDER BY id ASC")
+    @Query("SELECT * FROM TopArticle")
     suspend fun getAll(): List<TopArticle>
 }

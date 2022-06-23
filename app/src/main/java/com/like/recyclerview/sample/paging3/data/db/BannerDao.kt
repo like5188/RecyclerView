@@ -9,6 +9,6 @@ interface BannerDao : BaseDao<BannerInfo.Banner> {
     @Query("DELETE FROM Banner")
     suspend fun clear()
 
-    @Query("SELECT * FROM Banner ORDER BY id ASC")
+    @Query("SELECT * FROM Banner")
     suspend fun getAll(): List<BannerInfo.Banner>
 }
