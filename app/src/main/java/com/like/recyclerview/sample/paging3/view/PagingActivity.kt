@@ -91,9 +91,15 @@ class PagingActivity : AppCompatActivity() {
 
     fun queryDb(view: View) {
         lifecycleScope.launch(Dispatchers.IO) {
-            Logger.i(db.bannerDao().getAll().toString())
-            Logger.i(db.topArticleDao().getAll().toString())
-            Logger.i(db.articleDao().getAll().toString())
+            db.bannerDao().getAll().apply {
+                Logger.i("size=${this.size} $this")
+            }
+            db.topArticleDao().getAll().apply {
+                Logger.i("size=${this.size} $this")
+            }
+            db.articleDao().getAll().apply {
+                Logger.i("size=${this.size} $this")
+            }
         }
     }
 
