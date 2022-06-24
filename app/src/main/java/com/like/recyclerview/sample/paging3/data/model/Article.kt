@@ -8,9 +8,10 @@ import com.like.recyclerview.sample.BR
 import com.like.recyclerview.sample.R
 
 @Entity
-class Article  : IRecyclerViewItem {
+class Article : IRecyclerViewItem {
     @Ignore
     override val layoutId: Int = R.layout.item_article
+
     @Ignore
     override val variableId: Int = BR.item
 
@@ -20,7 +21,7 @@ class Article  : IRecyclerViewItem {
     var title: String? = null
 
     override fun toString(): String {
-        return "Article(id=$id, title=$title)"
+        return "Article(layoutId=$layoutId, variableId=$variableId, id=$id, title=$title)"
     }
 
 }

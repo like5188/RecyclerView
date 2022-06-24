@@ -55,11 +55,13 @@ class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>()
             db.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     articleDao.clear()
+                    Logger.e("articleDao clear")
                 }
                 val articleList = pagingModel?.datas
                 if (!articleList.isNullOrEmpty()) {
-                    Logger.printCollection(articleList)
                     articleDao.insert(*articleList.toTypedArray())
+                    Logger.e("articleDao insert")
+                    Logger.printCollection(articleDao.getAll())
                 }
             }
             MediatorResult.Success(
