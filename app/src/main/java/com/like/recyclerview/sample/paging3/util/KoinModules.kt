@@ -1,5 +1,6 @@
 package com.like.recyclerview.sample.paging3.util
 
+import androidx.paging.PagingConfig
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.dataSource.db.ArticleRemoteMediator
 import com.like.recyclerview.sample.paging3.dataSource.db.BannerDbDataSource
@@ -57,5 +58,9 @@ val myModule = module {
     //viewModel
     viewModel {
         PagingViewModel(get())
+    }
+
+    single {
+        PagingConfig(10, prefetchDistance = 1, initialLoadSize = 10)
     }
 }
