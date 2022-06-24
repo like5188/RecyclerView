@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import com.like.common.util.Logger
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.data.model.Article
 import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
@@ -57,6 +58,7 @@ class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>()
                 }
                 val articleList = pagingModel?.datas
                 if (!articleList.isNullOrEmpty()) {
+                    Logger.printCollection(articleList)
                     articleDao.insert(*articleList.toTypedArray())
                 }
             }
