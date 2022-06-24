@@ -39,13 +39,13 @@ class MainActivity : AppCompatActivity() {
     fun queryDb(view: View) {
         lifecycleScope.launch(Dispatchers.IO) {
             db.bannerDao().getAll().apply {
-                Logger.i("size=${this.size} $this")
+                Logger.i("banner size=${this.size} $this")
             }
             db.topArticleDao().getAll().apply {
-                Logger.i("size=${this.size} $this")
+                Logger.i("topArticle size=${this.size} $this")
             }
             db.articleDao().getAll().apply {
-                Logger.i("size=${this.size} $this")
+                Logger.i("article size=${this.size} $this")
             }
         }
     }
