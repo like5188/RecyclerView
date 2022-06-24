@@ -25,4 +25,18 @@
         android:text="启动PagingActivity"
         android:textAllCaps="false" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="queryDb"
+        android:text="queryDb"
+        android:textAllCaps="false" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="clearDb"
+        android:text="clearDb"
+        android:textAllCaps="false" />
+
 </LinearLayout>

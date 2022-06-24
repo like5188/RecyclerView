@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
-import com.like.common.util.Logger
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.ProgressDialog
@@ -15,13 +14,10 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityPagingBinding
 import com.like.recyclerview.sample.paging3.adapter.ArticleAdapter
 import com.like.recyclerview.sample.paging3.adapter.HeaderAdapter
-import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PagingActivity : AppCompatActivity() {
@@ -29,7 +25,6 @@ class PagingActivity : AppCompatActivity() {
         DataBindingUtil.setContentView<ActivityPagingBinding>(this, R.layout.activity_paging)
     }
     private val mViewModel: PagingViewModel by viewModel()
-    private val db: Db by inject()
 
     private val mArticleAdapter by lazy {
         ArticleAdapter()
@@ -91,25 +86,4 @@ class PagingActivity : AppCompatActivity() {
         mArticleAdapter.refresh()
     }
 
-    fun queryDb(view: View) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            db.bannerDao().getAll().apply {
-                Logger.i("size=${this.size} $this")
-            }
-            db.topArticleDao().getAll().apply {
-                Logger.i("size=${this.size} $this")
-            }
-            db.articleDao().getAll().apply {
-                Logger.i("size=${this.size} $this")
-            }
-        }
-    }
-
-    fun clearDb(view: View) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            db.bannerDao().clear()
-            db.topArticleDao().clear()
-            db.articleDao().clear()
-        }
-    }
 }
