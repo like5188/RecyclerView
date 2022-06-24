@@ -21,7 +21,6 @@ class PagingRepository(
     private val topArticleDataSource: TopArticleDataSource,
     private val topArticleDbDataSource: TopArticleDbDataSource
 ) : KoinComponent {
-    // initialLoadSize 默认为 PAGE_SIZE*3，所以这里需要设置一下。
     val articleFlow = Pager(get()) {
         get<ArticlePagingSource>()
     }.flow
