@@ -21,7 +21,7 @@ class Article : IRecyclerViewItem {
     var title: String? = null
 
     override fun toString(): String {
-        return "Article(layoutId=$layoutId, variableId=$variableId, id=$id, title=$title)"
+        return "Article(id=$id, title=$title)"
     }
 
 }
