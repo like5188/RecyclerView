@@ -14,21 +14,16 @@ class ArticlePagingSource : PagingSource<Int, Article>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Article> {
         return try {
-            val key = params.key ?: 0
-            val loadSize = params.loadSize
-            Logger.d("ArticlePagingSource key=$key loadSize=$loadSize")
-            val pagingModel = RetrofitUtils.retrofitApi.getArticle(key, loadSize).getDataIfSuccess()
-            val nextPage = if ((pagingModel?.curPage ?: 0) >= (pagingModel?.pageCount ?: 0)) {
-                //没有更多数据
-                null
-            } else {
-                key + 1
-            }
+            val page = params.key ?: 0
+            val pageSize = params.loadSize
+            val pagingModel = RetrofitUtils.retrofitApi.getArticle(page, pageSize).getDataIfSuccess()
+            val endOfPaginationReached = (pagingModel?.curPage ?: 0) >= (pagingModel?.pageCount ?: 0)
+            Logger.d("ArticlePagingSource page=$page pageSize=$pageSize endOfPaginationReached=$endOfPaginationReached")
 
             LoadResult.Page(
                 data = pagingModel?.datas ?: emptyList(),
                 prevKey = null,
-                nextKey = nextPage
+                nextKey = if (endOfPaginationReached) null else page + 1
             )
         } catch (e: Exception) {
             LoadResult.Error(e)
