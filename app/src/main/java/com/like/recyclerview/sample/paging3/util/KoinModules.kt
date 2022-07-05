@@ -62,6 +62,6 @@ val myModule = module {
 
     single {
         // initialLoadSize 默认为 PAGE_SIZE*3，所以这里需要设置一下。
-        PagingConfig(10, prefetchDistance = 1, initialLoadSize = 10, enablePlaceholders = false)
+        PagingConfig(30, prefetchDistance = 1, initialLoadSize = 30, enablePlaceholders = false)
     }
 }

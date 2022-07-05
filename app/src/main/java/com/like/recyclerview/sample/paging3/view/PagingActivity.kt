@@ -53,15 +53,15 @@ class PagingActivity : AppCompatActivity() {
             }
         }
 
-        mBinding.rv.adapter = mArticleAdapter
+        mBinding.rv.adapter = mArticleAdapter.withLoadStateHeaderAndFooter(mBannerAdapter, mFooterAdapter)
 
         lifecycleScope.launch {
             mViewModel.dbArticleFlowFlow.collectLatest {
                 mArticleAdapter.submitData(it)
             }
         }
-//        getBannerInfo()
-//        getTopArticle()
+        getBannerInfo()
+        getTopArticle()
     }
 
     private fun getBannerInfo() {
@@ -81,8 +81,8 @@ class PagingActivity : AppCompatActivity() {
     }
 
     fun refresh(view: View) {
-//        getBannerInfo()
-//        getTopArticle()
+        getBannerInfo()
+        getTopArticle()
         mArticleAdapter.refresh()
     }
 
