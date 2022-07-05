@@ -15,7 +15,10 @@ class Article : IRecyclerViewItem {
     @Ignore
     override val variableId: Int = BR.item
 
-    @PrimaryKey
+    // todo 不知道为什么，Room会在插入数据时根据PrimaryKey进行排序。所以不能使用[id]，会造成顺序错乱。
+    @PrimaryKey(autoGenerate = true)
+    var orderId: Int = 0
+
     var id: Int? = null
 
     var title: String? = null
