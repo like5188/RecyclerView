@@ -37,7 +37,7 @@ class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>()
             val pagingModel = RetrofitUtils.retrofitApi.getArticle(page, pageSize).getDataIfSuccess()
             val endOfPaginationReached = (pagingModel?.curPage ?: 0) >= (pagingModel?.pageCount ?: 0)
             Logger.d("ArticleRemoteMediator page=$page pageSize=$pageSize endOfPaginationReached=$endOfPaginationReached")
-
+            Logger.printCollection(pagingModel?.datas)
             db.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     remoteKeysDao.clearRemoteKeys(remoteArticle)
@@ -48,7 +48,6 @@ class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>()
                 if (!articleList.isNullOrEmpty()) {
                     articleDao.insert(*articleList.toTypedArray())
                     Logger.e("articleDao insert")
-                    Logger.printCollection(articleDao.getAll())
                 }
                 remoteKeysDao.insert(
                     RemoteKeysEntity(

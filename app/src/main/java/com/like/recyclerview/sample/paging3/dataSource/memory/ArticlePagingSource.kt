@@ -19,7 +19,7 @@ class ArticlePagingSource : PagingSource<Int, Article>() {
             val pagingModel = RetrofitUtils.retrofitApi.getArticle(page, pageSize).getDataIfSuccess()
             val endOfPaginationReached = (pagingModel?.curPage ?: 0) >= (pagingModel?.pageCount ?: 0)
             Logger.d("ArticlePagingSource page=$page pageSize=$pageSize endOfPaginationReached=$endOfPaginationReached")
-
+            Logger.printCollection(pagingModel?.datas)
             LoadResult.Page(
                 data = pagingModel?.datas ?: emptyList(),
                 prevKey = null,
