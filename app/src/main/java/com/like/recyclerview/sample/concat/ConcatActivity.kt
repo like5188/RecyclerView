@@ -120,9 +120,7 @@ class ConcatActivity : AppCompatActivity() {
             hide = { mProgressDialog.hide() }
             withHeaderAdapter(HeaderAdapter())
             withItemAdapter(ItemAdapter())
-            bindData(
-                mViewModel::getHeadersAndItems.asFlow()
-            )
+            bindData(mViewModel::getHeadersAndItems.asFlow())
         }
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {

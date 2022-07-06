@@ -8,6 +8,14 @@ import com.like.recyclerview.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
+/*
+使用方法：
+val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv)
+adapter.apply {
+    withItemAdapter(ItemAdapter())
+    bindData(mViewModel::getHeadersAndItems.asFlow())
+}
+ */
 /**
  * 对 Header、Footer、Item 三种 Adapter 进行组合。并绑定[PagingResult]或者[Flow]类型的数据。
  * 功能：
@@ -70,21 +78,21 @@ open class CombineAdapter<ResultType, ValueInList>(private val recyclerView: Rec
     }
 
     /**
-     * 设置 Header
+     * 设置 Header，固定于 [RecyclerView] 顶部
      */
     fun withHeaderAdapter(adapter: BaseAdapter<*, ValueInList>) {
         this.headerAdapter = adapter
     }
 
     /**
-     * 设置 列表
+     * 设置 列表，固定于 [RecyclerView] 中部，并且加载更多的数据是添加到其中。
      */
     fun withItemAdapter(adapter: BaseAdapter<*, ValueInList>) {
         this.itemAdapter = adapter
     }
 
     /**
-     * 设置 Footer
+     * 设置 Footer，固定于 [RecyclerView] 底部
      * @param adapter    加载更多视图 的 adapter
      * @param isAfter   是否是往后加载更多。true：往后加载更多；false：往前加载更多；默认为 null，表示不分页。
      */
