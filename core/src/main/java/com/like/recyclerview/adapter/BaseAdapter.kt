@@ -52,15 +52,6 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
         return getItemViewType(position, item)
     }
 
-    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int, payloads: MutableList<Any>) {
-        if (payloads.isNotEmpty()) {
-            val item = get(holder.bindingAdapterPosition) ?: return
-            onBindViewHolder(holder, item, payloads)
-        } else {
-            onBindViewHolder(holder, position)
-        }
-    }
-
     final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         val item = get(holder.bindingAdapterPosition) ?: return
         if (item is IRecyclerViewItem) {
@@ -79,8 +70,6 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
     }
 
     open fun getItemViewType(position: Int, item: ValueInList): Int = -1
-
-    open fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList, payloads: MutableList<Any>) {}
 
     open fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {}
 
