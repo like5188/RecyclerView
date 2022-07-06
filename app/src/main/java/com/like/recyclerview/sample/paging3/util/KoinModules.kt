@@ -64,7 +64,7 @@ val myModule = module {
         DbPagingRepository(get(), get(), get(), get(), get())
     }
     factory {
-        MemoryPagingRepository(get(), get())
+        MemoryPagingRepository(get(), get(), get())
     }
 
     //viewModel

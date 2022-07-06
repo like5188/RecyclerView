@@ -1,6 +1,7 @@
 package com.like.recyclerview.sample.paging3.repository.inMemory
 
 import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import kotlinx.coroutines.flow.flow
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -10,9 +11,10 @@ import org.koin.core.component.get
 class MemoryPagingRepository(
     private val memoryBannerInfoDataSource: MemoryBannerInfoDataSource,
     private val memoryTopArticleDataSource: MemoryTopArticleDataSource,
+    pagingConfig: PagingConfig
 ) : KoinComponent {
 
-    val memoryArticleFlow = Pager(get()) {
+    val memoryArticleFlow = Pager(pagingConfig) {
         get<MemoryArticlePagingSource>()
     }.flow
 
