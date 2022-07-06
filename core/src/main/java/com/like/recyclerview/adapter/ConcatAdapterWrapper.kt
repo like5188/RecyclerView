@@ -97,9 +97,10 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
      * 初始化操作（线程安全）
      */
     suspend fun initial() {
+        val realFlow = pagingResult?.flow ?: flow ?: return
         concurrencyHelper.cancelPreviousThenRun {
             pagingResult?.setRequestType?.invoke(RequestType.Initial)
-            collect(RequestType.Initial, show, hide, onError, onSuccess)
+            collect(RequestType.Initial, realFlow, show, hide, onError, onSuccess)
         }
     }
 
@@ -107,9 +108,10 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
      * 刷新操作（线程安全）
      */
     suspend fun refresh() {
+        val realFlow = pagingResult?.flow ?: flow ?: return
         concurrencyHelper.cancelPreviousThenRun {
             pagingResult?.setRequestType?.invoke(RequestType.Refresh)
-            collect(RequestType.Refresh, show, hide, onError, onSuccess)
+            collect(RequestType.Refresh, realFlow, show, hide, onError, onSuccess)
         }
     }
 
@@ -117,9 +119,10 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
      * 往后加载更多操作（线程安全）
      */
     private suspend fun after() {
+        val realFlow = pagingResult?.flow ?: flow ?: return
         concurrencyHelper.dropIfPreviousRunning {
             pagingResult?.setRequestType?.invoke(RequestType.After)
-            collect(RequestType.After, show, hide, onError, onSuccess)
+            collect(RequestType.After, realFlow, show, hide, onError, onSuccess)
         }
     }
 
@@ -127,20 +130,21 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
      * 往前加载更多操作（线程安全）
      */
     private suspend fun before() {
+        val realFlow = pagingResult?.flow ?: flow ?: return
         concurrencyHelper.dropIfPreviousRunning {
             pagingResult?.setRequestType?.invoke(RequestType.Before)
-            collect(RequestType.Before, show, hide, onError, onSuccess)
+            collect(RequestType.Before, realFlow, show, hide, onError, onSuccess)
         }
     }
 
     private suspend fun collect(
         requestType: RequestType,
+        flow: Flow<ResultType>,
         show: (() -> Unit)? = null,
         hide: (() -> Unit)? = null,
         onError: (suspend (RequestType, Throwable) -> Unit)? = null,
         onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null,
     ) {
-        val flow = pagingResult?.flow ?: flow ?: return
         flow.flowOn(Dispatchers.IO)
             .onStart {
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
