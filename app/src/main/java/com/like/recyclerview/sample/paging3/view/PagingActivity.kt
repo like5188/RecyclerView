@@ -29,7 +29,7 @@ class PagingActivity : AppCompatActivity() {
     private val mArticleAdapter by lazy {
         ArticleAdapter()
     }
-    private val mBannerAdapter by lazy {
+    private val mHeaderAdapter by lazy {
         HeaderAdapter()
     }
     private val mFooterAdapter by lazy {
@@ -57,7 +57,7 @@ class PagingActivity : AppCompatActivity() {
             mArticleAdapter.enableScrollToTopAfterRefresh()
         }
 
-        mBinding.rv.adapter = mArticleAdapter.withLoadStateHeaderAndFooter(mBannerAdapter, mFooterAdapter)
+        mBinding.rv.adapter = mArticleAdapter.withLoadStateHeaderAndFooter(mHeaderAdapter, mFooterAdapter)
 
         if (inDb) {
             getDbBannerInfo()
@@ -84,7 +84,7 @@ class PagingActivity : AppCompatActivity() {
     private fun getDbBannerInfo() {
         lifecycleScope.launchWhenCreated {
             mViewModel.getDbBannerInfoFlow(true).collectLatest {
-                mBannerAdapter.bannerInfo = it
+                mHeaderAdapter.bannerInfo = it
             }
         }
     }
@@ -92,7 +92,7 @@ class PagingActivity : AppCompatActivity() {
     private fun getDbTopArticle() {
         lifecycleScope.launchWhenCreated {
             mViewModel.getDbTopArticleFlow(true).collectLatest {
-                mBannerAdapter.topArticleList = it
+                mHeaderAdapter.topArticleList = it
             }
         }
     }
@@ -108,7 +108,7 @@ class PagingActivity : AppCompatActivity() {
     private fun getMemoryBannerInfo() {
         lifecycleScope.launchWhenCreated {
             mViewModel.getMemoryBannerInfoFlow().collectLatest {
-                mBannerAdapter.bannerInfo = it
+                mHeaderAdapter.bannerInfo = it
             }
         }
     }
@@ -116,7 +116,7 @@ class PagingActivity : AppCompatActivity() {
     private fun getMemoryTopArticle() {
         lifecycleScope.launchWhenCreated {
             mViewModel.getMemoryTopArticleFlow().collectLatest {
-                mBannerAdapter.topArticleList = it
+                mHeaderAdapter.topArticleList = it
             }
         }
     }
