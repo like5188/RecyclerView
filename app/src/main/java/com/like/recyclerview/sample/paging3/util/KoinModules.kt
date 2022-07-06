@@ -1,6 +1,7 @@
 package com.like.recyclerview.sample.paging3.util
 
 import androidx.paging.PagingConfig
+import com.like.recyclerview.sample.paging3.api.Api
 import com.like.recyclerview.sample.paging3.db.Db
 import com.like.recyclerview.sample.paging3.repository.inDb.ArticleRemoteMediator
 import com.like.recyclerview.sample.paging3.repository.inDb.DbBannerInfoDataSource
@@ -11,49 +12,56 @@ import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryBannerInfo
 import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryPagingRepository
 import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryTopArticleDataSource
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 val myModule = module {
+    //Api
+    single {
+        Retrofit.Builder()
+            .baseUrl("https://www.wanandroid.com/")
+            .client(
+                OkHttpClient.Builder()
+                    .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))// 添加日志打印
+                    .build()
+            )
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(Api::class.java)
+    }
+
     //Db
     single {
         Db.getInstance(get())
     }
 
-    //Dao
-    single {
-        get<Db>().bannerDao()
-    }
-    single {
-        get<Db>().topArticleDao()
-    }
-    single {
-        get<Db>().articleDao()
-    }
-
     //DataSource
     factory {
-        DbBannerInfoDataSource(get(), get())
+        DbBannerInfoDataSource(get(), get(), get())
     }
     factory {
-        DbTopArticleDataSource(get(), get())
+        DbTopArticleDataSource(get(), get(), get())
     }
     factory {
-        ArticleRemoteMediator(get())
+        ArticleRemoteMediator(get(), get())
     }
     factory {
-        MemoryBannerInfoDataSource()
+        MemoryBannerInfoDataSource(get())
     }
     factory {
-        MemoryTopArticleDataSource()
+        MemoryTopArticleDataSource(get())
     }
     factory {
-        MemoryArticlePagingSource()
+        MemoryArticlePagingSource(get())
     }
 
     //Repository
     factory {
-        DbPagingRepository(get(), get(), get())
+        DbPagingRepository(get(), get(), get(), get(), get())
     }
     factory {
         MemoryPagingRepository(get(), get())

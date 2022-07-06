@@ -2,22 +2,22 @@ package com.like.recyclerview.sample.paging3.repository.inDb
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import com.like.recyclerview.sample.paging3.db.Db
 import kotlinx.coroutines.flow.flow
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 
-@OptIn(KoinApiExtension::class, ExperimentalPagingApi::class)
+@OptIn(ExperimentalPagingApi::class)
 class DbPagingRepository(
     private val db: Db,
     private val dbBannerInfoDataSource: DbBannerInfoDataSource,
-    private val dbTopArticleDataSource: DbTopArticleDataSource
-) : KoinComponent {
+    private val dbTopArticleDataSource: DbTopArticleDataSource,
+    private val articleRemoteMediator: ArticleRemoteMediator,
+    private val pagingConfig: PagingConfig
+) {
 
     val dbArticleFlow = Pager(
-        get(),
-        remoteMediator = get<ArticleRemoteMediator>()
+        pagingConfig,
+        remoteMediator = articleRemoteMediator
     ) {
         db.articleDao().pagingSource()
     }.flow

@@ -6,15 +6,18 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.like.common.util.Logger
+import com.like.recyclerview.sample.paging3.api.Api
 import com.like.recyclerview.sample.paging3.db.Db
 import com.like.recyclerview.sample.paging3.vo.Article
 import com.like.recyclerview.sample.paging3.vo.RemoteKeysEntity
-import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 import retrofit2.HttpException
 import java.io.IOException
 
 @OptIn(ExperimentalPagingApi::class)
-class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>() {
+class ArticleRemoteMediator(
+    private val db: Db,
+    private val api: Api
+) : RemoteMediator<Int, Article>() {
     private val articleDao = db.articleDao()
     private val remoteKeysDao = db.remoteKeysDao()
 
@@ -37,7 +40,7 @@ class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>()
                 LoadType.REFRESH -> state.config.initialLoadSize
                 else -> state.config.pageSize
             }
-            val pagingModel = RetrofitUtils.retrofitApi.getArticle(page, pageSize).getDataIfSuccess()
+            val pagingModel = api.getArticle(page, pageSize).getDataIfSuccess()
             val endOfPaginationReached = (pagingModel?.curPage ?: 0) >= (pagingModel?.pageCount ?: 0)
             Logger.d("ArticleRemoteMediator page=$page pageSize=$pageSize endOfPaginationReached=$endOfPaginationReached")
             Logger.printCollection(pagingModel?.datas)

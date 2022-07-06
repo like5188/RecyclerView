@@ -1,12 +1,12 @@
 package com.like.recyclerview.sample.paging3.repository.inMemory
 
+import com.like.recyclerview.sample.paging3.api.Api
 import com.like.recyclerview.sample.paging3.vo.TopArticle
-import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 
-class MemoryTopArticleDataSource {
+class MemoryTopArticleDataSource(private val api: Api) {
 
     suspend fun load(): List<TopArticle>? {
-        return RetrofitUtils.retrofitApi.getTopArticle().getDataIfSuccess()
+        return api.getTopArticle().getDataIfSuccess()
     }
 
 }

@@ -27,7 +27,7 @@ class PagingActivity : AppCompatActivity() {
         DataBindingUtil.setContentView<ActivityPagingBinding>(this, R.layout.activity_paging)
     }
     private val mViewModel: PagingViewModel by viewModel()
-    private val inDb = true// true：使用数据库；false：不使用数据库；
+    private val inDb = false// true：使用数据库；false：不使用数据库；
 
     private val mArticleAdapter by lazy {
         ArticleAdapter()
