@@ -17,15 +17,11 @@ import kotlinx.coroutines.flow.*
  * 4、封装了初始化、刷新、往后加载更多、往前加载更多操作。并对这些操作做了并发处理，并发处理规则如下：
  * ①、初始化、刷新：如果有操作正在执行，则取消正在执行的操作，执行新操作。
  * ②、往后加载更多、往前加载更多：如果有操作正在执行，则放弃新操作，否则执行新操作。
- *
- * @param itemAdapter       列表的 adapter
  */
-open class CombineAdapter<ResultType, ValueInList>(
-    private val recyclerView: RecyclerView,
-    private val itemAdapter: BaseAdapter<*, ValueInList>
-) {
+open class CombineAdapter<ResultType, ValueInList>(private val recyclerView: RecyclerView) {
     private val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
     private var headerAdapter: BaseAdapter<*, ValueInList>? = null
+    private var itemAdapter: BaseAdapter<*, ValueInList>? = null
     private var loadMoreAdapter: BaseLoadMoreAdapter<*, *>? = null
     private val concurrencyHelper = ConcurrencyHelper()
     private var pagingResult: PagingResult<ResultType>? = null
@@ -58,6 +54,8 @@ open class CombineAdapter<ResultType, ValueInList>(
 
     /**
      * 绑定数据源
+     * 注意：两个 [bindData] 方法至少调用一个
+     *
      * @param pagingResult  使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
      */
     fun bindData(pagingResult: PagingResult<ResultType>) {
@@ -74,23 +72,30 @@ open class CombineAdapter<ResultType, ValueInList>(
     /**
      * 设置 Header
      */
-    fun withHeader(header: BaseAdapter<*, ValueInList>) {
-        this.headerAdapter = header
+    fun withHeaderAdapter(adapter: BaseAdapter<*, ValueInList>) {
+        this.headerAdapter = adapter
+    }
+
+    /**
+     * 设置 列表
+     */
+    fun withItemAdapter(adapter: BaseAdapter<*, ValueInList>) {
+        this.itemAdapter = adapter
     }
 
     /**
      * 设置 Footer
-     * @param footer    加载更多视图 的 adapter
+     * @param adapter    加载更多视图 的 adapter
      * @param isAfter   是否是往后加载更多。true：往后加载更多；false：往前加载更多；默认为 null，表示不分页。
      */
-    fun withFooter(footer: BaseLoadMoreAdapter<*, *>, isAfter: Boolean = true) {
-        footer.onLoadMore = if (isAfter) {
+    fun withFooterAdapter(adapter: BaseLoadMoreAdapter<*, *>, isAfter: Boolean = true) {
+        adapter.onLoadMore = if (isAfter) {
             ::after
         } else {
             ::before
         }
         this.isAfter = isAfter
-        this.loadMoreAdapter = footer
+        this.loadMoreAdapter = adapter
     }
 
     /**
@@ -176,12 +181,12 @@ open class CombineAdapter<ResultType, ValueInList>(
                                 adapter.add(headerAdapter)
                             }
                             if (!items.isNullOrEmpty()) {
-                                itemAdapter.clear()
+                                itemAdapter?.clear()
                                 if (isAfter == null || isAfter == true) {
-                                    itemAdapter.addAllToEnd(items)
+                                    itemAdapter?.addAllToEnd(items)
                                     adapter.addAll(itemAdapter, loadMoreAdapter)
                                 } else {
-                                    itemAdapter.addAllToStart(items)
+                                    itemAdapter?.addAllToStart(items)
                                     adapter.addAll(loadMoreAdapter, itemAdapter)
                                 }
                             }
@@ -203,9 +208,9 @@ open class CombineAdapter<ResultType, ValueInList>(
                         } else {
                             // 还有更多数据需要加载
                             if (isAfter == true) {
-                                itemAdapter.addAllToEnd(items)
+                                itemAdapter?.addAllToEnd(items)
                             } else if (isAfter == false) {
-                                itemAdapter.addAllToStart(items)
+                                itemAdapter?.addAllToStart(items)
                                 recyclerView.keepPosition(items.size, 1)
                             }
                             loadMoreAdapter?.hasMore()

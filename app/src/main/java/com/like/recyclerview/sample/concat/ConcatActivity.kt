@@ -81,19 +81,19 @@ class ConcatActivity : AppCompatActivity() {
 //                }
 //        }
 
-//        initItems()
-        initHeadersAndItems()
+        initItems()
+//        initHeadersAndItems()
 //        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
     }
 
     private fun initItems() {
-        val itemAdapter = ItemAdapter()
-        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
+            withItemAdapter(ItemAdapter())
             bindData(
                 mViewModel::getItems.asFlow().map {
                     it?.take(3)
@@ -114,12 +114,12 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initHeadersAndItems() {
-        val itemAdapter = ItemAdapter()
-        val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withHeader(HeaderAdapter())
+            withHeaderAdapter(HeaderAdapter())
+            withItemAdapter(ItemAdapter())
             bindData(
                 mViewModel::getHeadersAndItems.asFlow()
             )
@@ -136,7 +136,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadAfter() {
         val itemAdapter = ItemAdapter()
-        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv)
         val uiStatusController: DefaultUiStatusController? by lazy {
             DefaultUiStatusController(mBinding.rv)
         }
@@ -182,7 +182,8 @@ class ConcatActivity : AppCompatActivity() {
                     }
                 }
             }
-            withFooter(AdapterFactory.createLoadMoreAdapter())
+            withItemAdapter(itemAdapter)
+            withFooterAdapter(AdapterFactory.createLoadMoreAdapter())
             bindData(
                 mViewModel.loadAfterResult.apply {
                     flow = flow.map {
@@ -205,13 +206,13 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadAfterWithHeaders() {
-        val itemAdapter = ItemAdapter()
-        val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withHeader(HeaderAdapter())
-            withFooter(AdapterFactory.createLoadMoreAdapter())
+            withHeaderAdapter(HeaderAdapter())
+            withItemAdapter(ItemAdapter())
+            withFooterAdapter(AdapterFactory.createLoadMoreAdapter())
             bindData(mViewModel.LoadAfterWithHeadersResult)
         }
         mBinding.btnRefresh.setOnClickListener {
@@ -225,12 +226,12 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadBefore() {
-        val itemAdapter = ItemAdapter()
-        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withFooter(AdapterFactory.createLoadMoreAdapter(), false)
+            withItemAdapter(ItemAdapter())
+            withFooterAdapter(AdapterFactory.createLoadMoreAdapter(), false)
             bindData(
                 mViewModel.loadBeforeResult.apply {
                     flow = flow.map {

@@ -29,12 +29,13 @@ class TreeActivity : AppCompatActivity() {
         TreeRecyclerViewAdapter()
     }
     private val mAdapter by lazy {
-        CombineAdapter<List<BaseTreeNode>?, BaseTreeNode>(mBinding.rv, itemAdapter).apply {
+        CombineAdapter<List<BaseTreeNode>?, BaseTreeNode>(mBinding.rv).apply {
             show = { mBinding.swipeRefreshLayout.isRefreshing = true }
             hide = { mBinding.swipeRefreshLayout.isRefreshing = false }
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
             }
+            withItemAdapter(itemAdapter)
             bindData(mViewModel::getItems.asFlow())
         }
     }
