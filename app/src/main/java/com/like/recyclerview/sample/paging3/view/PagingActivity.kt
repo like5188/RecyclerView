@@ -16,10 +16,7 @@ import com.like.recyclerview.sample.paging3.adapter.ArticleAdapter
 import com.like.recyclerview.sample.paging3.adapter.HeaderAdapter
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PagingActivity : AppCompatActivity() {
@@ -56,12 +53,8 @@ class PagingActivity : AppCompatActivity() {
             }
         }
 
-        // 刷新后滚动到顶部
         lifecycleScope.launchWhenCreated {
-            mArticleAdapter.loadStateFlow
-                .distinctUntilChangedBy { it.refresh }
-                .filter { it.refresh is LoadState.NotLoading }
-                .collect { mBinding.rv.scrollToPosition(0) }
+            mArticleAdapter.enableScrollToTopAfterRefresh()
         }
 
         mBinding.rv.adapter = mArticleAdapter.withLoadStateHeaderAndFooter(mBannerAdapter, mFooterAdapter)

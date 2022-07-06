@@ -4,17 +4,28 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.utils.IListenerManager
 import com.like.recyclerview.utils.ListenerManager
 import com.like.recyclerview.viewholder.BindingViewHolder
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 
 open class BasePagingDataAdapter<ValueInList : Any, VB : ViewDataBinding>(
     diffCallback: DiffUtil.ItemCallback<ValueInList>,
 ) : PagingDataAdapter<ValueInList, BindingViewHolder<VB>>(diffCallback),
     IListenerManager<VB> by ListenerManager() {
+    private lateinit var recyclerView: RecyclerView
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        this.recyclerView = recyclerView
+    }
+
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
         return BindingViewHolder(DataBindingUtil.inflate<VB>(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
             // 为list添加Item的点击事件监听
@@ -61,6 +72,16 @@ open class BasePagingDataAdapter<ValueInList : Any, VB : ViewDataBinding>(
         // 这里不能直接把 holder.bindingAdapterPosition 的值传递下去，因为有添加删除前面的 item 都会造成后面 item 的位置改变，
         // 所以在使用的时候，需要随时使用 holder.bindingAdapterPosition 重新获取。
         onBindViewHolder(holder, item)
+    }
+
+    /**
+     * 启用刷新后滚动到顶部功能
+     */
+    suspend fun enableScrollToTopAfterRefresh() {
+        loadStateFlow
+            .distinctUntilChangedBy { it.refresh }
+            .filter { it.refresh is LoadState.NotLoading }
+            .collect { recyclerView.scrollToPosition(0) }
     }
 
     open fun getItemViewType(position: Int, item: ValueInList): Int = -1
