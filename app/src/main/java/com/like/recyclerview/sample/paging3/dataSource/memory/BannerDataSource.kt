@@ -6,12 +6,12 @@ import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
 class BannerDataSource {
 
     suspend fun load(): BannerInfo? {
-        val result = RetrofitUtils.retrofitApi.getBanner().getDataIfSuccess()
-        return if (result.isNullOrEmpty()) {
+        val data = RetrofitUtils.retrofitApi.getBanner().getDataIfSuccess()
+        return if (data.isNullOrEmpty()) {
             null
         } else {
             BannerInfo().apply {
-                banners = result
+                banners = data
             }
         }
     }
