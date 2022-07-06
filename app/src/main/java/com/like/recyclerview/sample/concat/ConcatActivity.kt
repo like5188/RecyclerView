@@ -11,7 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import com.hjq.toast.ToastUtils
 import com.like.common.util.*
 import com.like.paging.RequestType
-import com.like.recyclerview.adapter.ConcatAdapterWrapper
+import com.like.recyclerview.adapter.CombineAdapter
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IRecyclerViewItem
@@ -90,7 +90,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initItems() {
         val itemAdapter = ItemAdapter()
-        val adapter = ConcatAdapterWrapper<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
@@ -115,7 +115,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initHeadersAndItems() {
         val itemAdapter = ItemAdapter()
-        val adapter = ConcatAdapterWrapper<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv, itemAdapter)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
@@ -136,7 +136,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadAfter() {
         val itemAdapter = ItemAdapter()
-        val adapter = ConcatAdapterWrapper<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
         val uiStatusController: DefaultUiStatusController? by lazy {
             DefaultUiStatusController(mBinding.rv)
         }
@@ -206,7 +206,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadAfterWithHeaders() {
         val itemAdapter = ItemAdapter()
-        val adapter = ConcatAdapterWrapper<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv, itemAdapter)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
@@ -226,7 +226,7 @@ class ConcatActivity : AppCompatActivity() {
 
     private fun initLoadBefore() {
         val itemAdapter = ItemAdapter()
-        val adapter = ConcatAdapterWrapper<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
+        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv, itemAdapter)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }

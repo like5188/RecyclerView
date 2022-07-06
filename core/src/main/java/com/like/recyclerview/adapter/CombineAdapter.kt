@@ -9,10 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
 /**
- * 辅助[RecyclerView]绑定[PagingResult]或者[Flow]类型的数据。
+ * 对 Header、Footer、Item 三种 Adapter 进行组合。并绑定[PagingResult]或者[Flow]类型的数据。
  * 功能：
  * 1、支持添加 Header、Footer。
- * 2、支持进度条的显示隐藏。
+ * 2、支持初始化、刷新时进度条的显示隐藏。
  * 3、支持成功失败回调。
  * 4、封装了初始化、刷新、往后加载更多、往前加载更多操作。并对这些操作做了并发处理，并发处理规则如下：
  * ①、初始化、刷新：如果有操作正在执行，则取消正在执行的操作，执行新操作。
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.*
  *
  * @param itemAdapter       列表的 adapter
  */
-open class ConcatAdapterWrapper<ResultType, ValueInList>(
+open class CombineAdapter<ResultType, ValueInList>(
     private val recyclerView: RecyclerView,
     private val itemAdapter: BaseAdapter<*, ValueInList>
 ) {
@@ -162,7 +162,7 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
                 onError?.invoke(requestType, it)
             }.flowOn(Dispatchers.Main)
             .collect { resultType ->
-                val res = transformer(requestType, resultType)
+                val res = transform(requestType, resultType)
                 when (requestType) {
                     is RequestType.Initial, is RequestType.Refresh -> {
                         adapter.clear()
@@ -220,7 +220,7 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
      * 在这里进行数据转换，返回值为一个集合 List<List<ValueInList>?>?，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
      */
     @Suppress("UNCHECKED_CAST")
-    open suspend fun transformer(requestType: RequestType, resultType: ResultType): List<List<ValueInList>?>? {
+    protected open suspend fun transform(requestType: RequestType, resultType: ResultType): List<List<ValueInList>?>? {
         // resultType !is List<*> 的情况需要开发者自己处理，比如需要从 ResultType 中提取出 List 来使用。
         return if (resultType !is List<*> || resultType.isNullOrEmpty()
         ) {

@@ -7,7 +7,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.hjq.toast.ToastUtils
-import com.like.recyclerview.adapter.ConcatAdapterWrapper
+import com.like.recyclerview.adapter.CombineAdapter
 import com.like.recyclerview.ext.pinned.IPinnedItem
 import com.like.recyclerview.ext.pinned.PinnedItemDecoration
 import com.like.recyclerview.ext.tree.BaseTreeNode
@@ -29,7 +29,7 @@ class TreeActivity : AppCompatActivity() {
         TreeRecyclerViewAdapter()
     }
     private val mAdapter by lazy {
-        ConcatAdapterWrapper<List<BaseTreeNode>?, BaseTreeNode>(mBinding.rv, itemAdapter).apply {
+        CombineAdapter<List<BaseTreeNode>?, BaseTreeNode>(mBinding.rv, itemAdapter).apply {
             show = { mBinding.swipeRefreshLayout.isRefreshing = true }
             hide = { mBinding.swipeRefreshLayout.isRefreshing = false }
             onError = { requestType, throwable ->

@@ -3,7 +3,6 @@ package com.like.recyclerview.utils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.like.recyclerview.adapter.ConcatAdapterWrapper
 
 /**
  * 滚动到最顶部
