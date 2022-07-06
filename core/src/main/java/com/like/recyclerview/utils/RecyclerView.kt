@@ -59,7 +59,3 @@ fun RecyclerView.findLastVisibleItemPosition(): Int {
         else -> RecyclerView.NO_POSITION
     }
 }
-
-fun RecyclerView.setAdapter(wrapper: ConcatAdapterWrapper<*, *>) {
-    this.adapter = wrapper.adapter
-}

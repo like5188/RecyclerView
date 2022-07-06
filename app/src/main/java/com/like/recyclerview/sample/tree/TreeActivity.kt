@@ -15,7 +15,6 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
-import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 
@@ -44,7 +43,6 @@ class TreeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.itemAnimator = null
-        mBinding.rv.setAdapter(mAdapter)
         mBinding.rv.addItemDecoration(PinnedItemDecoration(itemAdapter).apply {
             setOnPinnedHeaderRenderListener(object :
                 PinnedItemDecoration.OnPinnedItemRenderListener {

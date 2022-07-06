@@ -13,13 +13,17 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
     private val recyclerView: RecyclerView,
     private val itemAdapter: BaseAdapter<*, ValueInList>
 ) {
-    val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
+    private val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
     private var headerAdapter: BaseAdapter<*, ValueInList>? = null
     private var loadMoreAdapter: BaseLoadMoreAdapter<*, *>? = null
     private val mConcurrencyHelper = ConcurrencyHelper()
     private var pagingResult: PagingResult<ResultType>? = null
     private var flow: Flow<ResultType>? = null
     private var isAfter: Boolean? = null
+
+    init {
+        recyclerView.adapter = adapter
+    }
 
     /**
      * 初始化或者刷新开始时显示进度条
