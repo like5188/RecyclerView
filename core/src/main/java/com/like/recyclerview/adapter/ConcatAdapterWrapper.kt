@@ -2,13 +2,24 @@ package com.like.recyclerview.adapter
 
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.like.common.util.Logger
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
 import com.like.recyclerview.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
+/**
+ * 辅助[RecyclerView]绑定[PagingResult]或者[Flow]类型的数据。
+ * 功能：
+ * 1、支持添加 Header、Footer。
+ * 2、支持进度条的显示隐藏。
+ * 3、支持成功失败回调。
+ * 4、封装了初始化、刷新、往后加载更多、往前加载更多操作。并对这些操作做了并发处理，并发处理规则如下：
+ * ①、初始化、刷新：如果有操作正在执行，则取消正在执行的操作，执行新操作。
+ * ②、往后加载更多、往前加载更多：如果有操作正在执行，则放弃新操作，否则执行新操作。
+ *
+ * @param itemAdapter       列表的 adapter
+ */
 open class ConcatAdapterWrapper<ResultType, ValueInList>(
     private val recyclerView: RecyclerView,
     private val itemAdapter: BaseAdapter<*, ValueInList>
@@ -16,7 +27,7 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
     private val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
     private var headerAdapter: BaseAdapter<*, ValueInList>? = null
     private var loadMoreAdapter: BaseLoadMoreAdapter<*, *>? = null
-    private val mConcurrencyHelper = ConcurrencyHelper()
+    private val concurrencyHelper = ConcurrencyHelper()
     private var pagingResult: PagingResult<ResultType>? = null
     private var flow: Flow<ResultType>? = null
     private var isAfter: Boolean? = null
@@ -45,18 +56,33 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
      */
     var onSuccess: (suspend (RequestType, ResultType) -> Unit)? = null
 
+    /**
+     * 绑定数据源
+     * @param pagingResult  使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
+     */
     fun bindData(pagingResult: PagingResult<ResultType>) {
         this.pagingResult = pagingResult
     }
 
+    /**
+     * 绑定数据源
+     */
     fun bindData(flow: Flow<ResultType>) {
         this.flow = flow
     }
 
+    /**
+     * 设置 Header
+     */
     fun withHeader(header: BaseAdapter<*, ValueInList>) {
         this.headerAdapter = header
     }
 
+    /**
+     * 设置 Footer
+     * @param footer    加载更多视图 的 adapter
+     * @param isAfter   是否是往后加载更多。true：往后加载更多；false：往前加载更多；默认为 null，表示不分页。
+     */
     fun withFooter(footer: BaseLoadMoreAdapter<*, *>, isAfter: Boolean = true) {
         footer.onLoadMore = if (isAfter) {
             ::after
@@ -67,29 +93,41 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
         this.loadMoreAdapter = footer
     }
 
+    /**
+     * 初始化操作（线程安全）
+     */
     suspend fun initial() {
-        mConcurrencyHelper.cancelPreviousThenRun {
+        concurrencyHelper.cancelPreviousThenRun {
             pagingResult?.setRequestType?.invoke(RequestType.Initial)
             collect(RequestType.Initial, show, hide, onError, onSuccess)
         }
     }
 
+    /**
+     * 刷新操作（线程安全）
+     */
     suspend fun refresh() {
-        mConcurrencyHelper.cancelPreviousThenRun {
+        concurrencyHelper.cancelPreviousThenRun {
             pagingResult?.setRequestType?.invoke(RequestType.Refresh)
             collect(RequestType.Refresh, show, hide, onError, onSuccess)
         }
     }
 
+    /**
+     * 往后加载更多操作（线程安全）
+     */
     private suspend fun after() {
-        mConcurrencyHelper.dropIfPreviousRunning {
+        concurrencyHelper.dropIfPreviousRunning {
             pagingResult?.setRequestType?.invoke(RequestType.After)
             collect(RequestType.After, show, hide, onError, onSuccess)
         }
     }
 
+    /**
+     * 往前加载更多操作（线程安全）
+     */
     private suspend fun before() {
-        mConcurrencyHelper.dropIfPreviousRunning {
+        concurrencyHelper.dropIfPreviousRunning {
             pagingResult?.setRequestType?.invoke(RequestType.Before)
             collect(RequestType.Before, show, hide, onError, onSuccess)
         }
@@ -105,7 +143,6 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
         val flow = pagingResult?.flow ?: flow ?: return
         flow.flowOn(Dispatchers.IO)
             .onStart {
-                Logger.d("RecyclerView requestType=$requestType")
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
                     show?.invoke()
                 }
@@ -175,9 +212,14 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
             }
     }
 
+    /**
+     * 在这里进行数据转换，返回值为一个集合 List<List<ValueInList>?>?，按照顺序分别表示 [headerAdapter]数据、[itemAdapter]数据。
+     */
     @Suppress("UNCHECKED_CAST")
     open suspend fun transformer(requestType: RequestType, resultType: ResultType): List<List<ValueInList>?>? {
-        return if (resultType !is List<*> || resultType.isNullOrEmpty()) {
+        // resultType !is List<*> 的情况需要开发者自己处理，比如需要从 ResultType 中提取出 List 来使用。
+        return if (resultType !is List<*> || resultType.isNullOrEmpty()
+        ) {
             null
         } else {
             var r = true
