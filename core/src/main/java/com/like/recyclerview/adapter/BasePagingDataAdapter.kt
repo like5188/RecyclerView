@@ -37,6 +37,15 @@ open class BasePagingDataAdapter<ValueInList : Any, VB : ViewDataBinding>(
         return getItemViewType(position, item)
     }
 
+    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty()) {
+            val item = getItem(holder.bindingAdapterPosition) ?: return
+            onBindViewHolder(holder, item, payloads)
+        } else {
+            onBindViewHolder(holder, position)
+        }
+    }
+
     final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         val item = getItem(holder.bindingAdapterPosition) ?: return
         if (item is IRecyclerViewItem) {
@@ -55,6 +64,8 @@ open class BasePagingDataAdapter<ValueInList : Any, VB : ViewDataBinding>(
     }
 
     open fun getItemViewType(position: Int, item: ValueInList): Int = -1
+
+    open fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList, payloads: MutableList<Any>) {}
 
     open fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {}
 }
