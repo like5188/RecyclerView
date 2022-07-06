@@ -11,8 +11,8 @@ class DbPagingRepository(
     private val db: Db,
     private val dbBannerInfoDataSource: DbBannerInfoDataSource,
     private val dbTopArticleDataSource: DbTopArticleDataSource,
-    private val articleRemoteMediator: ArticleRemoteMediator,
-    private val pagingConfig: PagingConfig
+    articleRemoteMediator: ArticleRemoteMediator,
+    pagingConfig: PagingConfig
 ) {
 
     val dbArticleFlow = Pager(
