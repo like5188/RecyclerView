@@ -33,7 +33,10 @@ class ArticleRemoteMediator(private val db: Db) : RemoteMediator<Int, Article>()
                     remoteKey.nextKey
                 }
             } ?: 0
-            val pageSize = state.config.pageSize
+            val pageSize = when (loadType) {
+                LoadType.REFRESH -> state.config.initialLoadSize
+                else -> state.config.pageSize
+            }
             val pagingModel = RetrofitUtils.retrofitApi.getArticle(page, pageSize).getDataIfSuccess()
             val endOfPaginationReached = (pagingModel?.curPage ?: 0) >= (pagingModel?.pageCount ?: 0)
             Logger.d("ArticleRemoteMediator page=$page pageSize=$pageSize endOfPaginationReached=$endOfPaginationReached")
