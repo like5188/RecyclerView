@@ -16,8 +16,10 @@ import com.like.recyclerview.sample.paging3.adapter.ArticleAdapter
 import com.like.recyclerview.sample.paging3.adapter.HeaderAdapter
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PagingActivity : AppCompatActivity() {
@@ -45,13 +47,21 @@ class PagingActivity : AppCompatActivity() {
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             mArticleAdapter.loadStateFlow.collectLatest {
                 when (it.refresh) {
                     is LoadState.NotLoading -> mProgressDialog.dismiss()
                     is LoadState.Loading -> mProgressDialog.show()
                 }
             }
+        }
+
+        // 刷新后滚动到顶部
+        lifecycleScope.launchWhenCreated {
+            mArticleAdapter.loadStateFlow
+                .distinctUntilChangedBy { it.refresh }
+                .filter { it.refresh is LoadState.NotLoading }
+                .collect { mBinding.rv.scrollToPosition(0) }
         }
 
         mBinding.rv.adapter = mArticleAdapter.withLoadStateHeaderAndFooter(mBannerAdapter, mFooterAdapter)
@@ -79,7 +89,7 @@ class PagingActivity : AppCompatActivity() {
     }
 
     private fun getDbBannerInfo() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             mViewModel.getDbBannerInfoFlow(true).collectLatest {
                 mBannerAdapter.bannerInfo = it
             }
@@ -87,7 +97,7 @@ class PagingActivity : AppCompatActivity() {
     }
 
     private fun getDbTopArticle() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             mViewModel.getDbTopArticleFlow(true).collectLatest {
                 mBannerAdapter.topArticleList = it
             }
@@ -95,7 +105,7 @@ class PagingActivity : AppCompatActivity() {
     }
 
     private fun getDbArticle() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             mViewModel.dbArticleFlow.collectLatest {
                 mArticleAdapter.submitData(it)
             }
@@ -103,7 +113,7 @@ class PagingActivity : AppCompatActivity() {
     }
 
     private fun getMemoryBannerInfo() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             mViewModel.getMemoryBannerInfoFlow().collectLatest {
                 mBannerAdapter.bannerInfo = it
             }
@@ -111,7 +121,7 @@ class PagingActivity : AppCompatActivity() {
     }
 
     private fun getMemoryTopArticle() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             mViewModel.getMemoryTopArticleFlow().collectLatest {
                 mBannerAdapter.topArticleList = it
             }
@@ -119,7 +129,7 @@ class PagingActivity : AppCompatActivity() {
     }
 
     private fun getMemoryArticle() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             mViewModel.memoryArticleFlow.collectLatest {
                 mArticleAdapter.submitData(it)
             }
