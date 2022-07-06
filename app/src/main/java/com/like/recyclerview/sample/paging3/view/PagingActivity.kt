@@ -25,6 +25,7 @@ class PagingActivity : AppCompatActivity() {
         DataBindingUtil.setContentView<ActivityPagingBinding>(this, R.layout.activity_paging)
     }
     private val mViewModel: PagingViewModel by viewModel()
+    private val inDb = false
 
     private val mArticleAdapter by lazy {
         ArticleAdapter()
@@ -55,18 +56,55 @@ class PagingActivity : AppCompatActivity() {
 
         mBinding.rv.adapter = mArticleAdapter.withLoadStateHeaderAndFooter(mBannerAdapter, mFooterAdapter)
 
+        if (inDb) {
+            getDbBannerInfo()
+            getDbTopArticle()
+            getDbArticle()
+        } else {
+            getBannerInfo()
+            getTopArticle()
+            getArticle()
+        }
+    }
+
+    fun refresh(view: View) {
+        if (inDb) {
+            getDbBannerInfo()
+            getDbTopArticle()
+        } else {
+            getBannerInfo()
+            getTopArticle()
+        }
+        mArticleAdapter.refresh()
+    }
+
+    private fun getDbBannerInfo() {
         lifecycleScope.launch {
-            mViewModel.dbArticleFlowFlow.collectLatest {
+            mViewModel.getDbBannerInfoFlow(true).collectLatest {
+                mBannerAdapter.bannerInfo = it
+            }
+        }
+    }
+
+    private fun getDbTopArticle() {
+        lifecycleScope.launch {
+            mViewModel.getDbTopArticleFlow(true).collectLatest {
+                mBannerAdapter.topArticleList = it
+            }
+        }
+    }
+
+    private fun getDbArticle() {
+        lifecycleScope.launch {
+            mViewModel.dbArticleFlow.collectLatest {
                 mArticleAdapter.submitData(it)
             }
         }
-        getBannerInfo()
-        getTopArticle()
     }
 
     private fun getBannerInfo() {
         lifecycleScope.launch {
-            mViewModel.getBannerInfoFlow(true).collectLatest {
+            mViewModel.getBannerInfoFlow().collectLatest {
                 mBannerAdapter.bannerInfo = it
             }
         }
@@ -74,16 +112,18 @@ class PagingActivity : AppCompatActivity() {
 
     private fun getTopArticle() {
         lifecycleScope.launch {
-            mViewModel.getTopArticleFlow(true).collectLatest {
+            mViewModel.getTopArticleFlow().collectLatest {
                 mBannerAdapter.topArticleList = it
             }
         }
     }
 
-    fun refresh(view: View) {
-        getBannerInfo()
-        getTopArticle()
-        mArticleAdapter.refresh()
+    private fun getArticle() {
+        lifecycleScope.launch {
+            mViewModel.articleFlow.collectLatest {
+                mArticleAdapter.submitData(it)
+            }
+        }
     }
 
 }

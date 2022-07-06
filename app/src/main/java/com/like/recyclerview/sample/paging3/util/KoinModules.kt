@@ -3,10 +3,10 @@ package com.like.recyclerview.sample.paging3.util
 import androidx.paging.PagingConfig
 import com.like.recyclerview.sample.paging3.data.db.Db
 import com.like.recyclerview.sample.paging3.dataSource.db.ArticleRemoteMediator
-import com.like.recyclerview.sample.paging3.dataSource.db.BannerDbDataSource
+import com.like.recyclerview.sample.paging3.dataSource.db.BannerInfoDbDataSource
 import com.like.recyclerview.sample.paging3.dataSource.db.TopArticleDbDataSource
 import com.like.recyclerview.sample.paging3.dataSource.memory.ArticlePagingSource
-import com.like.recyclerview.sample.paging3.dataSource.memory.BannerDataSource
+import com.like.recyclerview.sample.paging3.dataSource.memory.BannerInfoDataSource
 import com.like.recyclerview.sample.paging3.dataSource.memory.TopArticleDataSource
 import com.like.recyclerview.sample.paging3.repository.PagingRepository
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
@@ -32,7 +32,7 @@ val myModule = module {
 
     //DataSource
     factory {
-        BannerDbDataSource(get(), get())
+        BannerInfoDbDataSource(get(), get())
     }
     factory {
         TopArticleDbDataSource(get(), get())
@@ -41,7 +41,7 @@ val myModule = module {
         ArticleRemoteMediator(get())
     }
     factory {
-        BannerDataSource()
+        BannerInfoDataSource()
     }
     factory {
         TopArticleDataSource()
