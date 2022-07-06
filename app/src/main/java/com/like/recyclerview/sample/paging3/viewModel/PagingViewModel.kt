@@ -11,15 +11,15 @@ class PagingViewModel(
     private val memoryPagingRepository: MemoryPagingRepository
 ) : ViewModel() {
 
-    val articleFlow = memoryPagingRepository.articleFlow.cachedIn(viewModelScope)
+    val memoryArticleFlow = memoryPagingRepository.memoryArticleFlow.cachedIn(viewModelScope)
 
     val dbArticleFlow = dbPagingRepository.dbArticleFlow.cachedIn(viewModelScope)
 
-    fun getBannerInfoFlow() = memoryPagingRepository.getBannerInfoFlow()
+    fun getMemoryBannerInfoFlow() = memoryPagingRepository.getMemoryBannerInfoFlow()
 
     fun getDbBannerInfoFlow(isRefresh: Boolean) = dbPagingRepository.getDbBannerInfoFlow(isRefresh)
 
-    fun getTopArticleFlow() = memoryPagingRepository.getTopArticleFlow()
+    fun getMemoryTopArticleFlow() = memoryPagingRepository.getMemoryTopArticleFlow()
 
     fun getDbTopArticleFlow(isRefresh: Boolean) = dbPagingRepository.getDbTopArticleFlow(isRefresh)
 

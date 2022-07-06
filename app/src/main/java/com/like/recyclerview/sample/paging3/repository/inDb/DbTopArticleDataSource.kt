@@ -8,7 +8,7 @@ import com.like.recyclerview.sample.paging3.vo.TopArticle
 import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 import com.like.recyclerview.sample.paging3.util.IDbHelper
 
-class TopArticleDbDataSource(private val context: Context, private val topArticleEntityDao: TopArticleDao) {
+class DbTopArticleDataSource(private val context: Context, private val topArticleEntityDao: TopArticleDao) {
     private val mDbHelper = object : IDbHelper<List<TopArticle>?> {
         override suspend fun loadFromDb(isRefresh: Boolean): List<TopArticle>? {
             Logger.w("TopArticleDbDataSource loadFromDb")

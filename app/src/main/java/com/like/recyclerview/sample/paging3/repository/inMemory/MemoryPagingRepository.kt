@@ -8,20 +8,20 @@ import org.koin.core.component.get
 
 @OptIn(KoinApiExtension::class)
 class MemoryPagingRepository(
-    private val bannerInfoDataSource: BannerInfoDataSource,
-    private val topArticleDataSource: TopArticleDataSource,
+    private val memoryBannerInfoDataSource: MemoryBannerInfoDataSource,
+    private val memoryTopArticleDataSource: MemoryTopArticleDataSource,
 ) : KoinComponent {
 
-    val articleFlow = Pager(get()) {
-        get<ArticlePagingSource>()
+    val memoryArticleFlow = Pager(get()) {
+        get<MemoryArticlePagingSource>()
     }.flow
 
-    fun getBannerInfoFlow() = flow {
-        emit(bannerInfoDataSource.load())
+    fun getMemoryBannerInfoFlow() = flow {
+        emit(memoryBannerInfoDataSource.load())
     }
 
-    fun getTopArticleFlow() = flow {
-        emit(topArticleDataSource.load())
+    fun getMemoryTopArticleFlow() = flow {
+        emit(memoryTopArticleDataSource.load())
     }
 
 }

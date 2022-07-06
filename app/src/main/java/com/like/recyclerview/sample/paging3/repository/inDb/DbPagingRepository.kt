@@ -11,8 +11,8 @@ import org.koin.core.component.get
 @OptIn(KoinApiExtension::class, ExperimentalPagingApi::class)
 class DbPagingRepository(
     private val db: Db,
-    private val bannerInfoDbDataSource: BannerInfoDbDataSource,
-    private val topArticleDbDataSource: TopArticleDbDataSource
+    private val dbBannerInfoDataSource: DbBannerInfoDataSource,
+    private val dbTopArticleDataSource: DbTopArticleDataSource
 ) : KoinComponent {
 
     val dbArticleFlow = Pager(
@@ -23,10 +23,10 @@ class DbPagingRepository(
     }.flow
 
     fun getDbBannerInfoFlow(isRefresh: Boolean) = flow {
-        emit(bannerInfoDbDataSource.load(isRefresh))
+        emit(dbBannerInfoDataSource.load(isRefresh))
     }
 
     fun getDbTopArticleFlow(isRefresh: Boolean) = flow {
-        emit(topArticleDbDataSource.load(isRefresh))
+        emit(dbTopArticleDataSource.load(isRefresh))
     }
 }

@@ -6,7 +6,7 @@ import com.like.common.util.Logger
 import com.like.recyclerview.sample.paging3.vo.Article
 import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 
-class ArticlePagingSource : PagingSource<Int, Article>() {
+class MemoryArticlePagingSource : PagingSource<Int, Article>() {
 
     override fun getRefreshKey(state: PagingState<Int, Article>): Int? {
         return null

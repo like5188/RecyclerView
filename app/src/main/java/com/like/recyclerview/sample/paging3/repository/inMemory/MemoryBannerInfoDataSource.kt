@@ -3,7 +3,7 @@ package com.like.recyclerview.sample.paging3.repository.inMemory
 import com.like.recyclerview.sample.paging3.vo.BannerInfo
 import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 
-class BannerInfoDataSource {
+class MemoryBannerInfoDataSource {
 
     suspend fun load(): BannerInfo? {
         val data = RetrofitUtils.retrofitApi.getBanner().getDataIfSuccess()

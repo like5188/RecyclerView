@@ -25,7 +25,7 @@ class PagingActivity : AppCompatActivity() {
         DataBindingUtil.setContentView<ActivityPagingBinding>(this, R.layout.activity_paging)
     }
     private val mViewModel: PagingViewModel by viewModel()
-    private val inDb = true
+    private val inDb = true// true：使用数据库；false：不使用数据库；
 
     private val mArticleAdapter by lazy {
         ArticleAdapter()
@@ -61,9 +61,9 @@ class PagingActivity : AppCompatActivity() {
             getDbTopArticle()
             getDbArticle()
         } else {
-            getBannerInfo()
-            getTopArticle()
-            getArticle()
+            getMemoryBannerInfo()
+            getMemoryTopArticle()
+            getMemoryArticle()
         }
     }
 
@@ -72,8 +72,8 @@ class PagingActivity : AppCompatActivity() {
             getDbBannerInfo()
             getDbTopArticle()
         } else {
-            getBannerInfo()
-            getTopArticle()
+            getMemoryBannerInfo()
+            getMemoryTopArticle()
         }
         mArticleAdapter.refresh()
     }
@@ -102,25 +102,25 @@ class PagingActivity : AppCompatActivity() {
         }
     }
 
-    private fun getBannerInfo() {
+    private fun getMemoryBannerInfo() {
         lifecycleScope.launch {
-            mViewModel.getBannerInfoFlow().collectLatest {
+            mViewModel.getMemoryBannerInfoFlow().collectLatest {
                 mBannerAdapter.bannerInfo = it
             }
         }
     }
 
-    private fun getTopArticle() {
+    private fun getMemoryTopArticle() {
         lifecycleScope.launch {
-            mViewModel.getTopArticleFlow().collectLatest {
+            mViewModel.getMemoryTopArticleFlow().collectLatest {
                 mBannerAdapter.topArticleList = it
             }
         }
     }
 
-    private fun getArticle() {
+    private fun getMemoryArticle() {
         lifecycleScope.launch {
-            mViewModel.articleFlow.collectLatest {
+            mViewModel.memoryArticleFlow.collectLatest {
                 mArticleAdapter.submitData(it)
             }
         }

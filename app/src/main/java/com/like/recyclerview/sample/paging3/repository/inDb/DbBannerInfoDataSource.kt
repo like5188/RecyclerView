@@ -8,7 +8,7 @@ import com.like.recyclerview.sample.paging3.vo.BannerInfo
 import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 import com.like.recyclerview.sample.paging3.util.IDbHelper
 
-class BannerInfoDbDataSource(private val context: Context, private val bannerDao: BannerDao) {
+class DbBannerInfoDataSource(private val context: Context, private val bannerDao: BannerDao) {
     private val mDbHelper = object : IDbHelper<BannerInfo?> {
         override suspend fun loadFromDb(isRefresh: Boolean): BannerInfo? {
             Logger.e("BannerDbDataSource loadFromDb")

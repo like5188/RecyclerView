@@ -3,13 +3,13 @@ package com.like.recyclerview.sample.paging3.util
 import androidx.paging.PagingConfig
 import com.like.recyclerview.sample.paging3.db.Db
 import com.like.recyclerview.sample.paging3.repository.inDb.ArticleRemoteMediator
-import com.like.recyclerview.sample.paging3.repository.inDb.BannerInfoDbDataSource
+import com.like.recyclerview.sample.paging3.repository.inDb.DbBannerInfoDataSource
 import com.like.recyclerview.sample.paging3.repository.inDb.DbPagingRepository
-import com.like.recyclerview.sample.paging3.repository.inDb.TopArticleDbDataSource
-import com.like.recyclerview.sample.paging3.repository.inMemory.ArticlePagingSource
-import com.like.recyclerview.sample.paging3.repository.inMemory.BannerInfoDataSource
+import com.like.recyclerview.sample.paging3.repository.inDb.DbTopArticleDataSource
+import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryArticlePagingSource
+import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryBannerInfoDataSource
 import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryPagingRepository
-import com.like.recyclerview.sample.paging3.repository.inMemory.TopArticleDataSource
+import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryTopArticleDataSource
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -33,22 +33,22 @@ val myModule = module {
 
     //DataSource
     factory {
-        BannerInfoDbDataSource(get(), get())
+        DbBannerInfoDataSource(get(), get())
     }
     factory {
-        TopArticleDbDataSource(get(), get())
+        DbTopArticleDataSource(get(), get())
     }
     factory {
         ArticleRemoteMediator(get())
     }
     factory {
-        BannerInfoDataSource()
+        MemoryBannerInfoDataSource()
     }
     factory {
-        TopArticleDataSource()
+        MemoryTopArticleDataSource()
     }
     factory {
-        ArticlePagingSource()
+        MemoryArticlePagingSource()
     }
 
     //Repository
