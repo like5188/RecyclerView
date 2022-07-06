@@ -177,14 +177,25 @@ open class ConcatAdapterWrapper<ResultType, ValueInList>(
 
     @Suppress("UNCHECKED_CAST")
     open suspend fun transformer(requestType: RequestType, resultType: ResultType): List<List<ValueInList>?>? {
-        return if (headerAdapter == null) {// 如果返回值[ResultType]为 List<ValueInList>? 类型
-            if (resultType is List<*>? && !resultType.isNullOrEmpty()) {
-                listOf(emptyList(), resultType as? List<ValueInList>)
-            } else {
-                emptyList()
+        return if (resultType !is List<*> || resultType.isNullOrEmpty()) {
+            null
+        } else {
+            var r = true
+            for (i in 0 until resultType.size) {
+                if (resultType[i] !is List<*>) {
+                    r = false
+                    break
+                }
             }
-        } else {// 如果返回值[ResultType]为 List<List<ValueInList>?>? 类型
-            resultType as? List<List<ValueInList>?>
+            if (r) {// 返回值[ResultType]为 List<List<ValueInList>?>? 类型
+                resultType as? List<List<ValueInList>?>
+            } else {// 返回值[ResultType]为 List<ValueInList>? 类型
+                if (headerAdapter == null) {
+                    listOf(null, resultType as? List<ValueInList>)
+                } else {
+                    listOf(resultType as? List<ValueInList>)
+                }
+            }
         }
     }
 
