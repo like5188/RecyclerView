@@ -21,7 +21,7 @@ abstract class Db : RoomDatabase() {
     private val mIsDatabaseCreated = MutableLiveData<Boolean>()
 
     companion object {
-        private const val DATABASE_NAME = "paging3-test-db"
+        private const val DATABASE_NAME = "paging3.db"
 
         @Volatile
         private var INSTANCE: Db? = null

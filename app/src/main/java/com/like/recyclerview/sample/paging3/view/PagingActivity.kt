@@ -25,7 +25,7 @@ class PagingActivity : AppCompatActivity() {
         DataBindingUtil.setContentView<ActivityPagingBinding>(this, R.layout.activity_paging)
     }
     private val mViewModel: PagingViewModel by viewModel()
-    private val inDb = false
+    private val inDb = true
 
     private val mArticleAdapter by lazy {
         ArticleAdapter()
