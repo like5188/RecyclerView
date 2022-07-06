@@ -1,6 +1,6 @@
-package com.like.recyclerview.sample.paging3.data.netWork
+package com.like.recyclerview.sample.paging3.api
 
-import com.like.recyclerview.sample.paging3.data.model.*
+import com.like.recyclerview.sample.paging3.vo.*
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

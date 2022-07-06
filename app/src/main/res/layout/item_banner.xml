@@ -4,7 +4,7 @@
 
         <variable
             name="item"
-            type="com.like.recyclerview.sample.paging3.data.model.BannerInfo.Banner" />
+            type="com.like.recyclerview.sample.paging3.vo.BannerInfo.Banner" />
     </data>
 
     <LinearLayout

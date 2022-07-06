@@ -1,10 +1,10 @@
-package com.like.recyclerview.sample.paging3.dataSource.memory
+package com.like.recyclerview.sample.paging3.repository.inMemory
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.like.common.util.Logger
-import com.like.recyclerview.sample.paging3.data.model.Article
-import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
+import com.like.recyclerview.sample.paging3.vo.Article
+import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 
 class ArticlePagingSource : PagingSource<Int, Article>() {
 

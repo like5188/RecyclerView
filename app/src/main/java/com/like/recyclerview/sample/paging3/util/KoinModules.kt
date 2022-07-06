@@ -1,14 +1,15 @@
 package com.like.recyclerview.sample.paging3.util
 
 import androidx.paging.PagingConfig
-import com.like.recyclerview.sample.paging3.data.db.Db
-import com.like.recyclerview.sample.paging3.dataSource.db.ArticleRemoteMediator
-import com.like.recyclerview.sample.paging3.dataSource.db.BannerInfoDbDataSource
-import com.like.recyclerview.sample.paging3.dataSource.db.TopArticleDbDataSource
-import com.like.recyclerview.sample.paging3.dataSource.memory.ArticlePagingSource
-import com.like.recyclerview.sample.paging3.dataSource.memory.BannerInfoDataSource
-import com.like.recyclerview.sample.paging3.dataSource.memory.TopArticleDataSource
-import com.like.recyclerview.sample.paging3.repository.PagingRepository
+import com.like.recyclerview.sample.paging3.db.Db
+import com.like.recyclerview.sample.paging3.repository.inDb.ArticleRemoteMediator
+import com.like.recyclerview.sample.paging3.repository.inDb.BannerInfoDbDataSource
+import com.like.recyclerview.sample.paging3.repository.inDb.DbPagingRepository
+import com.like.recyclerview.sample.paging3.repository.inDb.TopArticleDbDataSource
+import com.like.recyclerview.sample.paging3.repository.inMemory.ArticlePagingSource
+import com.like.recyclerview.sample.paging3.repository.inMemory.BannerInfoDataSource
+import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryPagingRepository
+import com.like.recyclerview.sample.paging3.repository.inMemory.TopArticleDataSource
 import com.like.recyclerview.sample.paging3.viewModel.PagingViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -52,12 +53,15 @@ val myModule = module {
 
     //Repository
     factory {
-        PagingRepository(get(), get(), get(), get(), get())
+        DbPagingRepository(get(), get(), get())
+    }
+    factory {
+        MemoryPagingRepository(get(), get())
     }
 
     //viewModel
     viewModel {
-        PagingViewModel(get())
+        PagingViewModel(get(), get())
     }
 
     single {

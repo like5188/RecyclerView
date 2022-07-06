@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.data.db
+package com.like.recyclerview.sample.paging3.db
 
 import androidx.room.Delete
 import androidx.room.Insert

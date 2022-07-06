@@ -4,7 +4,7 @@
 
         <variable
             name="item"
-            type="com.like.recyclerview.sample.paging3.data.model.TopArticle" />
+            type="com.like.recyclerview.sample.paging3.vo.TopArticle" />
     </data>
 
     <LinearLayout

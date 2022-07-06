@@ -1,11 +1,11 @@
-package com.like.recyclerview.sample.paging3.dataSource.db
+package com.like.recyclerview.sample.paging3.repository.inDb
 
 import android.content.Context
 import com.like.common.util.Logger
 import com.like.common.util.isInternetAvailable
-import com.like.recyclerview.sample.paging3.data.db.BannerDao
-import com.like.recyclerview.sample.paging3.data.model.BannerInfo
-import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
+import com.like.recyclerview.sample.paging3.db.BannerDao
+import com.like.recyclerview.sample.paging3.vo.BannerInfo
+import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 import com.like.recyclerview.sample.paging3.util.IDbHelper
 
 class BannerInfoDbDataSource(private val context: Context, private val bannerDao: BannerDao) {

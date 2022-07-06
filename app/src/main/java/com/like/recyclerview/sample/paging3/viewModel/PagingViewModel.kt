@@ -3,20 +3,24 @@ package com.like.recyclerview.sample.paging3.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.like.recyclerview.sample.paging3.repository.PagingRepository
+import com.like.recyclerview.sample.paging3.repository.inDb.DbPagingRepository
+import com.like.recyclerview.sample.paging3.repository.inMemory.MemoryPagingRepository
 
-class PagingViewModel(private val pagingRepository: PagingRepository) : ViewModel() {
+class PagingViewModel(
+    private val dbPagingRepository: DbPagingRepository,
+    private val memoryPagingRepository: MemoryPagingRepository
+) : ViewModel() {
 
-    val articleFlow = pagingRepository.articleFlow.cachedIn(viewModelScope)
+    val articleFlow = memoryPagingRepository.articleFlow.cachedIn(viewModelScope)
 
-    val dbArticleFlow = pagingRepository.dbArticleFlow.cachedIn(viewModelScope)
+    val dbArticleFlow = dbPagingRepository.dbArticleFlow.cachedIn(viewModelScope)
 
-    fun getBannerInfoFlow() = pagingRepository.getBannerInfoFlow()
+    fun getBannerInfoFlow() = memoryPagingRepository.getBannerInfoFlow()
 
-    fun getDbBannerInfoFlow(isRefresh: Boolean) = pagingRepository.getDbBannerInfoFlow(isRefresh)
+    fun getDbBannerInfoFlow(isRefresh: Boolean) = dbPagingRepository.getDbBannerInfoFlow(isRefresh)
 
-    fun getTopArticleFlow() = pagingRepository.getTopArticleFlow()
+    fun getTopArticleFlow() = memoryPagingRepository.getTopArticleFlow()
 
-    fun getDbTopArticleFlow(isRefresh: Boolean) = pagingRepository.getDbTopArticleFlow(isRefresh)
+    fun getDbTopArticleFlow(isRefresh: Boolean) = dbPagingRepository.getDbTopArticleFlow(isRefresh)
 
 }

@@ -11,8 +11,8 @@ import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ItemBannerBinding
 import com.like.recyclerview.sample.databinding.ItemHeaderBinding
 import com.like.recyclerview.sample.databinding.ItemTopArticleBinding
-import com.like.recyclerview.sample.paging3.data.model.BannerInfo
-import com.like.recyclerview.sample.paging3.data.model.TopArticle
+import com.like.recyclerview.sample.paging3.vo.BannerInfo
+import com.like.recyclerview.sample.paging3.vo.TopArticle
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 class HeaderAdapter : LoadStateAdapter<BindingViewHolder<ItemHeaderBinding>>() {

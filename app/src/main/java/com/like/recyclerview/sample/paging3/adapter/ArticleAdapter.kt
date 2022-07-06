@@ -3,7 +3,7 @@ package com.like.recyclerview.sample.paging3.adapter
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import com.like.recyclerview.adapter.BasePagingDataAdapter
-import com.like.recyclerview.sample.paging3.data.model.Article
+import com.like.recyclerview.sample.paging3.vo.Article
 
 class ArticleAdapter : BasePagingDataAdapter<Article, ViewDataBinding>(
     object : DiffUtil.ItemCallback<Article>() {

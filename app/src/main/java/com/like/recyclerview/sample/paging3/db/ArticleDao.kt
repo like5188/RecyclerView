@@ -1,9 +1,9 @@
-package com.like.recyclerview.sample.paging3.data.db
+package com.like.recyclerview.sample.paging3.db
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
-import com.like.recyclerview.sample.paging3.data.model.Article
+import com.like.recyclerview.sample.paging3.vo.Article
 
 @Dao
 interface ArticleDao : BaseDao<Article> {

@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.data.netWork
+package com.like.recyclerview.sample.paging3.api
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

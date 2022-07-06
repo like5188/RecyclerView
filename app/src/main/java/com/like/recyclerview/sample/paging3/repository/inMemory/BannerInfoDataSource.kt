@@ -1,7 +1,7 @@
-package com.like.recyclerview.sample.paging3.dataSource.memory
+package com.like.recyclerview.sample.paging3.repository.inMemory
 
-import com.like.recyclerview.sample.paging3.data.model.BannerInfo
-import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
+import com.like.recyclerview.sample.paging3.vo.BannerInfo
+import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 
 class BannerInfoDataSource {
 

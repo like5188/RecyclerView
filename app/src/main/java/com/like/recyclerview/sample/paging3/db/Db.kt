@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.data.db
+package com.like.recyclerview.sample.paging3.db
 
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
@@ -7,10 +7,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.like.recyclerview.sample.paging3.data.model.Article
-import com.like.recyclerview.sample.paging3.data.model.BannerInfo
-import com.like.recyclerview.sample.paging3.data.model.RemoteKeysEntity
-import com.like.recyclerview.sample.paging3.data.model.TopArticle
+import com.like.recyclerview.sample.paging3.vo.Article
+import com.like.recyclerview.sample.paging3.vo.BannerInfo
+import com.like.recyclerview.sample.paging3.vo.RemoteKeysEntity
+import com.like.recyclerview.sample.paging3.vo.TopArticle
 
 @Database(
     entities = [BannerInfo.Banner::class, TopArticle::class, Article::class, RemoteKeysEntity::class],

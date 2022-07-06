@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.dataSource.db
+package com.like.recyclerview.sample.paging3.repository.inDb
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
@@ -6,10 +6,10 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.like.common.util.Logger
-import com.like.recyclerview.sample.paging3.data.db.Db
-import com.like.recyclerview.sample.paging3.data.model.Article
-import com.like.recyclerview.sample.paging3.data.model.RemoteKeysEntity
-import com.like.recyclerview.sample.paging3.data.netWork.RetrofitUtils
+import com.like.recyclerview.sample.paging3.db.Db
+import com.like.recyclerview.sample.paging3.vo.Article
+import com.like.recyclerview.sample.paging3.vo.RemoteKeysEntity
+import com.like.recyclerview.sample.paging3.api.RetrofitUtils
 import retrofit2.HttpException
 import java.io.IOException
 

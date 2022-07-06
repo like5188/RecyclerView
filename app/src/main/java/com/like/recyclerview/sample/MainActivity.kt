@@ -8,7 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import com.hjq.toast.ToastUtils
 import com.like.common.util.Logger
 import com.like.recyclerview.sample.addimage.PictureSelectorActivity
-import com.like.recyclerview.sample.paging3.data.db.Db
+import com.like.recyclerview.sample.paging3.db.Db
 import com.like.recyclerview.sample.paging3.view.PagingActivity
 import com.like.recyclerview.sample.tree.TreeActivity
 import kotlinx.coroutines.Dispatchers

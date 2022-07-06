@@ -1,8 +1,8 @@
-package com.like.recyclerview.sample.paging3.data.db
+package com.like.recyclerview.sample.paging3.db
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.like.recyclerview.sample.paging3.data.model.BannerInfo
+import com.like.recyclerview.sample.paging3.vo.BannerInfo
 
 @Dao
 interface BannerDao : BaseDao<BannerInfo.Banner> {

@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.paging3.data.model
+package com.like.recyclerview.sample.paging3.vo
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

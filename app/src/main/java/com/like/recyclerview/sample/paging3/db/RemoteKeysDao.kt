@@ -1,8 +1,8 @@
-package com.like.recyclerview.sample.paging3.data.db
+package com.like.recyclerview.sample.paging3.db
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.like.recyclerview.sample.paging3.data.model.RemoteKeysEntity
+import com.like.recyclerview.sample.paging3.vo.RemoteKeysEntity
 
 @Dao
 interface RemoteKeysDao : BaseDao<RemoteKeysEntity> {
