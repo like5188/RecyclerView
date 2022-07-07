@@ -52,7 +52,7 @@ class ConcatActivity : AppCompatActivity() {
     private val itemAdapter by lazy {
         ItemAdapter()
     }
-    private val footerAdapter by lazy {
+    private val loadMoreAdapter by lazy {
         AdapterFactory.createLoadMoreAdapter()
     }
     private val adapter by lazy {
@@ -95,9 +95,9 @@ class ConcatActivity : AppCompatActivity() {
 
 //        initItems()
 //        initHeadersAndItems()
-        initLoadAfter()
+//        initLoadAfter()
 //        initLoadAfterWithHeaders()
-//        initLoadBefore()
+        initLoadBefore()
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -200,7 +200,7 @@ class ConcatActivity : AppCompatActivity() {
                     }.flowOn(Dispatchers.IO)
                 }
             )
-            withFooterAdapter(footerAdapter)
+            withFooterAdapter(loadMoreAdapter)
         }
     }
 
@@ -216,7 +216,7 @@ class ConcatActivity : AppCompatActivity() {
                 itemAdapter,
                 mViewModel.loadAfterResult
             )
-            withFooterAdapter(footerAdapter)
+            withFooterAdapter(loadMoreAdapter)
         }
     }
 
@@ -224,6 +224,7 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
+            withHeaderAdapter(loadMoreAdapter)
             withItemAdapter(
                 itemAdapter,
                 mViewModel.loadBeforeResult.apply {
@@ -235,7 +236,6 @@ class ConcatActivity : AppCompatActivity() {
                     }.flowOn(Dispatchers.IO)
                 }
             )
-            withFooterAdapter(footerAdapter, false)
         }
     }
 

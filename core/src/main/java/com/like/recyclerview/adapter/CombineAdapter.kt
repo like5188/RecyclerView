@@ -35,9 +35,11 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
     private var itemAdapter: BaseAdapter<*, ValueInList>? = null
     private var loadMoreAdapter: BaseLoadMoreAdapter<*, *>? = null
     private val concurrencyHelper = ConcurrencyHelper()
-    private var isAfter: Boolean? = null
     private var pagingResult: PagingResult<List<ValueInList>?>? = null
     private var flow: Flow<List<ValueInList>?>? = null
+
+    // 是否是往后加载更多。true：往后加载更多；false：往前加载更多；默认为 null，表示不分页。
+    private var isAfter: Boolean? = null
 
     /**
      * 把 Header 的数据[flow]及列表的数据[pagingResult]组合为 List<List<ValueInList>?>?
@@ -99,7 +101,27 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
     var onLoadMoreSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null
 
     /**
-     * 设置 Header，固定于 [RecyclerView] 顶部
+     * 设置 Footer 往后加载更多，固定于 [RecyclerView] 底部
+     * @param adapter    往后加载更多视图 的 adapter
+     */
+    fun withFooterAdapter(adapter: BaseLoadMoreAdapter<*, *>) {
+        adapter.onLoadMore = ::after
+        this.isAfter = true
+        this.loadMoreAdapter = adapter
+    }
+
+    /**
+     * 设置 Header 往前加载更多，固定于 [RecyclerView] 顶部
+     * @param adapter    往前加载更多视图 的 adapter
+     */
+    fun withHeaderAdapter(adapter: BaseLoadMoreAdapter<*, *>) {
+        adapter.onLoadMore = ::before
+        this.isAfter = false
+        this.loadMoreAdapter = adapter
+    }
+
+    /**
+     * 设置 Header 数据，固定于 [RecyclerView] 顶部
      * @param flow  Header 需要的数据。
      */
     fun withHeaderAdapter(adapter: BaseAdapter<*, ValueInList>, flow: Flow<List<ValueInList>?>) {
@@ -108,7 +130,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
     }
 
     /**
-     * 设置不分页列表，固定于 [RecyclerView] 中部。
+     * 设置（不分页）列表数据，固定于 [RecyclerView] 中部。
      */
     fun withItemAdapter(adapter: BaseAdapter<*, ValueInList>, flow: Flow<List<ValueInList>?>) {
         this.itemAdapter = adapter
@@ -116,27 +138,12 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
     }
 
     /**
-     * 设置分页列表，固定于 [RecyclerView] 中部，并且加载更多的数据是添加到其中。
+     * 设置（分页）列表数据，固定于 [RecyclerView] 中部，并且加载更多的数据是添加到其中。
      * @param pagingResult  列表需要的数据。使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
      */
     fun withItemAdapter(adapter: BaseAdapter<*, ValueInList>, pagingResult: PagingResult<List<ValueInList>?>) {
         this.itemAdapter = adapter
         this.pagingResult = pagingResult
-    }
-
-    /**
-     * 设置 Footer，固定于 [RecyclerView] 底部
-     * @param adapter    加载更多视图 的 adapter
-     * @param isAfter   是否是往后加载更多。true：往后加载更多；false：往前加载更多；默认为 null，表示不分页。
-     */
-    fun withFooterAdapter(adapter: BaseLoadMoreAdapter<*, *>, isAfter: Boolean = true) {
-        adapter.onLoadMore = if (isAfter) {
-            ::after
-        } else {
-            ::before
-        }
-        this.isAfter = isAfter
-        this.loadMoreAdapter = adapter
     }
 
     /**
