@@ -90,11 +90,11 @@ class ConcatActivity : AppCompatActivity() {
 //                }
 //        }
 
-//        initItems()
+        initItems()
 //        initHeadersAndItems()
 //        initLoadAfter()
 //        initLoadAfterWithHeaders()
-        initLoadBefore()
+//        initLoadBefore()
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
