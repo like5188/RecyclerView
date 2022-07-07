@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
 /**
- * 对 数据及加载状态 这两种 Adapter 进行组合。并绑定[PagingResult]或者[Flow]类型的数据。
+ * 组合[BaseAdapter]和[BaseLoadStateAdapter]。并绑定[PagingResult]或者[Flow]类型的数据。
  * 功能：
  * 1、支持添加加载状态：Header、Footer。
  * 2、支持初始化、刷新时进度条的显示隐藏。
