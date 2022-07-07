@@ -24,7 +24,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             // 此回调在添加 item 时也会触发，但是重新清除所有并添加的 item 如果和上一次的一样，则不会触发（比如刷新时）
             // 所以只靠此方法触发加载更多不行，在 hasMore() 方法中也必须触发。否则在上述情况下会不能触发加载更多。
-            Logger.e("loading onScrolled")
+            Logger.e("onScrolled")
             isLoading()
         }
     }
@@ -37,12 +37,12 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
         // 判断是否显示了 BaseLoadMoreAdapter
         if (isAfter) {
             if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-                Logger.e("loading")
+                Logger.e("isLoading")
                 loading()
             }
         } else {
             if (recyclerView.findFirstVisibleItemPosition() == 0) {
-                Logger.e("loading")
+                Logger.e("isLoading")
                 loading()
             }
         }
@@ -69,7 +69,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
      */
     internal fun hasMore() {
         hasMore.compareAndSet(false, true)
-        Logger.e("loading hasMore")
+        Logger.e("hasMore")
         isLoading()
     }
 
