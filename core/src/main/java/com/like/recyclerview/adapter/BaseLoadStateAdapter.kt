@@ -4,7 +4,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import com.like.common.util.Logger
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import com.like.recyclerview.utils.findFirstVisibleItemPosition
 import com.like.recyclerview.utils.findLastVisibleItemPosition
 import com.like.recyclerview.viewholder.BindingViewHolder
@@ -26,8 +26,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
             super.onScrollStateChanged(recyclerView, newState)
             // 此回调在添加 item 时也会触发，但是重新清除所有并添加的 item 如果和上一次的一样多，则不会触发（比如刷新时）
             // 所以只靠此方法触发加载更多不行，需要在 onBindViewHolder 方法中也触发以处理上述情况。
-            Logger.e("onScrollStateChanged newState=$newState")
-            if (newState == 0 || isVisible()) {// 注意：newState==0 有时不能触发，所以需要添加额外的判断。参考：https://blog.csdn.net/wangcheeng/article/details/109722538
+            if (newState == SCROLL_STATE_IDLE || isVisible()) {// 注意：newState==SCROLL_STATE_IDLE 有时不能触发，所以需要添加额外的判断。参考：https://blog.csdn.net/wangcheeng/article/details/109722538
                 loadMore()// 滚动时触发加载更多
             }
         }
@@ -47,7 +46,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
         super.onBindViewHolder(holder, item)
         mHolder = holder
-        Logger.e("onBindViewHolder")
         loadMore()// 初始化或者刷新时触发加载更多
     }
 
@@ -56,7 +54,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
      */
     internal fun hasMore() {
         hasMore.compareAndSet(false, true)
-        Logger.e("hasMore")
     }
 
     /**
@@ -79,7 +76,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
      * 加载更多数据
      */
     private fun loadMore() {
-        Logger.e("loadMore")
         if (!::mHolder.isInitialized) return
         recyclerView.post {// 这里必须用 post，否则 onBindViewHolder 调用此方法时，计算不了 findLastVisibleItemPosition。
             if (!isVisible()) {
@@ -91,7 +87,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
                 val context = mHolder.itemView.context
                 if (context is LifecycleOwner) {
                     context.lifecycleScope.launch(Dispatchers.Main) {
-                        Logger.e("onLoadMore")
                         onLoadMore()
                     }
                 }
