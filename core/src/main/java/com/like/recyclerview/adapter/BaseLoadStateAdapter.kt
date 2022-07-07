@@ -25,28 +25,10 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
             // 此回调在添加 item 时也会触发，但是重新清除所有并添加的 item 如果和上一次的一样，则不会触发（比如刷新时）
             // 所以只靠此方法触发加载更多不行，在 hasMore() 方法中也必须触发。否则在上述情况下会不能触发加载更多。
             Logger.e("onScrolled")
-            isLoading()
+            loadMore()
         }
     }
     internal var isAfter: Boolean = true
-
-    /**
-     * 是否触发 [loading] 操作
-     */
-    private fun isLoading() {
-        // 判断是否显示了 BaseLoadMoreAdapter
-        if (isAfter) {
-            if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-                Logger.e("isLoading")
-                loading()
-            }
-        } else {
-            if (recyclerView.findFirstVisibleItemPosition() == 0) {
-                Logger.e("isLoading")
-                loading()
-            }
-        }
-    }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -70,15 +52,26 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     internal fun hasMore() {
         hasMore.compareAndSet(false, true)
         Logger.e("hasMore")
-        isLoading()
+        loadMore()
     }
 
     /**
-     * 请求数据时调用此方法。
+     * 加载更多数据
      */
-    private fun loading() {
+    private fun loadMore() {
+        Logger.e("loadMore")
         if (!::mHolder.isInitialized) return
         if (hasMore.compareAndSet(true, false)) {
+            // 判断是否显示了 BaseLoadMoreAdapter
+            if (isAfter) {
+                if (recyclerView.findLastVisibleItemPosition() != (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
+                    return
+                }
+            } else {
+                if (recyclerView.findFirstVisibleItemPosition() != 0) {
+                    return
+                }
+            }
             mHolder.binding.root.setOnClickListener(null)
             onLoading()
             val context = mHolder.itemView.context
@@ -108,7 +101,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener {
             hasMore.set(true)
-            isLoading()
+            loadMore()
         }
         onError(throwable)
     }
