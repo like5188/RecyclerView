@@ -122,6 +122,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
 
     /**
      * 设置 Header 数据，固定于 [RecyclerView] 顶部
+     * 注意：在不分页或者往后加载更多时，才会添加。
      * @param flow  Header 需要的数据。
      */
     fun withHeaderAdapter(adapter: BaseAdapter<*, ValueInList>, flow: Flow<List<ValueInList>?>) {
