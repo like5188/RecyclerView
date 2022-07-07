@@ -13,7 +13,10 @@ import kotlinx.coroutines.flow.*
 val adapter = CombineAdapter<IRecyclerViewItem>(mBinding.rv)
 adapter.apply {
     withItemAdapter(ItemAdapter())
-    bindData(mViewModel::getHeadersAndItems.asFlow())
+    bindData(mViewModel::getItems.asFlow())
+}
+lifecycleScope.launch {
+    adapter.initial()
 }
  */
 /**
