@@ -20,15 +20,22 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
     private lateinit var recyclerView: RecyclerView
+    internal var isAfter: Boolean = true
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            // 此回调在添加 item 时也会触发，但是重新清除所有并添加的 item 如果和上一次的一样，则不会触发（比如刷新时）
-            // 所以只靠此方法触发加载更多不行，在 hasMore() 方法中也必须触发。否则在上述情况下会不能触发加载更多。
             Logger.e("onScrolled")
-            loadMore()
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            // 此回调在添加 item 时也会触发，但是重新清除所有并添加的 item 如果和上一次的一样多，则不会触发（比如刷新时）
+            // 所以只靠此方法触发加载更多不行，需要在 onBindViewHolder 方法中也触发以处理上述情况。
+            Logger.e("onScrollStateChanged newState=$newState")
+            if (newState == 0) {
+                loadMore()
+            }
         }
     }
-    internal var isAfter: Boolean = true
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -44,15 +51,16 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
         super.onBindViewHolder(holder, item)
         mHolder = holder
+        Logger.e("onBindViewHolder")
+        loadMore()
     }
 
     /**
-     * 如果还有更多数据时调用此方法。
+     * 如果还有更多数据时调用此方法进行标记。
      */
     internal fun hasMore() {
         hasMore.compareAndSet(false, true)
         Logger.e("hasMore")
-        loadMore()
     }
 
     /**
@@ -61,24 +69,26 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     private fun loadMore() {
         Logger.e("loadMore")
         if (!::mHolder.isInitialized) return
-        if (hasMore.compareAndSet(true, false)) {
+        recyclerView.post {// 这里必须用 post，否则 onBindViewHolder 调用此方法时，计算不了 findLastVisibleItemPosition。
             // 判断是否显示了 BaseLoadMoreAdapter
             if (isAfter) {
                 if (recyclerView.findLastVisibleItemPosition() != (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-                    return
+                    return@post
                 }
             } else {
                 if (recyclerView.findFirstVisibleItemPosition() != 0) {
-                    return
+                    return@post
                 }
             }
-            mHolder.binding.root.setOnClickListener(null)
-            onLoading()
-            val context = mHolder.itemView.context
-            if (context is LifecycleOwner) {
-                context.lifecycleScope.launch(Dispatchers.Main) {
-                    Logger.e("onLoadMore")
-                    onLoadMore()
+            if (hasMore.compareAndSet(true, false)) {
+                mHolder.binding.root.setOnClickListener(null)
+                onLoading()
+                val context = mHolder.itemView.context
+                if (context is LifecycleOwner) {
+                    context.lifecycleScope.launch(Dispatchers.Main) {
+                        Logger.e("onLoadMore")
+                        onLoadMore()
+                    }
                 }
             }
         }
