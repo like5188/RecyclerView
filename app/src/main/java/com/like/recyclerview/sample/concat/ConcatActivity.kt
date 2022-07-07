@@ -81,10 +81,10 @@ class ConcatActivity : AppCompatActivity() {
 //                }
 //        }
 
-        initItems()
+//        initItems()
 //        initHeadersAndItems()
 //        initLoadAfter()
-//        initLoadAfterWithHeaders()
+        initLoadAfterWithHeaders()
 //        initLoadBefore()
     }
 

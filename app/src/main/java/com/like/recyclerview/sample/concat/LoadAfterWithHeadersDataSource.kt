@@ -1,5 +1,6 @@
 package com.like.recyclerview.sample.concat
 
+import android.util.Log
 import com.like.common.util.successIfAllSuccess
 import com.like.paging.RequestType
 import com.like.paging.dataSource.byPageNoKeyed.PageNoKeyedPagingDataSource
@@ -19,12 +20,14 @@ class LoadAfterWithHeadersDataSource(pageSize: Int) : PageNoKeyedPagingDataSourc
     }
 
     private fun getHeader(): List<IRecyclerViewItem>? {
+        Log.d("tag", "LoadAfterWithHeadersDataSource getHeader")
         return (0..5).map {
             DataFactory.createHeader(it)
         }
     }
 
     private fun getAfter(pageNo: Int, pageSize: Int): List<IRecyclerViewItem>? {
+        Log.d("tag", "LoadAfterWithHeadersDataSource getAfter")
         val start = pageNo * pageSize + 1
         val end = start + pageSize
         return when (i++) {
