@@ -8,21 +8,10 @@ import com.like.recyclerview.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
-/*
-使用方法：
-val adapter = CombineAdapter<IRecyclerViewItem>(mBinding.rv)
-adapter.apply {
-    withItemAdapter(ItemAdapter())
-    bindData(mViewModel::getItems.asFlow())
-}
-lifecycleScope.launch {
-    adapter.initial()
-}
- */
 /**
- * 对 Header、Footer、Item 三种 Adapter 进行组合。并绑定[PagingResult]或者[Flow]类型的数据。
+ * 对 数据及加载状态 这两种 Adapter 进行组合。并绑定[PagingResult]或者[Flow]类型的数据。
  * 功能：
- * 1、支持添加 Header、Footer。
+ * 1、支持添加加载状态：Header、Footer。
  * 2、支持初始化、刷新时进度条的显示隐藏。
  * 3、支持成功失败回调。
  * 4、封装了初始化、刷新、往后加载更多、往前加载更多操作。并对这些操作做了并发处理，并发处理规则如下：
