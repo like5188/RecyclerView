@@ -110,7 +110,7 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withItemAdapter(
+            withDataAdapter(
                 itemAdapter,
                 mViewModel::getItems.asFlow().map {
                     it?.take(3)
@@ -126,7 +126,7 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withItemAdapter(
+            withDataAdapter(
                 itemAdapter,
                 mViewModel::getHeadersAndItems.asFlow()
             )
@@ -177,7 +177,7 @@ class ConcatActivity : AppCompatActivity() {
                     }
                 }
             }
-            withItemAdapter(
+            withPagingDataAdapter(
                 itemAdapter,
                 mViewModel.loadAfterResult.apply {
                     flow = flow.map {
@@ -188,7 +188,7 @@ class ConcatActivity : AppCompatActivity() {
                     }.flowOn(Dispatchers.IO)
                 }
             )
-            withFooterAdapter(loadMoreAdapter)
+            withLoadStateFooter(loadMoreAdapter)
         }
     }
 
@@ -196,11 +196,11 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withItemAdapter(
+            withPagingDataAdapter(
                 itemAdapter,
                 mViewModel.LoadAfterWithHeadersResult
             )
-            withFooterAdapter(loadMoreAdapter)
+            withLoadStateFooter(loadMoreAdapter)
         }
     }
 
@@ -208,8 +208,8 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withHeaderAdapter(loadMoreAdapter)
-            withItemAdapter(
+            withLoadStateHeader(loadMoreAdapter)
+            withPagingDataAdapter(
                 itemAdapter,
                 mViewModel.loadBeforeResult.apply {
                     flow = flow.map {

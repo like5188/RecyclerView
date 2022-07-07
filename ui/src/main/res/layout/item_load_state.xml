@@ -8,7 +8,7 @@
 
         <variable
             name="loadMoreItem"
-            type="com.like.recyclerview.ui.loadmore.LoadMoreItem" />
+            type="com.like.recyclerview.ui.loadstate.LoadStateItem" />
     </data>
 
     <FrameLayout

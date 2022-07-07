@@ -31,8 +31,8 @@ lifecycleScope.launch {
  */
 open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
     private val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    private var itemAdapter: BaseAdapter<*, ValueInList>? = null
-    private var loadMoreAdapter: BaseLoadMoreAdapter<*, *>? = null
+    private var dataAdapter: BaseAdapter<*, ValueInList>? = null
+    private var loadStateAdapter: BaseLoadStateAdapter<*, *>? = null
     private var pagingResult: PagingResult<List<ValueInList>?>? = null
     private val concurrencyHelper = ConcurrencyHelper()
 
@@ -61,30 +61,28 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
     var onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null
 
     /**
-     * 设置 Header 往前加载更多，固定于 [RecyclerView] 顶部
-     * @param adapter    往前加载更多视图 的 adapter
+     * 设置加载状态视图到 Header，固定于 [RecyclerView] 顶部，用于往前加载更多
      */
-    fun withHeaderAdapter(adapter: BaseLoadMoreAdapter<*, *>) {
+    fun withLoadStateHeader(adapter: BaseLoadStateAdapter<*, *>) {
         adapter.onLoadMore = ::before
         adapter.isAfter = false
-        this.loadMoreAdapter = adapter
+        this.loadStateAdapter = adapter
     }
 
     /**
-     * 设置 Footer 往后加载更多，固定于 [RecyclerView] 底部
-     * @param adapter    往后加载更多视图 的 adapter
+     * 设置加载状态视图到 Footer，固定于 [RecyclerView] 底部，用于往后加载更多
      */
-    fun withFooterAdapter(adapter: BaseLoadMoreAdapter<*, *>) {
+    fun withLoadStateFooter(adapter: BaseLoadStateAdapter<*, *>) {
         adapter.onLoadMore = ::after
         adapter.isAfter = true
-        this.loadMoreAdapter = adapter
+        this.loadStateAdapter = adapter
     }
 
     /**
      * 设置（不分页）列表数据，固定于 [RecyclerView] 中部。
      */
-    fun withItemAdapter(adapter: BaseAdapter<*, ValueInList>, flow: Flow<List<ValueInList>?>) {
-        this.itemAdapter = adapter
+    fun withDataAdapter(adapter: BaseAdapter<*, ValueInList>, flow: Flow<List<ValueInList>?>) {
+        this.dataAdapter = adapter
         this.pagingResult = PagingResult(flow) {}
     }
 
@@ -92,8 +90,8 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 设置（分页）列表数据，固定于 [RecyclerView] 中部，并且加载更多的数据是添加到其中。
      * @param pagingResult  列表需要的数据。使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
      */
-    fun withItemAdapter(adapter: BaseAdapter<*, ValueInList>, pagingResult: PagingResult<List<ValueInList>?>) {
-        this.itemAdapter = adapter
+    fun withPagingDataAdapter(adapter: BaseAdapter<*, ValueInList>, pagingResult: PagingResult<List<ValueInList>?>) {
+        this.dataAdapter = adapter
         this.pagingResult = pagingResult
     }
 
@@ -161,7 +159,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
             }.catch {
                 if (requestType is RequestType.After || requestType is RequestType.Before) {
                     // 加载更多失败时，直接更新[loadMoreAdapter]
-                    loadMoreAdapter?.error(it)
+                    loadStateAdapter?.error(it)
                 }
                 onError?.invoke(requestType, it)
             }.flowOn(Dispatchers.Main)
@@ -169,29 +167,29 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
                     adapter.clear()
                     if (!items.isNullOrEmpty()) {
-                        itemAdapter?.apply {
+                        dataAdapter?.apply {
                             clear()
-                            if (loadMoreAdapter?.isAfter == false) {// 往前加载更多
+                            if (loadStateAdapter?.isAfter == false) {// 往前加载更多
                                 addAllToStart(items)
-                                adapter.addAll(loadMoreAdapter, this)
+                                adapter.addAll(loadStateAdapter, this)
                             } else {// 不分页或者往后加载更多
                                 addAllToEnd(items)
-                                adapter.addAll(this, loadMoreAdapter)
+                                adapter.addAll(this, loadStateAdapter)
                             }
                         }
 
-                        if (loadMoreAdapter?.isAfter == false) {// 往前加载更多
+                        if (loadStateAdapter?.isAfter == false) {// 往前加载更多
                             recyclerView.scrollToBottom()
                         } else {
                             recyclerView.scrollToTop()
                         }
 
-                        loadMoreAdapter?.hasMore()
+                        loadStateAdapter?.hasMore()
                     }
                 } else {
                     if (!items.isNullOrEmpty()) {
-                        itemAdapter?.apply {
-                            if (loadMoreAdapter?.isAfter == false) {// 往前加载更多
+                        dataAdapter?.apply {
+                            if (loadStateAdapter?.isAfter == false) {// 往前加载更多
                                 addAllToStart(items)
                                 recyclerView.keepPosition(items.size, 1)
                             } else {
@@ -199,10 +197,10 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                             }
                         }
                         // 还有更多数据需要加载
-                        loadMoreAdapter?.hasMore()
+                        loadStateAdapter?.hasMore()
                     } else {
                         // 没有更多数据需要加载
-                        loadMoreAdapter?.end()
+                        loadStateAdapter?.end()
                     }
                 }
                 onSuccess?.invoke(requestType, items)
