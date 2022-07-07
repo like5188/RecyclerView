@@ -22,17 +22,13 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     private lateinit var recyclerView: RecyclerView
     internal var isAfter: Boolean = true
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            Logger.e("onScrolled")
-        }
-
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             // 此回调在添加 item 时也会触发，但是重新清除所有并添加的 item 如果和上一次的一样多，则不会触发（比如刷新时）
             // 所以只靠此方法触发加载更多不行，需要在 onBindViewHolder 方法中也触发以处理上述情况。
             Logger.e("onScrollStateChanged newState=$newState")
-            if (newState == 0) {
-                loadMore()
+            if (newState == 0 || isVisible()) {// 注意：newState==0 有时不能触发，所以需要添加额外的判断。参考：https://blog.csdn.net/wangcheeng/article/details/109722538
+                loadMore()// 滚动时触发加载更多
             }
         }
     }
@@ -52,7 +48,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
         super.onBindViewHolder(holder, item)
         mHolder = holder
         Logger.e("onBindViewHolder")
-        loadMore()
+        loadMore()// 初始化或者刷新时触发加载更多
     }
 
     /**
@@ -64,21 +60,30 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     }
 
     /**
+     * 判断 BaseLoadMoreAdapter 是否可见
+     */
+    private fun isVisible(): Boolean {
+        if (isAfter) {
+            if (recyclerView.findLastVisibleItemPosition() != (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
+                return false
+            }
+        } else {
+            if (recyclerView.findFirstVisibleItemPosition() != 0) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
      * 加载更多数据
      */
     private fun loadMore() {
         Logger.e("loadMore")
         if (!::mHolder.isInitialized) return
         recyclerView.post {// 这里必须用 post，否则 onBindViewHolder 调用此方法时，计算不了 findLastVisibleItemPosition。
-            // 判断是否显示了 BaseLoadMoreAdapter
-            if (isAfter) {
-                if (recyclerView.findLastVisibleItemPosition() != (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-                    return@post
-                }
-            } else {
-                if (recyclerView.findFirstVisibleItemPosition() != 0) {
-                    return@post
-                }
+            if (!isVisible()) {
+                return@post
             }
             if (hasMore.compareAndSet(true, false)) {
                 mHolder.binding.root.setOnClickListener(null)
