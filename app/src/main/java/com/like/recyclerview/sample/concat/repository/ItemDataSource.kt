@@ -1,15 +1,16 @@
-package com.like.recyclerview.sample.concat
+package com.like.recyclerview.sample.concat.repository
 
-import android.util.Log
+import com.like.common.util.Logger
 import com.like.recyclerview.model.IRecyclerViewItem
+import com.like.recyclerview.sample.concat.vo.DataFactory
 import kotlinx.coroutines.delay
 
 class ItemDataSource {
     private var i = 0
 
     suspend fun load(): List<IRecyclerViewItem>? {
-        Log.d("tag", "ItemDataSource")
-        delay(1000)
+        Logger.d("ItemDataSource")
+        delay(2000)
         return when (i++) {
             0 -> throw RuntimeException("load error 0")
             1 -> throw RuntimeException("load error 1")

@@ -1,40 +1,37 @@
-package com.like.recyclerview.sample.concat
+package com.like.recyclerview.sample.concat.repository
 
-import android.util.Log
-import com.like.common.util.successIfAllSuccess
+import com.like.common.util.Logger
 import com.like.paging.RequestType
 import com.like.paging.dataSource.byPageNoKeyed.PageNoKeyedPagingDataSource
 import com.like.recyclerview.model.IRecyclerViewItem
+import com.like.recyclerview.sample.concat.vo.DataFactory
 import kotlinx.coroutines.delay
 
-class LoadAfterWithHeadersDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<List<IRecyclerViewItem>?>>(0, pageSize) {
+class LoadAfterDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRecyclerViewItem>?>(0, pageSize) {
     private var i = 0
     private var j = 0
 
-    override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<List<IRecyclerViewItem>?> {
-        delay(1000)
+    override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<IRecyclerViewItem>? {
+        Logger.d("LoadAfterDataSource requestType=$requestType pageNo=$pageNo pageSize=$pageSize")
         if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
             i = 0
         }
-        return successIfAllSuccess(::getHeader, { getAfter(pageNo, pageSize) })
-    }
-
-    private fun getHeader(): List<IRecyclerViewItem>? {
-        Log.d("tag", "LoadAfterWithHeadersDataSource getHeader")
-        return (0..5).map {
-            DataFactory.createHeader(it)
-        }
+        delay(2000)
+        return getAfter(pageNo, pageSize)
     }
 
     private fun getAfter(pageNo: Int, pageSize: Int): List<IRecyclerViewItem>? {
-        Log.d("tag", "LoadAfterWithHeadersDataSource getAfter")
         val start = pageNo * pageSize + 1
         val end = start + pageSize
         return when (i++) {
             0 -> {
                 when (j++) {
-                    0 -> throw RuntimeException("initial error")
-                    1 -> emptyList()
+                    0 -> throw RuntimeException("load error 0")
+                    1 -> throw RuntimeException("load error 1")
+                    2 -> throw RuntimeException("load error 2")
+                    3 -> emptyList()
+                    4 -> throw RuntimeException("load error 4")
+                    6 -> throw RuntimeException("load error 6")
                     else -> {
                         (start until end).map {
                             DataFactory.createItem(it)
@@ -42,10 +39,10 @@ class LoadAfterWithHeadersDataSource(pageSize: Int) : PageNoKeyedPagingDataSourc
                     }
                 }
             }
-            2 -> {
+            3 -> {
                 throw RuntimeException("load more error")
             }
-            4 -> {
+            5 -> {
                 emptyList()
             }
             else -> {

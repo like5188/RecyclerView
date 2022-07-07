@@ -46,6 +46,18 @@ class ConcatActivity : AppCompatActivity() {
     private val mProgressDialog by lazy {
         ProgressDialog(this)
     }
+    private val headerAdapter by lazy {
+        HeaderAdapter()
+    }
+    private val itemAdapter by lazy {
+        ItemAdapter()
+    }
+    private val footerAdapter by lazy {
+        AdapterFactory.createLoadMoreAdapter()
+    }
+    private val adapter by lazy {
+        CombineAdapter<IRecyclerViewItem>(mBinding.rv)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,18 +95,26 @@ class ConcatActivity : AppCompatActivity() {
 
 //        initItems()
 //        initHeadersAndItems()
-//        initLoadAfter()
-        initLoadAfterWithHeaders()
+        initLoadAfter()
+//        initLoadAfterWithHeaders()
 //        initLoadBefore()
+
+        mBinding.btnRefresh.setOnClickListener {
+            lifecycleScope.launch {
+                adapter.refresh()
+            }
+        }
+        lifecycleScope.launch {
+            adapter.initial()
+        }
     }
 
     private fun initItems() {
-        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withItemAdapter(ItemAdapter())
-            bindData(
+            withItemAdapter(
+                itemAdapter,
                 mViewModel::getItems.asFlow().map {
                     it?.take(3)
                 }.retryWhen { cause, attempt ->
@@ -103,38 +123,24 @@ class ConcatActivity : AppCompatActivity() {
                 }.flowOn(Dispatchers.IO)
             )
         }
-        mBinding.btnRefresh.setOnClickListener {
-            lifecycleScope.launch {
-                adapter.refresh()
-            }
-        }
-        lifecycleScope.launch {
-            adapter.initial()
-        }
     }
 
     private fun initHeadersAndItems() {
-        val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withHeaderAdapter(HeaderAdapter())
-            withItemAdapter(ItemAdapter())
-            bindData(mViewModel::getHeadersAndItems.asFlow())
-        }
-        mBinding.btnRefresh.setOnClickListener {
-            lifecycleScope.launch {
-                adapter.refresh()
-            }
-        }
-        lifecycleScope.launch {
-            adapter.initial()
+            withHeaderAdapter(
+                headerAdapter,
+                mViewModel::getHeaders.asFlow()
+            )
+            withItemAdapter(
+                itemAdapter,
+                mViewModel::getItems.asFlow()
+            )
         }
     }
 
     private fun initLoadAfter() {
-        val itemAdapter = ItemAdapter()
-        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv)
         val uiStatusController: DefaultUiStatusController? by lazy {
             DefaultUiStatusController(mBinding.rv)
         }
@@ -165,13 +171,13 @@ class ConcatActivity : AppCompatActivity() {
                     }
                 }
             }
-            onSuccess = { requestType, resultType ->
+            onInitialOrRefreshSuccess = { requestType, resultType ->
                 uiStatusController?.apply {
                     this.refresh = {
                         refresh()
                     }
-                    if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) &&
-                        (resultType == null || (resultType is List<*> && resultType.isEmpty()))
+                    if (resultType.isNullOrEmpty() ||
+                        (resultType.getOrNull(0).isNullOrEmpty() && resultType.getOrNull(1).isNullOrEmpty())
                     ) {
                         // 显示空视图
                         showUiStatus(TAG_UI_STATUS_EMPTY)
@@ -180,9 +186,11 @@ class ConcatActivity : AppCompatActivity() {
                     }
                 }
             }
-            withItemAdapter(itemAdapter)
-            withFooterAdapter(AdapterFactory.createLoadMoreAdapter())
-            bindData(
+            onLoadMoreSuccess = { requestType, resultType ->
+                uiStatusController?.showContent()
+            }
+            withItemAdapter(
+                itemAdapter,
                 mViewModel.loadAfterResult.apply {
                     flow = flow.map {
                         it?.take(5)
@@ -192,45 +200,32 @@ class ConcatActivity : AppCompatActivity() {
                     }.flowOn(Dispatchers.IO)
                 }
             )
-        }
-        mBinding.btnRefresh.setOnClickListener {
-            lifecycleScope.launch {
-                adapter.refresh()
-            }
-        }
-        lifecycleScope.launch {
-            adapter.initial()
+            withFooterAdapter(footerAdapter)
         }
     }
 
     private fun initLoadAfterWithHeaders() {
-        val adapter = CombineAdapter<List<List<IRecyclerViewItem>?>, IRecyclerViewItem>(mBinding.rv)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withHeaderAdapter(HeaderAdapter())
-            withItemAdapter(ItemAdapter())
-            withFooterAdapter(AdapterFactory.createLoadMoreAdapter())
-            bindData(mViewModel.LoadAfterWithHeadersResult)
-        }
-        mBinding.btnRefresh.setOnClickListener {
-            lifecycleScope.launch {
-                adapter.refresh()
-            }
-        }
-        lifecycleScope.launch {
-            adapter.initial()
+            withHeaderAdapter(
+                headerAdapter,
+                mViewModel::getHeaders.asFlow()
+            )
+            withItemAdapter(
+                itemAdapter,
+                mViewModel.loadAfterResult
+            )
+            withFooterAdapter(footerAdapter)
         }
     }
 
     private fun initLoadBefore() {
-        val adapter = CombineAdapter<List<IRecyclerViewItem>?, IRecyclerViewItem>(mBinding.rv)
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withItemAdapter(ItemAdapter())
-            withFooterAdapter(AdapterFactory.createLoadMoreAdapter(), false)
-            bindData(
+            withItemAdapter(
+                itemAdapter,
                 mViewModel.loadBeforeResult.apply {
                     flow = flow.map {
                         it?.take(3)
@@ -240,14 +235,7 @@ class ConcatActivity : AppCompatActivity() {
                     }.flowOn(Dispatchers.IO)
                 }
             )
-        }
-        mBinding.btnRefresh.setOnClickListener {
-            lifecycleScope.launch {
-                adapter.refresh()
-            }
-        }
-        lifecycleScope.launch {
-            adapter.initial()
+            withFooterAdapter(footerAdapter, false)
         }
     }
 
