@@ -6,7 +6,7 @@ import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.BR
 import com.like.recyclerview.sample.R
 
-data class Item2(val id: Int, val name: String, val des: String)  : IRecyclerViewItem {
+data class Item2(val id: Int, var name: String, val des: String)  : IRecyclerViewItem {
     override val layoutId: Int = R.layout.item2
     override val variableId: Int = BR.item2
 

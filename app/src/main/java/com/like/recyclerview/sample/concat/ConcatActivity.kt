@@ -17,6 +17,7 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
+import com.like.recyclerview.sample.concat.vo.Item2
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
 import com.like.recyclerview.ui.util.AdapterFactory
@@ -90,19 +91,41 @@ class ConcatActivity : AppCompatActivity() {
 //                }
 //        }
 
-        initItems()
+//        initItems()
 //        initHeadersAndItems()
 //        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
+//        mBinding.btnRefresh.setOnClickListener {
+//            lifecycleScope.launch {
+//                adapter.refresh()
+//            }
+//        }
+//        lifecycleScope.launch {
+//            adapter.initial()
+//        }
 
+
+        // ListAdapter 测试
+        initListAdapter()
+    }
+
+    private fun initListAdapter() {
+        val itemListAdapter = ItemListAdapter()
+        mBinding.rv.adapter = itemListAdapter
+        lifecycleScope.launchWhenCreated {
+            val list = mViewModel.getItems()
+            itemListAdapter.submitList(list)
+        }
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                adapter.refresh()
+                val list = mViewModel.getItems()
+                itemListAdapter.submitList(list)
+//                val list = itemListAdapter.currentList.toMutableList()
+//                val newData = (list[1] as Item2).copy(name = "hahahaha")
+//                list[1] = newData
+//                itemListAdapter.submitList(list)
             }
-        }
-        lifecycleScope.launch {
-            adapter.initial()
         }
     }
 
