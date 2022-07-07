@@ -53,7 +53,7 @@ class ConcatActivity : AppCompatActivity() {
         ItemAdapter()
     }
     private val loadMoreAdapter by lazy {
-        AdapterFactory.createLoadMoreAdapter()
+        AdapterFactory.createLoadMoreAdapter(true)
     }
     private val adapter by lazy {
         CombineAdapter<IRecyclerViewItem>(mBinding.rv)
@@ -95,9 +95,9 @@ class ConcatActivity : AppCompatActivity() {
 
 //        initItems()
 //        initHeadersAndItems()
-//        initLoadAfter()
+        initLoadAfter()
 //        initLoadAfterWithHeaders()
-        initLoadBefore()
+//        initLoadBefore()
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -225,11 +225,15 @@ class ConcatActivity : AppCompatActivity() {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
             withHeaderAdapter(loadMoreAdapter)
+            withHeaderAdapter(
+                headerAdapter,
+                mViewModel::getHeaders.asFlow()
+            )
             withItemAdapter(
                 itemAdapter,
                 mViewModel.loadBeforeResult.apply {
                     flow = flow.map {
-                        it?.take(3)
+                        it?.take(20)
                     }.retryWhen { cause, attempt ->
                         Logger.e("retryWhen")
                         cause.message == "load error 0" && attempt == 0L

@@ -5,7 +5,7 @@ import com.like.recyclerview.ui.loadmore.LoadMoreItem
 
 object AdapterFactory {
 
-    fun createLoadMoreAdapter() = LoadMoreAdapter().apply {
+    fun createLoadMoreAdapter(isAfter: Boolean = true) = LoadMoreAdapter(isAfter).apply {
         addToEnd(LoadMoreItem())
     }
 

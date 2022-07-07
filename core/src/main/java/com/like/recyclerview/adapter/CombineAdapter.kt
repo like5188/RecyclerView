@@ -122,7 +122,6 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
 
     /**
      * 设置 Header 数据，固定于 [RecyclerView] 顶部
-     * 注意：在不分页或者往后加载更多时，才会添加。
      * @param flow  Header 需要的数据。
      */
     fun withHeaderAdapter(adapter: BaseAdapter<*, ValueInList>, flow: Flow<List<ValueInList>?>) {
@@ -212,27 +211,51 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                 if (!resultType.isNullOrEmpty()) {
                     val headers = resultType.getOrNull(0)
                     val items = resultType.getOrNull(1)
-                    // 不分页或者往后加载更多时，才添加 header
-                    if ((isAfter == null || isAfter == true) && !headers.isNullOrEmpty() && headerAdapter != null) {
-                        headerAdapter!!.clear()
-                        headerAdapter!!.addAllToEnd(headers)
-                        adapter.add(headerAdapter)
-                    }
-                    if (!items.isNullOrEmpty()) {
-                        itemAdapter?.clear()
-                        if (isAfter == null || isAfter == true) {
-                            itemAdapter?.addAllToEnd(items)
-                            adapter.addAll(itemAdapter, loadMoreAdapter)
-                        } else {
-                            itemAdapter?.addAllToStart(items)
-                            adapter.addAll(loadMoreAdapter, itemAdapter)
+
+                    val hasItem = itemAdapter != null && !items.isNullOrEmpty()
+
+                    if (hasItem) {
+                        loadMoreAdapter?.apply {
+                            if (isAfter == false) {// 往前加载更多
+                                adapter.add(this)
+                            }
                         }
                     }
-                    if (isAfter == null || isAfter == true) {
-                        recyclerView.scrollToTop()
-                    } else {
-                        recyclerView.scrollToBottom()
+
+                    headerAdapter?.apply {
+                        if (!headers.isNullOrEmpty()) {
+                            clear()
+                            addAllToEnd(headers)
+                            adapter.add(this)
+                        }
                     }
+
+                    itemAdapter?.apply {
+                        if (!items.isNullOrEmpty()) {
+                            clear()
+                            if (isAfter == false) {// 往前加载更多
+                                addAllToStart(items)
+                            } else {// 不分页或者往后加载更多
+                                addAllToEnd(items)
+                            }
+                            adapter.add(this)
+                        }
+                    }
+
+                    if (hasItem) {
+                        loadMoreAdapter?.apply {
+                            if (isAfter != false) {// 不分页或者往后加载更多
+                                adapter.add(loadMoreAdapter)
+                            }
+                        }
+                    }
+
+                    if (isAfter == false) {// 往前加载更多
+                        recyclerView.scrollToBottom()
+                    } else {
+                        recyclerView.scrollToTop()
+                    }
+
                     if (!items.isNullOrEmpty()) {
                         loadMoreAdapter?.hasMore()
                     }
@@ -253,21 +276,25 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                 loadMoreAdapter?.error(it)
                 onError?.invoke(requestType, it)
             }.flowOn(Dispatchers.Main)
-            .collect { resultType ->
-                if (resultType.isNullOrEmpty()) {
+            .collect { items ->
+                itemAdapter?.apply {
+                    if (!items.isNullOrEmpty()) {
+                        if (isAfter == false) {// 往前加载更多
+                            addAllToStart(items)
+                            recyclerView.keepPosition(items.size, (headerAdapter?.itemCount ?: 0) + 1)
+                        } else {
+                            addAllToEnd(items)
+                        }
+                    }
+                }
+                if (items.isNullOrEmpty()) {
                     // 没有更多数据需要加载
                     loadMoreAdapter?.end()
                 } else {
                     // 还有更多数据需要加载
-                    if (isAfter == true) {
-                        itemAdapter?.addAllToEnd(resultType)
-                    } else if (isAfter == false) {
-                        itemAdapter?.addAllToStart(resultType)
-                        recyclerView.keepPosition(resultType.size, 1)
-                    }
                     loadMoreAdapter?.hasMore()
                 }
-                onSuccess?.invoke(requestType, resultType)
+                onSuccess?.invoke(requestType, items)
             }
     }
 

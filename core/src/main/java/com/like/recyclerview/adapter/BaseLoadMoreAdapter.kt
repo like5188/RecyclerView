@@ -4,6 +4,8 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.like.common.util.Logger
+import com.like.recyclerview.utils.findFirstVisibleItemPosition
 import com.like.recyclerview.utils.findLastVisibleItemPosition
 import com.like.recyclerview.viewholder.BindingViewHolder
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * 封装了加载更多逻辑，用于显示加载状态的 header（往前加载更多） 或者 footer（往后加载更多）
  */
-abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseAdapter<VB, ValueInList>() {
+abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList>(private val isAfter: Boolean) :
+    BaseAdapter<VB, ValueInList>() {
     private val hasMore = AtomicBoolean(false)
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
@@ -22,6 +25,7 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseAdap
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             // 此回调在添加 item 时也会触发，但是重新清除所有并添加的 item 如果和上一次的一样，则不会触发（比如刷新时）
             // 所以只靠此方法触发加载更多不行，在 hasMore() 方法中也必须触发。否则在上述情况下会不能触发加载更多。
+            Logger.e("loading onScrolled")
             isLoading()
         }
     }
@@ -31,8 +35,16 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseAdap
      */
     private fun isLoading() {
         // 判断是否显示了 BaseLoadMoreAdapter
-        if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-            loading()
+        if (isAfter) {
+            if (recyclerView.findLastVisibleItemPosition() == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
+                Logger.e("loading")
+                loading()
+            }
+        } else {
+            if (recyclerView.findFirstVisibleItemPosition() == 0) {
+                Logger.e("loading")
+                loading()
+            }
         }
     }
 
@@ -57,6 +69,7 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseAdap
      */
     fun hasMore() {
         hasMore.compareAndSet(false, true)
+        Logger.e("loading hasMore")
         isLoading()
     }
 
@@ -71,6 +84,7 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseAdap
             val context = mHolder.itemView.context
             if (context is LifecycleOwner) {
                 context.lifecycleScope.launch(Dispatchers.Main) {
+                    Logger.e("onLoadMore")
                     onLoadMore()
                 }
             }
@@ -94,7 +108,7 @@ abstract class BaseLoadMoreAdapter<VB : ViewDataBinding, ValueInList> : BaseAdap
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener {
             hasMore.set(true)
-            loading()
+            isLoading()
         }
         onError(throwable)
     }
