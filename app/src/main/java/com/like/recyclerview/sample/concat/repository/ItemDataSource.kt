@@ -10,7 +10,7 @@ class ItemDataSource {
 
     suspend fun load(): List<IRecyclerViewItem>? {
         Logger.d("ItemDataSource")
-        delay(2000)
+        delay(1000)
         return when (i++) {
             0 -> throw RuntimeException("load error 0")
             1 -> throw RuntimeException("load error 1")

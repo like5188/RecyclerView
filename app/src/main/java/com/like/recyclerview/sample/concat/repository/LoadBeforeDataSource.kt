@@ -16,7 +16,7 @@ class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRe
         if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
             i = 0
         }
-        delay(2000)
+        delay(1000)
         return getBefore(pageNo, pageSize)
     }
 

@@ -9,7 +9,7 @@ class HeaderDataSource {
 
     suspend fun load(): List<IRecyclerViewItem>? {
         Logger.d("HeaderDataSource")
-        delay(2000)
+        delay(1000)
         return (0..5).map {
             DataFactory.createHeader(it)
         }

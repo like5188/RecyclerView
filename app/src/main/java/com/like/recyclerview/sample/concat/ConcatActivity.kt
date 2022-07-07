@@ -46,14 +46,11 @@ class ConcatActivity : AppCompatActivity() {
     private val mProgressDialog by lazy {
         ProgressDialog(this)
     }
-    private val headerAdapter by lazy {
-        HeaderAdapter()
-    }
     private val itemAdapter by lazy {
         ItemAdapter()
     }
     private val loadMoreAdapter by lazy {
-        AdapterFactory.createLoadMoreAdapter(true)
+        AdapterFactory.createLoadMoreAdapter()
     }
     private val adapter by lazy {
         CombineAdapter<IRecyclerViewItem>(mBinding.rv)
@@ -95,9 +92,9 @@ class ConcatActivity : AppCompatActivity() {
 
 //        initItems()
 //        initHeadersAndItems()
-        initLoadAfter()
+//        initLoadAfter()
 //        initLoadAfterWithHeaders()
-//        initLoadBefore()
+        initLoadBefore()
 
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -129,13 +126,9 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withHeaderAdapter(
-                headerAdapter,
-                mViewModel::getHeaders.asFlow()
-            )
             withItemAdapter(
                 itemAdapter,
-                mViewModel::getItems.asFlow()
+                mViewModel::getHeadersAndItems.asFlow()
             )
         }
     }
@@ -171,23 +164,18 @@ class ConcatActivity : AppCompatActivity() {
                     }
                 }
             }
-            onInitialOrRefreshSuccess = { requestType, resultType ->
+            onSuccess = { requestType, resultType ->
                 uiStatusController?.apply {
                     this.refresh = {
                         refresh()
                     }
-                    if (resultType.isNullOrEmpty() ||
-                        (resultType.getOrNull(0).isNullOrEmpty() && resultType.getOrNull(1).isNullOrEmpty())
-                    ) {
+                    if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && resultType.isNullOrEmpty()) {
                         // 显示空视图
                         showUiStatus(TAG_UI_STATUS_EMPTY)
                     } else {
                         showContent()
                     }
                 }
-            }
-            onLoadMoreSuccess = { requestType, resultType ->
-                uiStatusController?.showContent()
             }
             withItemAdapter(
                 itemAdapter,
@@ -208,13 +196,9 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withHeaderAdapter(
-                headerAdapter,
-                mViewModel::getHeaders.asFlow()
-            )
             withItemAdapter(
                 itemAdapter,
-                mViewModel.loadAfterResult
+                mViewModel.LoadAfterWithHeadersResult
             )
             withFooterAdapter(loadMoreAdapter)
         }
@@ -225,10 +209,6 @@ class ConcatActivity : AppCompatActivity() {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
             withHeaderAdapter(loadMoreAdapter)
-            withHeaderAdapter(
-                headerAdapter,
-                mViewModel::getHeaders.asFlow()
-            )
             withItemAdapter(
                 itemAdapter,
                 mViewModel.loadBeforeResult.apply {
