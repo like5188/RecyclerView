@@ -67,7 +67,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     /**
      * 如果还有更多数据时调用此方法。
      */
-    fun hasMore() {
+    internal fun hasMore() {
         hasMore.compareAndSet(false, true)
         Logger.e("loading hasMore")
         isLoading()
@@ -76,7 +76,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     /**
      * 请求数据时调用此方法。
      */
-    fun loading() {
+    private fun loading() {
         if (!::mHolder.isInitialized) return
         if (hasMore.compareAndSet(true, false)) {
             mHolder.binding.root.setOnClickListener(null)
@@ -94,7 +94,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
     /**
      * 没有更多数据时调用此方法更新界面。
      */
-    fun end() {
+    internal fun end() {
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener(null)
         onEnd()
@@ -104,7 +104,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
      * 请求数据出错时调用此方法更新界面。
      * 此方法中添加了出错重试点击监听。
      */
-    fun error(throwable: Throwable) {
+    internal fun error(throwable: Throwable) {
         if (!::mHolder.isInitialized) return
         mHolder.binding.root.setOnClickListener {
             hasMore.set(true)
