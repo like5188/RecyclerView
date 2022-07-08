@@ -172,7 +172,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                             recyclerView.scrollToTop()
                         }
 
-                        loadStateAdapter?.hasMore()
+                        loadStateAdapter?.hasMore(true)
                     }
                 } else {
                     if (!items.isNullOrEmpty()) {
@@ -188,7 +188,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                             }
                         }
                         // 还有更多数据需要加载
-                        loadStateAdapter?.hasMore()
+                        loadStateAdapter?.hasMore(false)
                     } else {
                         // 没有更多数据需要加载
                         loadStateAdapter?.end()
