@@ -1,5 +1,8 @@
 package com.like.recyclerview.adapter
 
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -15,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * 加载状态 Adapter
  */
-abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAdapter<VB, ValueInList>() {
+abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter<BindingViewHolder<VB>>() {
     private val hasMore = AtomicBoolean(false)
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
@@ -43,11 +46,22 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
         recyclerView.removeOnScrollListener(onScrollListener)
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
-        super.onBindViewHolder(holder, item)
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
+        return BindingViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), getLayoutId(), parent, false))
+    }
+
+    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
         mHolder = holder
+        onBindViewHolder(holder)
         loadMore()// 初始化或者刷新时触发加载更多
     }
+
+    final override fun getItemCount(): Int {
+        return 1
+    }
+
+    abstract fun getLayoutId(): Int
+    open fun onBindViewHolder(holder: BindingViewHolder<VB>) {}
 
     /**
      * 如果还有更多数据时调用此方法进行标记。
@@ -82,7 +96,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
                 return@post
             }
             if (hasMore.compareAndSet(true, false)) {
-                mHolder.binding.root.setOnClickListener(null)
+                mHolder.itemView.setOnClickListener(null)
                 onLoading()
                 val context = mHolder.itemView.context
                 if (context is LifecycleOwner) {
@@ -99,7 +113,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
      */
     internal fun end() {
         if (!::mHolder.isInitialized) return
-        mHolder.binding.root.setOnClickListener(null)
+        mHolder.itemView.setOnClickListener(null)
         onEnd()
     }
 
@@ -109,7 +123,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding, ValueInList> : BaseAda
      */
     internal fun error(throwable: Throwable) {
         if (!::mHolder.isInitialized) return
-        mHolder.binding.root.setOnClickListener {
+        mHolder.itemView.setOnClickListener {
             hasMore.set(true)
             loadMore()
         }

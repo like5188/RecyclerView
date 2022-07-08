@@ -9,26 +9,21 @@ class ItemDataSource {
     private var i = 0
 
     suspend fun load(): List<IRecyclerViewItem>? {
-        Logger.d("ItemDataSource")
+        Logger.d("ItemDataSource i=$i")
         delay(1000)
         return when (i++) {
-            0 -> listOf(DataFactory.createItem(0), DataFactory.createItem(1), DataFactory.createItem(2))
-            1 -> listOf(DataFactory.createItem(1), DataFactory.createItem(2), DataFactory.createItem(3))
-            else -> null
+            0 -> throw RuntimeException("load error 0")
+            1 -> throw RuntimeException("load error 1")
+            2 -> throw RuntimeException("load error 2")
+            3 -> emptyList()
+            4 -> throw RuntimeException("load error 4")
+            6 -> throw RuntimeException("load error 6")
+            else -> {
+                (0 until 10).map {
+                    DataFactory.createItem(it)
+                }
+            }
         }
-//        return when (i++) {
-//            0 -> throw RuntimeException("load error 0")
-//            1 -> throw RuntimeException("load error 1")
-//            2 -> throw RuntimeException("load error 2")
-//            3 -> emptyList()
-//            4 -> throw RuntimeException("load error 4")
-//            6 -> throw RuntimeException("load error 6")
-//            else -> {
-//                (0 until 10).map {
-//                    DataFactory.createItem(it)
-//                }
-//            }
-//        }
     }
 
 }

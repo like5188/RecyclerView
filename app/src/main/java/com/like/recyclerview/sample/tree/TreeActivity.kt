@@ -35,7 +35,7 @@ class TreeActivity : AppCompatActivity() {
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
             }
-            withDataAdapter(itemAdapter, mViewModel::getItems.asFlow())
+            withListAdapter(itemAdapter, mViewModel::getItems.asFlow())
         }
     }
 

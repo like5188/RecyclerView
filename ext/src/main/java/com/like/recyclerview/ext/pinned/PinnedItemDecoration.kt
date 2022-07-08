@@ -10,7 +10,7 @@ import android.widget.RelativeLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
-import com.like.recyclerview.adapter.BaseAdapter
+import com.like.recyclerview.adapter.BaseListAdapter
 import com.like.recyclerview.utils.findFirstVisibleItemPosition
 
 /**
@@ -21,7 +21,7 @@ import com.like.recyclerview.utils.findFirstVisibleItemPosition
 <androidx.recyclerview.widget.RecyclerView />
 </FrameLayout>
  */
-class PinnedItemDecoration(private val mItemAdapter: BaseAdapter<*, *>) : RecyclerView.ItemDecoration() {
+class PinnedItemDecoration(private val mItemAdapter: BaseListAdapter<*, *>) : RecyclerView.ItemDecoration() {
     private var mCurPinnedItem: PinnedItem? = null
     private var mRecyclerViewParent: ViewGroup? = null
     private var mOnPinnedItemRenderListener: OnPinnedItemRenderListener? = null
@@ -144,7 +144,7 @@ class PinnedItemDecoration(private val mItemAdapter: BaseAdapter<*, *>) : Recycl
         val firstVisiblePosition = recyclerView.findFirstVisibleItemPosition()
         if (firstVisiblePosition < mItemAdapter.itemCount && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition downTo 0) {
-                val item = mItemAdapter.get(position)
+                val item = mItemAdapter.currentList[position]
                 if (item is IPinnedItem) {
                     return PinnedItem(
                         item.layoutId,
@@ -164,7 +164,7 @@ class PinnedItemDecoration(private val mItemAdapter: BaseAdapter<*, *>) : Recycl
         val firstVisiblePosition = recyclerView.findFirstVisibleItemPosition()
         if (firstVisiblePosition < mItemAdapter.itemCount - 1 && firstVisiblePosition >= 0) {
             for (position in firstVisiblePosition + 1 until mItemAdapter.itemCount) {
-                val item = mItemAdapter.get(position)
+                val item = mItemAdapter.currentList[position]
                 if (item is IPinnedItem) {
                     return PinnedItem(
                         item.layoutId,

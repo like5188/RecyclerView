@@ -3,17 +3,19 @@ package com.like.recyclerview.ext.addimage
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.previewPhotos
-import com.like.recyclerview.adapter.BaseAdapter
+import com.like.recyclerview.adapter.BaseListAdapter
 import com.like.recyclerview.utils.ItemTouchHelperCallback
 import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.entity.LocalMedia
 
 open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
+    diffCallback: DiffUtil.ItemCallback<ValueInList>,
     private val maxSelectNum: Int = Int.MAX_VALUE
-) : BaseAdapter<VB, ValueInList>() {
+) : BaseListAdapter<VB, ValueInList>(diffCallback) {
     lateinit var activity: AppCompatActivity
     lateinit var itemCreator: (LocalMedia) -> ValueInList
     lateinit var getSelectedLocalMedias: () -> List<LocalMedia>
@@ -41,15 +43,19 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
         val items = list.filter { !localMedias.contains(it) }.map {
             itemCreator(it)
         }
-        val curCount = mList.size
+        val curCount = itemCount
         when {
             curCount + items.size < maxSelectNum -> {
-                addAllToEnd(items)
+                val newItems = currentList.toMutableList()
+                newItems.addAll(items)
+                submitList(newItems)
                 onAdded()
             }
             curCount + items.size == maxSelectNum -> {// 移除+号
                 notifyRemovePlus()
-                addAllToEnd(items)
+                val newItems = currentList.toMutableList()
+                newItems.addAll(items)
+                submitList(newItems)
                 onAdded()
             }
             else -> {// 不能添加
@@ -59,14 +65,18 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
     }
 
     fun removeItem(position: Int) {
-        val curCount = mList.size
+        val curCount = itemCount
         when {
             curCount < maxSelectNum -> {
-                remove(position)
+                val newItems = currentList.toMutableList()
+                newItems.removeAt(position)
+                submitList(newItems)
                 onRemoved()
             }
             curCount == maxSelectNum -> {// 添加+号
-                remove(position)
+                val newItems = currentList.toMutableList()
+                newItems.removeAt(position)
+                submitList(newItems)
                 notifyAddPlus()
                 onRemoved()
             }

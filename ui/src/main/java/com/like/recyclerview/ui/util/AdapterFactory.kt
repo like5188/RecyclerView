@@ -5,8 +5,6 @@ import com.like.recyclerview.ui.loadstate.LoadStateItem
 
 object AdapterFactory {
 
-    fun createLoadMoreAdapter() = LoadStateAdapter().apply {
-        addToEnd(LoadStateItem())
-    }
+    fun createLoadMoreAdapter() = LoadStateAdapter(LoadStateItem())
 
 }

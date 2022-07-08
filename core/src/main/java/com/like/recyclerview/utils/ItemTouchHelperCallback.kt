@@ -5,7 +5,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.like.recyclerview.adapter.BaseAdapter
+import com.like.recyclerview.adapter.BaseListAdapter
+import java.util.*
 
 /*
 * 使用方式：在 adapter 中
@@ -24,8 +25,8 @@ override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
  * @param adapter                       数据的 Adapter
  * @param forbidsDraggingItemPosition   禁止拖拽的 item 的位置，默认 -1，表示没有需要禁止拖拽的 item。
  */
-class ItemTouchHelperCallback(
-    private val adapter: BaseAdapter<*, *>,
+class ItemTouchHelperCallback<ValueInList>(
+    private val adapter: BaseListAdapter<*, ValueInList>,
     private val forbidsDraggingItemPosition: Int = -1,
 ) : ItemTouchHelper.Callback() {
 
@@ -46,7 +47,9 @@ class ItemTouchHelperCallback(
         }
         val fromPosition = viewHolder.bindingAdapterPosition
         val toPosition = target.bindingAdapterPosition// 不能使用 absoluteAdapterPosition，否则当移动到加号上去会崩溃。
-        adapter.moveItem(fromPosition, toPosition)
+        val newItems = adapter.currentList.toMutableList()
+        Collections.swap(newItems, fromPosition, toPosition)
+        adapter.submitList(newItems)
         return true
     }
 

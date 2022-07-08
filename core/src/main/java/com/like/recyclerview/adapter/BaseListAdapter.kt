@@ -4,10 +4,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.like.recyclerview.model.IRecyclerViewItem
-import com.like.recyclerview.utils.AdapterDataManager
-import com.like.recyclerview.utils.IAdapterDataManager
 import com.like.recyclerview.utils.IListenerManager
 import com.like.recyclerview.utils.ListenerManager
 import com.like.recyclerview.viewholder.BindingViewHolder
@@ -18,13 +17,9 @@ import com.like.recyclerview.viewholder.BindingViewHolder
  * 2：数据处理；
  * 3：界面更新；
  */
-open class BaseAdapter<VB : ViewDataBinding, ValueInList>
-    : RecyclerView.Adapter<BindingViewHolder<VB>>(),
-    IListenerManager<VB> by ListenerManager(),
-    IAdapterDataManager<ValueInList> by AdapterDataManager() {
-    init {
-        this.initAdapterDataManager(this)
-    }
+open class BaseListAdapter<VB : ViewDataBinding, ValueInList>(diffCallback: DiffUtil.ItemCallback<ValueInList>) :
+    ListAdapter<ValueInList, BindingViewHolder<VB>>(diffCallback),
+    IListenerManager<VB> by ListenerManager() {
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
         return BindingViewHolder(DataBindingUtil.inflate<VB>(LayoutInflater.from(parent.context), viewType, parent, false)).apply {
@@ -40,12 +35,8 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
         }
     }
 
-    final override fun getItemCount(): Int {
-        return mList.size
-    }
-
     final override fun getItemViewType(position: Int): Int {
-        val item = get(position) ?: return -1
+        val item = getItem(position) ?: return -1
         if (item is IRecyclerViewItem) {
             return item.layoutId
         }
@@ -53,7 +44,7 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
     }
 
     final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
-        val item = get(holder.bindingAdapterPosition) ?: return
+        val item = getItem(holder.bindingAdapterPosition) ?: return
         if (item is IRecyclerViewItem) {
             val variableId = item.variableId
             if (variableId >= 0) {
@@ -69,6 +60,9 @@ open class BaseAdapter<VB : ViewDataBinding, ValueInList>
         onBindViewHolder(holder, item)
     }
 
+    /**
+     * 如果没有使用 [IRecyclerViewItem] 类型的数据类，则必须重写此方法
+     */
     open fun getItemViewType(position: Int, item: ValueInList): Int = -1
 
     open fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {}

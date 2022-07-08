@@ -2,18 +2,20 @@ package com.like.recyclerview.ext.tree
 
 import android.widget.CheckBox
 import androidx.databinding.ViewDataBinding
-import com.like.recyclerview.adapter.BaseAdapter
+import androidx.recyclerview.widget.DiffUtil
+import com.like.recyclerview.adapter.BaseListAdapter
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 /**
  * 树形结构的adapter，不使用分页
  */
-abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : BaseAdapter<VB, BaseTreeNode>() {
+abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding>(diffCallback: DiffUtil.ItemCallback<BaseTreeNode>) :
+    BaseListAdapter<VB, BaseTreeNode>(diffCallback) {
     init {
-        addOnItemClickListener {
+        this.addOnItemClickListener {
             val binding = it.binding
             val position = it.bindingAdapterPosition
-            val item = get(position)
+            val item = currentList[position]
             clickItem(binding, position, item)
         }
     }
@@ -24,8 +26,8 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : BaseAdapt
     fun clickItem(binding: ViewDataBinding, position: Int, item: BaseTreeNode?) {
         item ?: return
         if (item.isExpanded) {
-            val children = mList.filter { it.isChild(item) }
-            removeAll(children)
+            val newList = currentList.filter { !it.isChild(item) }
+            submitList(newList)
             onContract(item, position, binding)
             item.isExpanded = !item.isExpanded
         } else {
@@ -35,7 +37,9 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : BaseAdapt
                     it.parent = item
                     it.isChecked.set(item.isChecked.get())
                 }
-                addAll(position + 1, children)
+                val newList = currentList.toMutableList()
+                newList.addAll(position + 1, children)
+                submitList(newList)
                 item.isExpanded = !item.isExpanded
             }
         }
@@ -56,7 +60,7 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : BaseAdapt
     fun clickCheckBox(checkBox: CheckBox, item: BaseTreeNode) {
         item.isChecked.set(checkBox.isChecked)
         // 改变孩子的checkBox状态
-        val children = mList.filter { it.isChild(item) }
+        val children = currentList.filter { it.isChild(item) }
         children.forEach {
             it.isChecked.set(checkBox.isChecked)
         }
@@ -69,7 +73,7 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : BaseAdapt
         } else {
             // 取消选中孩子，并不一定要取消选中父亲，因为父亲有可能有其它选中的孩子
             parents.forEach { parent ->
-                val checkedChildren = mList
+                val checkedChildren = currentList
                     .filter { it.isChild(parent) && it.isChecked.get() }
                 if (checkedChildren.isEmpty()) {
                     parent.isChecked.set(checkBox.isChecked)
@@ -81,7 +85,7 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding> : BaseAdapt
     /**
      * 获取已经选中的节点
      */
-    fun getCheckedNodes() = mList
+    fun getCheckedNodes() = currentList
         .filter { it.isChecked.get() }
         .map { it as BaseTreeNode }
 

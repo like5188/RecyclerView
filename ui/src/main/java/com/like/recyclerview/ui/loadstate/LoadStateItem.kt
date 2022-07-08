@@ -2,12 +2,10 @@ package com.like.recyclerview.ui.loadstate
 
 import androidx.annotation.ColorRes
 import androidx.databinding.ObservableInt
-import com.like.recyclerview.model.IRecyclerViewItem
-import com.like.recyclerview.ui.BR
 import com.like.recyclerview.ui.R
 
 /**
- * 用于 RecyclerView 加载状态的视图
+ * 加载状态数据
  *
  * @param loadingTip        加载中的描述
  * @param endTip            没有数据了的描述
@@ -21,15 +19,13 @@ data class LoadStateItem(
     @ColorRes val progressBarBgColor: Int = R.color.recyclerview_bg_gray_0,
     @ColorRes val textColor: Int = R.color.recyclerview_text_gray_0,
     val textSize: Float = 16f,
-) : IRecyclerViewItem {
+) {
     companion object {
         const val LOADING = 0
         const val END = 1
         const val ERROR = 2
     }
 
-    override val layoutId: Int = R.layout.item_load_state
-    override val variableId: Int = BR.loadMoreItem
     val status: ObservableInt = ObservableInt(LOADING)
 
     fun loading() {

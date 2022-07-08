@@ -17,7 +17,6 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
-import com.like.recyclerview.sample.concat.vo.Item2
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
 import com.like.recyclerview.ui.util.AdapterFactory
@@ -93,39 +92,16 @@ class ConcatActivity : AppCompatActivity() {
 
 //        initItems()
 //        initHeadersAndItems()
-//        initLoadAfter()
+        initLoadAfter()
 //        initLoadAfterWithHeaders()
 //        initLoadBefore()
-//        mBinding.btnRefresh.setOnClickListener {
-//            lifecycleScope.launch {
-//                adapter.refresh()
-//            }
-//        }
-//        lifecycleScope.launch {
-//            adapter.initial()
-//        }
-
-
-        // ListAdapter 测试
-        initListAdapter()
-    }
-
-    private fun initListAdapter() {
-        val itemListAdapter = ItemListAdapter()
-        mBinding.rv.adapter = itemListAdapter
-        lifecycleScope.launchWhenCreated {
-            val list = mViewModel.getItems()
-            itemListAdapter.submitList(list)
-        }
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
-                val list = mViewModel.getItems()
-                itemListAdapter.submitList(list)
-//                val list = itemListAdapter.currentList.toMutableList()
-//                val newData = (list[1] as Item2).copy(name = "hahahaha")
-//                list[1] = newData
-//                itemListAdapter.submitList(list)
+                adapter.refresh()
             }
+        }
+        lifecycleScope.launch {
+            adapter.initial()
         }
     }
 
@@ -133,7 +109,7 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withDataAdapter(
+            withListAdapter(
                 itemAdapter,
                 mViewModel::getItems.asFlow().map {
                     it?.take(3)
@@ -149,7 +125,7 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withDataAdapter(
+            withListAdapter(
                 itemAdapter,
                 mViewModel::getHeadersAndItems.asFlow()
             )
@@ -200,7 +176,7 @@ class ConcatActivity : AppCompatActivity() {
                     }
                 }
             }
-            withPagingDataAdapter(
+            withPagingListAdapter(
                 itemAdapter,
                 mViewModel.loadAfterResult.apply {
                     flow = flow.map {
@@ -219,7 +195,7 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
-            withPagingDataAdapter(
+            withPagingListAdapter(
                 itemAdapter,
                 mViewModel.LoadAfterWithHeadersResult
             )
@@ -232,7 +208,7 @@ class ConcatActivity : AppCompatActivity() {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
             withLoadStateHeader(loadMoreAdapter)
-            withPagingDataAdapter(
+            withPagingListAdapter(
                 itemAdapter,
                 mViewModel.loadBeforeResult.apply {
                     flow = flow.map {

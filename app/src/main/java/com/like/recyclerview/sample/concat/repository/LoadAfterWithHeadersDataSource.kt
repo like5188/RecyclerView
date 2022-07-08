@@ -38,7 +38,7 @@ class LoadAfterWithHeadersDataSource(pageSize: Int) : PageNoKeyedPagingDataSourc
     }
 
     private suspend fun getAfter(pageNo: Int, pageSize: Int): List<IRecyclerViewItem>? {
-        Logger.d("LoadAfterWithHeadersDataSource getAfter")
+        Logger.d("LoadAfterWithHeadersDataSource getAfter pageNo=$pageNo pageSize=$pageSize i=$i j=$j")
         delay(1000)
         val start = pageNo * pageSize + 1
         val end = start + pageSize

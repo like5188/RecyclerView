@@ -1,26 +1,32 @@
 package com.like.recyclerview.ext.addimage
 
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.selectMultiplePhoto
 import com.like.common.util.selectSinglePhoto
-import com.like.recyclerview.adapter.BaseAdapter
 import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.entity.LocalMedia
 import kotlinx.coroutines.launch
 
-open class PlusAdapter<VB : ViewDataBinding, ValueInList>(
+abstract class PlusAdapter<VB : ViewDataBinding, ValueInList>(
     private val maxSelectNum: Int = Int.MAX_VALUE
-) : BaseAdapter<VB, ValueInList>() {
+) : RecyclerView.Adapter<BindingViewHolder<VB>>() {
     lateinit var activity: AppCompatActivity
     lateinit var getSelectedLocalMedias: () -> List<LocalMedia>
     lateinit var onSelected: (List<LocalMedia>) -> Unit
     lateinit var onPlusClicked: () -> Unit
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {
-        super.onBindViewHolder(holder, item)
-        holder.binding.root.setOnClickListener {
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
+        return BindingViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), getLayoutId(), parent, false))
+    }
+
+    final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
+        holder.itemView.setOnClickListener {
             activity.lifecycleScope.launch {
                 if (maxSelectNum == 1) {
                     activity.selectSinglePhoto()?.apply {
@@ -34,6 +40,14 @@ open class PlusAdapter<VB : ViewDataBinding, ValueInList>(
             }
             onPlusClicked()
         }
+        onBindViewHolder(holder)
     }
+
+    final override fun getItemCount(): Int {
+        return 1
+    }
+
+    abstract fun getLayoutId(): Int
+    open fun onBindViewHolder(holder: BindingViewHolder<VB>) {}
 
 }

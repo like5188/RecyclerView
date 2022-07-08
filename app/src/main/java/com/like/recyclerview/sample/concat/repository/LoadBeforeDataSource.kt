@@ -12,7 +12,7 @@ class LoadBeforeDataSource(pageSize: Int) : PageNoKeyedPagingDataSource<List<IRe
     private var j = 0
 
     override suspend fun load(requestType: RequestType, pageNo: Int, pageSize: Int): List<IRecyclerViewItem>? {
-        Logger.d("LoadBeforeDataSource requestType=$requestType pageNo=$pageNo pageSize=$pageSize")
+        Logger.d("LoadBeforeDataSource requestType=$requestType pageNo=$pageNo pageSize=$pageSize i=$i j=$j")
         if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
             i = 0
         }
