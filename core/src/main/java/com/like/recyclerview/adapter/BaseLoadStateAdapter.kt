@@ -7,7 +7,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import com.like.common.util.Logger
 import com.like.recyclerview.utils.findFirstVisibleItemPosition
 import com.like.recyclerview.utils.findLastVisibleItemPosition
 import com.like.recyclerview.viewholder.BindingViewHolder
@@ -33,7 +32,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
                 // 此回调在添加 item 时也会触发，但是刷新后，如果添加的 item 和上一次的一样多，则不会触发。
                 // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
                 // 滚动界面触发
-                Logger.i("loadMore by scroll")
                 loadMore()
             }
         }
@@ -69,7 +67,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
     internal fun hasMore(isRefresh: Boolean) {
         hasMore.compareAndSet(false, true)
         if (isRefresh) {// 只针对 onScrolled 无法处理的那种刷新情况
-            Logger.i("loadMore by refresh data")
             loadMore()
         }
     }
@@ -103,7 +100,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
             val context = mHolder.itemView.context
             if (context is LifecycleOwner) {
                 context.lifecycleScope.launch(Dispatchers.Main) {
-                    Logger.w("onLoadMore")
                     onLoading()
                     onLoadMore()
                 }
@@ -129,7 +125,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
         mHolder.itemView.setOnClickListener {
             hasMore.set(true)
             // 加载失败后由点击事件触发
-            Logger.i("loadMore by click after error")
             loadMore()
         }
         onError(throwable)
