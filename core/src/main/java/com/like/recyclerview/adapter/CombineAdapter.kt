@@ -209,7 +209,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
 
     /**
      * 是否有更多数据
-     * 判断由使用者提供。因为 listAdapter 中有可能包含 header 和 item。
+     * 判断由使用者提供。因为 listAdapter 中有可能包含 header（比如 banner） 和 item。
      * 我们一般需要根据 item 来判断。如果全部是 header 数据的话，就不应该有更多数据。
      */
     open fun hasMore(data: List<ValueInList>?): Boolean {
