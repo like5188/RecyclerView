@@ -100,8 +100,8 @@ class ConcatActivity : AppCompatActivity() {
 //        initItems()
 //        initHeadersAndItems()
 //        initLoadAfter()
-//        initLoadAfterWithHeaders()
-        initLoadBefore()
+        initLoadAfterWithHeaders()
+//        initLoadBefore()
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
                 adapter.refresh()
