@@ -72,7 +72,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
             recyclerView.postDelayed({
                 Logger.i("loadMore by refresh data")
                 loadMore()
-            }, 1000)
+            }, 200)
         }
     }
 
