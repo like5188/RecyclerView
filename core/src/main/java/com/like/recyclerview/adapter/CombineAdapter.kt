@@ -173,11 +173,11 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                         }
                         // 更新 loadStateAdapter 的状态
                         if (hasMore) {
-                            // 此处必须放在 submitList 的回调里面，并且使用 post 来提交
+                            // 此处必须放在 submitList 的回调里面，并且使用 postDelayed 来提交，达到双重保障。当然也可以监听数据的插入来处理，但是比较麻烦。
                             // 否则会由于调用本方法时界面还没有真正收到新的数据，
                             // 导致 loadStateAdapter 还显示于界面中（实际上插入新的数据后，它有可能会处于界面外了，此时不应该触发加载更多），
                             // 导致错误的调用加载更多。
-                            recyclerView.post { loadStateAdapter?.hasMore(true) }
+                            recyclerView.postDelayed({ loadStateAdapter?.hasMore(true) }, 100)
                         }
                     }
                 } else {
@@ -199,7 +199,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                         }
                         // 更新 loadStateAdapter 的状态
                         if (hasMore) {
-                            recyclerView.post { loadStateAdapter?.hasMore(false) }
+                            recyclerView.postDelayed({ loadStateAdapter?.hasMore(false) }, 100)
                         }
                     }
                 }
