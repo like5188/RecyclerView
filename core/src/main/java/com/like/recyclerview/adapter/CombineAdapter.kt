@@ -154,17 +154,22 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
             }.flowOn(Dispatchers.Main)
             .collect { items ->
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
-                    if (!items.isNullOrEmpty()) {
-                        listAdapter?.apply {
-                            submitList(items)
-                            if (loadStateAdapter?.isAfter == false) {// 往前加载更多
-                                adapter.addIfAbsent(loadStateAdapter)
-                                adapter.addIfAbsent(this)
-                            } else {// 不分页或者往后加载更多
-                                adapter.addIfAbsent(this)
-                                adapter.addIfAbsent(loadStateAdapter)
-                            }
+                    val hasMore = hasMore(items)
+                    // 添加 adapter
+                    if (loadStateAdapter?.isAfter == false) {// 往前加载更多
+                        if (hasMore) {
+                            adapter.addIfAbsent(loadStateAdapter)
                         }
+                        adapter.addIfAbsent(listAdapter)
+                    } else {// 不分页或者往后加载更多
+                        adapter.addIfAbsent(listAdapter)
+                        if (hasMore) {
+                            adapter.addIfAbsent(loadStateAdapter)
+                        }
+                    }
+                    // 添加列表数据
+                    if (!items.isNullOrEmpty()) {
+                        listAdapter?.submitList(items)
 
                         if (loadStateAdapter?.isAfter == false) {// 往前加载更多
                             recyclerView.scrollToBottom()
@@ -172,11 +177,13 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                             recyclerView.scrollToTop()
                         }
                     }
-                    if (hasMore(items)) {
+                    // 更新 loadStateAdapter 的状态
+                    if (hasMore) {
                         loadStateAdapter?.hasMore(true)
                     }
                 } else {
                     if (!items.isNullOrEmpty()) {
+                        // 添加列表数据
                         listAdapter?.apply {
                             val newItems = currentList.toMutableList()
                             if (loadStateAdapter?.isAfter == false) {// 往前加载更多
@@ -189,6 +196,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                             }
                         }
                     }
+                    // 更新 loadStateAdapter 的状态
                     if (hasMore(items)) {
                         // 还有更多数据需要加载
                         loadStateAdapter?.hasMore(false)
