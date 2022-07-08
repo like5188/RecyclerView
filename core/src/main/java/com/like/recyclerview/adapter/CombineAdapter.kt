@@ -180,7 +180,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                             recyclerView.postDelayed({ loadStateAdapter?.hasMore(true) }, 100)
                         }
                     }
-                } else {
+                } else {// 加载更多
                     if (items.isNullOrEmpty()) {
                         loadStateAdapter?.end()
                         return@collect
