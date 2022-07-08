@@ -28,12 +28,14 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
     internal var isAfter: Boolean = true
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            // 此回调在添加 item 时也会触发，但是刷新后，如果添加的 item 和上一次的一样多，则不会触发。
-            // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
-            // 滚动界面触发
-            Logger.i("loadMore by scroll")
-            loadMore()
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                // 此回调在添加 item 时也会触发，但是刷新后，如果添加的 item 和上一次的一样多，则不会触发。
+                // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
+                // 滚动界面触发
+                Logger.i("loadMore by scroll")
+                loadMore()
+            }
         }
     }
 
@@ -66,11 +68,11 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
      */
     internal fun hasMore(isRefresh: Boolean) {
         hasMore.compareAndSet(false, true)
-        if (isRefresh) {// 只针对 onScrolled 无法处理的那种刷新情况，需要调用 post 方法，否则会由于调用本方法时界面还没有更新，导致多次调用加载更多。
-            recyclerView.post {
+        if (isRefresh) {// 只针对 onScrolled 无法处理的那种刷新情况，需要调用 postDelayed 方法，否则会由于调用本方法时界面还没有真正显示出来插入的数据，导致多次调用加载更多。
+            recyclerView.postDelayed({
                 Logger.i("loadMore by refresh data")
                 loadMore()
-            }
+            }, 1000)
         }
     }
 
