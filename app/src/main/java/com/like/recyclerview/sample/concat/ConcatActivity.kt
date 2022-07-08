@@ -17,6 +17,8 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.ProgressDialog
 import com.like.recyclerview.sample.R
+import com.like.recyclerview.sample.concat.vo.Item1
+import com.like.recyclerview.sample.concat.vo.Item2
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
 import com.like.recyclerview.ui.util.AdapterFactory
@@ -53,7 +55,12 @@ class ConcatActivity : AppCompatActivity() {
         AdapterFactory.createLoadMoreAdapter()
     }
     private val adapter by lazy {
-        CombineAdapter<IRecyclerViewItem>(mBinding.rv)
+        object : CombineAdapter<IRecyclerViewItem>(mBinding.rv) {
+            override fun hasMore(data: List<IRecyclerViewItem>?): Boolean {
+                val items = data?.filter { it is Item1 || it is Item2 }
+                return !items.isNullOrEmpty()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,8 +100,8 @@ class ConcatActivity : AppCompatActivity() {
 //        initItems()
 //        initHeadersAndItems()
 //        initLoadAfter()
-//        initLoadAfterWithHeaders()
-        initLoadBefore()
+        initLoadAfterWithHeaders()
+//        initLoadBefore()
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
                 adapter.refresh()

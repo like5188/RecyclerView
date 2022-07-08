@@ -171,7 +171,8 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                         } else {
                             recyclerView.scrollToTop()
                         }
-
+                    }
+                    if (hasMore(items)) {
                         loadStateAdapter?.hasMore(true)
                     }
                 } else {
@@ -187,6 +188,8 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                                 submitList(newItems)
                             }
                         }
+                    }
+                    if (hasMore(items)) {
                         // 还有更多数据需要加载
                         loadStateAdapter?.hasMore(false)
                     } else {
@@ -196,6 +199,10 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                 }
                 onSuccess?.invoke(requestType, items)
             }
+    }
+
+    open fun hasMore(data: List<ValueInList>?): Boolean {
+        return !data.isNullOrEmpty()
     }
 
 }
