@@ -20,9 +20,9 @@ import kotlinx.coroutines.flow.*
  */
 open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
     private val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
-    private var listAdapter: BaseListAdapter<*, ValueInList>? = null
+    private lateinit var listAdapter: BaseListAdapter<*, ValueInList>
     private var loadStateAdapter: BaseLoadStateAdapter<*>? = null
-    private var pagingResult: PagingResult<List<ValueInList>?>? = null
+    private lateinit var pagingResult: PagingResult<List<ValueInList>?>
     private val concurrencyHelper = ConcurrencyHelper()
 
     init {
@@ -88,10 +88,9 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 初始化操作（线程安全）
      */
     suspend fun initial() {
-        val f = pagingResult?.flow ?: return
         concurrencyHelper.cancelPreviousThenRun {
-            pagingResult?.setRequestType?.invoke(RequestType.Initial)
-            collect(RequestType.Initial, f, show, hide, onError, onSuccess)
+            pagingResult.setRequestType.invoke(RequestType.Initial)
+            collect(RequestType.Initial, pagingResult.flow, show, hide, onError, onSuccess)
         }
     }
 
@@ -99,10 +98,9 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 刷新操作（线程安全）
      */
     suspend fun refresh() {
-        val f = pagingResult?.flow ?: return
         concurrencyHelper.cancelPreviousThenRun {
-            pagingResult?.setRequestType?.invoke(RequestType.Refresh)
-            collect(RequestType.Refresh, f, show, hide, onError, onSuccess)
+            pagingResult.setRequestType.invoke(RequestType.Refresh)
+            collect(RequestType.Refresh, pagingResult.flow, show, hide, onError, onSuccess)
         }
     }
 
@@ -110,10 +108,9 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 往后加载更多操作（线程安全）
      */
     private suspend fun after() {
-        val f = pagingResult?.flow ?: return
         concurrencyHelper.dropIfPreviousRunning {
-            pagingResult?.setRequestType?.invoke(RequestType.After)
-            collect(RequestType.After, f, show, hide, onError, onSuccess)
+            pagingResult.setRequestType.invoke(RequestType.After)
+            collect(RequestType.After, pagingResult.flow, show, hide, onError, onSuccess)
         }
     }
 
@@ -121,10 +118,9 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 往前加载更多操作（线程安全）
      */
     private suspend fun before() {
-        val f = pagingResult?.flow ?: return
         concurrencyHelper.dropIfPreviousRunning {
-            pagingResult?.setRequestType?.invoke(RequestType.Before)
-            collect(RequestType.Before, f, show, hide, onError, onSuccess)
+            pagingResult.setRequestType.invoke(RequestType.Before)
+            collect(RequestType.Before, pagingResult.flow, show, hide, onError, onSuccess)
         }
     }
 
@@ -171,7 +167,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                             adapter.addIfAbsent(loadStateAdapter)
                         }
                     }
-                    listAdapter?.submitList(items) {
+                    listAdapter.submitList(items) {
                         // RecyclerView 界面位置处理
                         if (loadMoreBefore) {
                             recyclerView.scrollToBottom()
@@ -180,11 +176,11 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                         }
                         // 更新 loadStateAdapter 的状态
                         if (hasMore) {
-                            // 此处必须放在 submitList 的回调里面
+                            // 此处必须放在 submitList 的回调里面，并且使用 post 来提交
                             // 否则会由于调用本方法时界面还没有真正收到新的数据，
                             // 导致 loadStateAdapter 还显示于界面中（实际上插入新的数据后，它有可能会处于界面外了，此时不应该触发加载更多），
                             // 导致错误的调用加载更多。
-                            loadStateAdapter?.hasMore(true)
+                            recyclerView.post { loadStateAdapter?.hasMore(true) }
                         }
                     }
                 } else {
@@ -193,22 +189,20 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                         return@collect
                     }
                     // 添加列表数据
-                    listAdapter?.apply {
-                        val newItems = currentList.toMutableList()
+                    val newItems = listAdapter.currentList.toMutableList()
+                    if (loadMoreBefore) {
+                        newItems.addAll(0, items)
+                    } else {
+                        newItems.addAll(items)
+                    }
+                    listAdapter.submitList(newItems) {
+                        // RecyclerView 界面位置处理
                         if (loadMoreBefore) {
-                            newItems.addAll(0, items)
-                        } else {
-                            newItems.addAll(items)
+                            recyclerView.keepPosition(items.size, 1)
                         }
-                        submitList(newItems) {
-                            // RecyclerView 界面位置处理
-                            if (loadMoreBefore) {
-                                recyclerView.keepPosition(items.size, 1)
-                            }
-                            // 更新 loadStateAdapter 的状态
-                            if (hasMore) {
-                                loadStateAdapter?.hasMore(false)
-                            }
+                        // 更新 loadStateAdapter 的状态
+                        if (hasMore) {
+                            recyclerView.post { loadStateAdapter?.hasMore(false) }
                         }
                     }
                 }
