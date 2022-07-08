@@ -88,9 +88,10 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 初始化操作（线程安全）
      */
     suspend fun initial() {
+        val requestType = RequestType.Initial
         concurrencyHelper.cancelPreviousThenRun {
-            pagingResult.setRequestType.invoke(RequestType.Initial)
-            collect(RequestType.Initial, pagingResult.flow, show, hide, onError, onSuccess)
+            pagingResult.setRequestType.invoke(requestType)
+            collect(requestType)
         }
     }
 
@@ -98,9 +99,10 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 刷新操作（线程安全）
      */
     suspend fun refresh() {
+        val requestType = RequestType.Refresh
         concurrencyHelper.cancelPreviousThenRun {
-            pagingResult.setRequestType.invoke(RequestType.Refresh)
-            collect(RequestType.Refresh, pagingResult.flow, show, hide, onError, onSuccess)
+            pagingResult.setRequestType.invoke(requestType)
+            collect(requestType)
         }
     }
 
@@ -108,9 +110,10 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 往后加载更多操作（线程安全）
      */
     private suspend fun after() {
+        val requestType = RequestType.After
         concurrencyHelper.dropIfPreviousRunning {
-            pagingResult.setRequestType.invoke(RequestType.After)
-            collect(RequestType.After, pagingResult.flow, show, hide, onError, onSuccess)
+            pagingResult.setRequestType.invoke(requestType)
+            collect(requestType)
         }
     }
 
@@ -118,21 +121,15 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 往前加载更多操作（线程安全）
      */
     private suspend fun before() {
+        val requestType = RequestType.Before
         concurrencyHelper.dropIfPreviousRunning {
-            pagingResult.setRequestType.invoke(RequestType.Before)
-            collect(RequestType.Before, pagingResult.flow, show, hide, onError, onSuccess)
+            pagingResult.setRequestType.invoke(requestType)
+            collect(requestType)
         }
     }
 
-    private suspend fun collect(
-        requestType: RequestType,
-        flow: Flow<List<ValueInList>?>,
-        show: (() -> Unit)? = null,
-        hide: (() -> Unit)? = null,
-        onError: (suspend (RequestType, Throwable) -> Unit)? = null,
-        onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null,
-    ) {
-        flow.flowOn(Dispatchers.IO)
+    private suspend fun collect(requestType: RequestType) {
+        pagingResult.flow.flowOn(Dispatchers.IO)
             .onStart {
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
                     show?.invoke()
