@@ -68,11 +68,9 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
      */
     internal fun hasMore(isRefresh: Boolean) {
         hasMore.compareAndSet(false, true)
-        if (isRefresh) {// 只针对 onScrolled 无法处理的那种刷新情况，需要调用 postDelayed 方法，否则会由于调用本方法时界面还没有真正显示出来插入的数据，导致多次调用加载更多。
-            recyclerView.postDelayed({
-                Logger.i("loadMore by refresh data")
-                loadMore()
-            }, 200)
+        if (isRefresh) {// 只针对 onScrolled 无法处理的那种刷新情况
+            Logger.i("loadMore by refresh data")
+            loadMore()
         }
     }
 

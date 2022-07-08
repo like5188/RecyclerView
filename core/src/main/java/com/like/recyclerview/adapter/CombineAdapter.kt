@@ -153,62 +153,74 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
                 onError?.invoke(requestType, it)
             }.flowOn(Dispatchers.Main)
             .collect { items ->
+                // 是否往前加载更多。处理逻辑分为两种：1、往前加载更多；2、往后加载更多或者不分页；
+                val loadMoreBefore = loadStateAdapter?.isAfter == false
+                val hasMore = hasMore(items)
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
-                    val hasMore = hasMore(items)
+                    if (items.isNullOrEmpty()) return@collect
+                    // 添加列表数据
                     // 添加 adapter
-                    if (loadStateAdapter?.isAfter == false) {// 往前加载更多
+                    if (loadMoreBefore) {
                         if (hasMore) {
                             adapter.addIfAbsent(loadStateAdapter)
                         }
                         adapter.addIfAbsent(listAdapter)
-                    } else {// 不分页或者往后加载更多
+                    } else {
                         adapter.addIfAbsent(listAdapter)
                         if (hasMore) {
                             adapter.addIfAbsent(loadStateAdapter)
                         }
                     }
-                    // 添加列表数据
-                    if (!items.isNullOrEmpty()) {
-                        listAdapter?.submitList(items)
-
-                        if (loadStateAdapter?.isAfter == false) {// 往前加载更多
+                    listAdapter?.submitList(items) {
+                        // RecyclerView 界面位置处理
+                        if (loadMoreBefore) {
                             recyclerView.scrollToBottom()
                         } else {
                             recyclerView.scrollToTop()
                         }
-                    }
-                    // 更新 loadStateAdapter 的状态
-                    if (hasMore) {
-                        loadStateAdapter?.hasMore(true)
-                    }
-                } else {
-                    if (!items.isNullOrEmpty()) {
-                        // 添加列表数据
-                        listAdapter?.apply {
-                            val newItems = currentList.toMutableList()
-                            if (loadStateAdapter?.isAfter == false) {// 往前加载更多
-                                newItems.addAll(0, items)
-                                submitList(newItems)
-                                recyclerView.keepPosition(items.size, 1)
-                            } else {
-                                newItems.addAll(items)
-                                submitList(newItems)
-                            }
+                        // 更新 loadStateAdapter 的状态
+                        if (hasMore) {
+                            // 此处必须放在 submitList 的回调里面
+                            // 否则会由于调用本方法时界面还没有真正收到新的数据，
+                            // 导致 loadStateAdapter 还显示于界面中（实际上插入新的数据后，它有可能会处于界面外了，此时不应该触发加载更多），
+                            // 导致错误的调用加载更多。
+                            loadStateAdapter?.hasMore(true)
                         }
                     }
-                    // 更新 loadStateAdapter 的状态
-                    if (hasMore(items)) {
-                        // 还有更多数据需要加载
-                        loadStateAdapter?.hasMore(false)
-                    } else {
-                        // 没有更多数据需要加载
+                } else {
+                    if (items.isNullOrEmpty()) {
                         loadStateAdapter?.end()
+                        return@collect
+                    }
+                    // 添加列表数据
+                    listAdapter?.apply {
+                        val newItems = currentList.toMutableList()
+                        if (loadMoreBefore) {
+                            newItems.addAll(0, items)
+                        } else {
+                            newItems.addAll(items)
+                        }
+                        submitList(newItems) {
+                            // RecyclerView 界面位置处理
+                            if (loadMoreBefore) {
+                                recyclerView.keepPosition(items.size, 1)
+                            }
+                            // 更新 loadStateAdapter 的状态
+                            if (hasMore) {
+                                loadStateAdapter?.hasMore(false)
+                            }
+                        }
                     }
                 }
                 onSuccess?.invoke(requestType, items)
             }
     }
 
+    /**
+     * 是否有更多数据
+     * 判断由使用者提供。因为 listAdapter 中有可能包含 header 和 item。
+     * 我们一般需要根据 item 来判断。如果全部是 header 数据的话，就不应该有更多数据。
+     */
     open fun hasMore(data: List<ValueInList>?): Boolean {
         return !data.isNullOrEmpty()
     }
