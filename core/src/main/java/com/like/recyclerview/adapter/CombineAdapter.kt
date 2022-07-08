@@ -69,6 +69,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
 
     /**
      * 设置（不分页）列表数据，固定于 [RecyclerView] 中部。
+     * 注意：[withListAdapter]、[withPagingListAdapter]这两个方法必须调用一个
      */
     fun withListAdapter(adapter: BaseListAdapter<*, ValueInList>, flow: Flow<List<ValueInList>?>) {
         this.listAdapter = adapter
@@ -77,6 +78,7 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
 
     /**
      * 设置（分页）列表数据，固定于 [RecyclerView] 中部，并且加载更多的数据是添加到其中。
+     * 注意：[withListAdapter]、[withPagingListAdapter]这两个方法必须调用一个
      * @param pagingResult  列表需要的数据。使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
      */
     fun withPagingListAdapter(adapter: BaseListAdapter<*, ValueInList>, pagingResult: PagingResult<List<ValueInList>?>) {
