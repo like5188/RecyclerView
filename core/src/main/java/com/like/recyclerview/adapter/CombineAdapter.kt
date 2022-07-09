@@ -18,16 +18,13 @@ import kotlinx.coroutines.flow.*
  * ①、初始化、刷新：如果有操作正在执行，则取消正在执行的操作，执行新操作。
  * ②、往后加载更多、往前加载更多：如果有操作正在执行，则放弃新操作，否则执行新操作。
  */
-open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
-    private val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
+open class CombineAdapter<ValueInList> {
+    private lateinit var recyclerView: RecyclerView
+    internal val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
     private lateinit var listAdapter: BaseListAdapter<*, ValueInList>
     private var loadStateAdapter: BaseLoadStateAdapter<*>? = null
     private lateinit var pagingResult: PagingResult<List<ValueInList>?>
     private val concurrencyHelper = ConcurrencyHelper()
-
-    init {
-        recyclerView.adapter = adapter
-    }
 
     /**
      * 初始化或者刷新开始时显示进度条
@@ -48,6 +45,10 @@ open class CombineAdapter<ValueInList>(private val recyclerView: RecyclerView) {
      * 请求成功时回调
      */
     var onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null
+
+    internal fun attachedToRecyclerView(recyclerView: RecyclerView) {
+        this.recyclerView = recyclerView
+    }
 
     /**
      * 设置加载状态视图到 Header，固定于 [RecyclerView] 顶部，用于往前加载更多

@@ -22,6 +22,7 @@ import com.like.recyclerview.sample.concat.vo.Item2
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
 import com.like.recyclerview.ui.util.AdapterFactory
+import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOn
@@ -55,7 +56,7 @@ class ConcatActivity : AppCompatActivity() {
         AdapterFactory.createLoadMoreAdapter()
     }
     private val adapter by lazy {
-        object : CombineAdapter<IRecyclerViewItem>(mBinding.rv) {
+        object : CombineAdapter<IRecyclerViewItem>() {
             override fun hasMore(data: List<IRecyclerViewItem>?): Boolean {
                 val items = data?.filter { it is Item1 || it is Item2 }
                 return !items.isNullOrEmpty()
@@ -67,6 +68,7 @@ class ConcatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
+        mBinding.rv.setAdapter(adapter)
 
 //        lifecycleScope.launchWhenResumed {
 //            (0..3).asFlow()

@@ -3,6 +3,7 @@ package com.like.recyclerview.utils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.like.recyclerview.adapter.CombineAdapter
 
 /**
  * 滚动到最顶部
@@ -57,4 +58,9 @@ fun RecyclerView.findLastVisibleItemPosition(): Int {
         }
         else -> RecyclerView.NO_POSITION
     }
+}
+
+fun RecyclerView.setAdapter(adapter: CombineAdapter<*>) {
+    adapter.attachedToRecyclerView(this)
+    this.adapter = adapter.adapter
 }

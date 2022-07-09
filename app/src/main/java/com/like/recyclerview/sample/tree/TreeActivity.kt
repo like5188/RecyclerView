@@ -15,6 +15,7 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
+import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 
@@ -29,7 +30,7 @@ class TreeActivity : AppCompatActivity() {
         TreeRecyclerViewAdapter()
     }
     private val mAdapter by lazy {
-        CombineAdapter<BaseTreeNode>(mBinding.rv).apply {
+        CombineAdapter<BaseTreeNode>().apply {
             show = { mBinding.swipeRefreshLayout.isRefreshing = true }
             hide = { mBinding.swipeRefreshLayout.isRefreshing = false }
             onError = { requestType, throwable ->
@@ -70,6 +71,7 @@ class TreeActivity : AppCompatActivity() {
                 }
             })
         })
+        mBinding.rv.setAdapter(mAdapter)
 
         mBinding.swipeRefreshLayout.setOnRefreshListener {
             lifecycleScope.launch {
