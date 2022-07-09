@@ -24,3 +24,48 @@ interface IListenerManager<VB : ViewDataBinding> {
     fun clearOnItemLongClickListeners()
 
 }
+
+open class ListenerManager<VB : ViewDataBinding> : IListenerManager<VB> {
+    private val mOnItemClickListeners = mutableListOf<OnItemClickListener<VB>>()
+    private val mOnItemLongClickListeners = mutableListOf<OnItemLongClickListener<VB>>()
+
+    override fun onItemClick(holder: BindingViewHolder<VB>) {
+        mOnItemClickListeners.forEach {
+            it.onItemClick(holder)
+        }
+    }
+
+    override fun onItemLongClick(holder: BindingViewHolder<VB>) {
+        mOnItemLongClickListeners.forEach {
+            it.onItemLongClick(holder)
+        }
+    }
+
+    override fun addOnItemClickListener(listener: OnItemClickListener<VB>) {
+        if (!mOnItemClickListeners.contains(listener)) {
+            mOnItemClickListeners.add(listener)
+        }
+    }
+
+    override fun addOnItemLongClickListener(listener: OnItemLongClickListener<VB>) {
+        if (!mOnItemLongClickListeners.contains(listener)) {
+            mOnItemLongClickListeners.add(listener)
+        }
+    }
+
+    override fun removeOnItemClickListener(listener: OnItemClickListener<VB>) {
+        mOnItemClickListeners.remove(listener)
+    }
+
+    override fun removeOnItemLongClickListener(listener: OnItemLongClickListener<VB>) {
+        mOnItemLongClickListeners.remove(listener)
+    }
+
+    override fun clearOnItemClickListeners() {
+        mOnItemClickListeners.clear()
+    }
+
+    override fun clearOnItemLongClickListeners() {
+        mOnItemLongClickListeners.clear()
+    }
+}

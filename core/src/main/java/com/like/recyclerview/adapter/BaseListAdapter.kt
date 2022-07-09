@@ -12,10 +12,9 @@ import com.like.recyclerview.utils.ListenerManager
 import com.like.recyclerview.viewholder.BindingViewHolder
 
 /**
- * 封装了
+ * 继承自 [ListAdapter]
  * 1：单击、长按监听；
- * 2：数据处理；
- * 3：界面更新；
+ * 2：对[IRecyclerViewItem]类型的数据进行了对应处理；
  */
 open class BaseListAdapter<VB : ViewDataBinding, ValueInList>(diffCallback: DiffUtil.ItemCallback<ValueInList>) :
     ListAdapter<ValueInList, BindingViewHolder<VB>>(diffCallback),
