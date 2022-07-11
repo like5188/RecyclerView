@@ -21,9 +21,9 @@ import com.like.recyclerview.sample.concat.vo.Item1
 import com.like.recyclerview.sample.concat.vo.Item2
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
-import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.ui.adapter.BaseUiStatusController
 import com.like.recyclerview.ui.adapter.UiStatusControllerCombineAdapter
+import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -53,8 +53,8 @@ class ConcatActivity : AppCompatActivity() {
         AdapterFactory.createLoadMoreAdapter()
     }
 
-    private val uiStatusController by lazy {
-        object : BaseUiStatusController(mBinding.rv) {
+    private val adapter by lazy {
+        val uiStatusController = object : BaseUiStatusController(mBinding.rv) {
             override fun addUiStatus(context: Context, refresh: suspend () -> Unit) {
                 addUiStatus(TAG_UI_STATUS_EMPTY, UiStatus<ViewUiStatusBinding>(context, R.layout.view_ui_status).apply {
                     dataBinding.iv.setImageResource(R.drawable.common_back)
@@ -95,17 +95,9 @@ class ConcatActivity : AppCompatActivity() {
                 return TAG_UI_STATUS_ERROR
             }
         }
-    }
-    private val adapter by lazy {
-//        object : CombineAdapter<IRecyclerViewItem>() {
-//            override fun hasMore(data: List<IRecyclerViewItem>?): Boolean {
-//                val items = data?.filter { it is Item1 || it is Item2 }
-//                return !items.isNullOrEmpty()
-//            }
-//        }
         object : UiStatusControllerCombineAdapter<IRecyclerViewItem>(uiStatusController) {
-            override fun hasMore(data: List<IRecyclerViewItem>?): Boolean {
-                val items = data?.filter { it is Item1 || it is Item2 }
+            override fun hasMore(list: List<IRecyclerViewItem>?): Boolean {
+                val items = list?.filter { it is Item1 || it is Item2 }
                 return !items.isNullOrEmpty()
             }
 
