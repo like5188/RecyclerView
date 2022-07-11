@@ -232,7 +232,7 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     class DefaultUiStatusController(view: View) : UiStatusController(view) {
-        var clickRefreshBtn = false
+        private var clickRefreshBtn = false
         var show: (() -> Unit)? = null
         var refresh: (suspend () -> Unit)? = null
 
