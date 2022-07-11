@@ -1,4 +1,4 @@
-package com.like.recyclerview.ui.util
+package com.like.recyclerview.ui.adapter
 
 import com.like.paging.RequestType
 import com.like.recyclerview.adapter.CombineAdapter

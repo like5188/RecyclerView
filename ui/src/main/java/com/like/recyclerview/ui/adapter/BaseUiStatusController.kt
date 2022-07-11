@@ -1,4 +1,4 @@
-package com.like.recyclerview.ui.util
+package com.like.recyclerview.ui.adapter
 
 import android.content.Context
 import android.view.View

@@ -22,8 +22,8 @@ import com.like.recyclerview.sample.concat.vo.Item2
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
 import com.like.recyclerview.ui.util.AdapterFactory
-import com.like.recyclerview.ui.util.BaseUiStatusController
-import com.like.recyclerview.ui.util.UiStatusControllerCombineAdapter
+import com.like.recyclerview.ui.adapter.BaseUiStatusController
+import com.like.recyclerview.ui.adapter.UiStatusControllerCombineAdapter
 import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
