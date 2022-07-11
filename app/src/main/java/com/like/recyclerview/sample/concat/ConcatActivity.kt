@@ -23,7 +23,8 @@ import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
 import com.like.recyclerview.ui.adapter.BaseUiStatusController
 import com.like.recyclerview.ui.adapter.UiStatusCombineAdapter
-import com.like.recyclerview.ui.util.AdapterFactory
+import com.like.recyclerview.ui.loadstate.LoadStateAdapter
+import com.like.recyclerview.ui.loadstate.LoadStateItem
 import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -46,11 +47,11 @@ class ConcatActivity : AppCompatActivity() {
     private val mProgressDialog by lazy {
         ProgressDialog(this)
     }
-    private val itemAdapter by lazy {
+    private val listAdapter by lazy {
         ItemAdapter()
     }
-    private val loadMoreAdapter by lazy {
-        AdapterFactory.createLoadMoreAdapter()
+    private val loadStateAdapter by lazy {
+        LoadStateAdapter(LoadStateItem())
     }
 
     private val adapter by lazy {
@@ -170,7 +171,7 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
             withListAdapter(
-                itemAdapter,
+                listAdapter,
                 mViewModel::getItems.asFlow().map {
                     it?.take(3)
                 }.retryWhen { cause, attempt ->
@@ -189,7 +190,7 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
             withListAdapter(
-                itemAdapter,
+                listAdapter,
                 mViewModel::getHeadersAndItems.asFlow()
             )
         }
@@ -203,7 +204,7 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
             withPagingListAdapter(
-                itemAdapter,
+                listAdapter,
                 mViewModel.loadAfterResult.apply {
                     flow = flow.map {
                         it?.take(5)
@@ -213,7 +214,7 @@ class ConcatActivity : AppCompatActivity() {
                     }.flowOn(Dispatchers.IO)
                 }
             )
-            withLoadStateFooter(loadMoreAdapter)
+            withLoadStateFooter(loadStateAdapter)
         }
     }
 
@@ -225,10 +226,10 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
             withPagingListAdapter(
-                itemAdapter,
+                listAdapter,
                 mViewModel.LoadAfterWithHeadersResult
             )
-            withLoadStateFooter(loadMoreAdapter)
+            withLoadStateFooter(loadStateAdapter)
         }
     }
 
@@ -239,9 +240,9 @@ class ConcatActivity : AppCompatActivity() {
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
             }
-            withLoadStateHeader(loadMoreAdapter)
+            withLoadStateHeader(loadStateAdapter)
             withPagingListAdapter(
-                itemAdapter,
+                listAdapter,
                 mViewModel.loadBeforeResult.apply {
                     flow = flow.map {
                         it?.take(20)
