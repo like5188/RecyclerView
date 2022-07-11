@@ -2,6 +2,7 @@ package com.like.recyclerview.adapter
 
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.like.common.util.Logger
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
 import com.like.recyclerview.utils.*
@@ -29,26 +30,28 @@ open class CombineAdapter<ValueInList> {
     /**
      * 初始化或者刷新开始时显示进度条
      */
-    var show: (() -> Unit)? = null
+    open var show: (() -> Unit)? = null
 
     /**
      * 初始化或者刷新完成时隐藏进度条
      */
-    var hide: (() -> Unit)? = null
+    open var hide: (() -> Unit)? = null
 
     /**
      * 请求失败时回调
      */
-    var onError: (suspend (RequestType, Throwable) -> Unit)? = null
+    open var onError: (suspend (RequestType, Throwable) -> Unit)? = null
 
     /**
      * 请求成功时回调
      */
-    var onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null
+    open var onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null
 
     internal fun attachedToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
     }
+
+    fun itemCount() = listAdapter.itemCount
 
     /**
      * 设置加载状态视图到 Header，固定于 [RecyclerView] 顶部，用于往前加载更多
@@ -149,61 +152,63 @@ open class CombineAdapter<ValueInList> {
                 onError?.invoke(requestType, it)
             }.flowOn(Dispatchers.Main)
             .collect { items ->
+                Logger.e(items)
                 // 是否往前加载更多。处理逻辑分为两种：1、往前加载更多；2、往后加载更多或者不分页；
                 val loadMoreBefore = loadStateAdapter?.isAfter == false
                 val hasMore = hasMore(items)
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
-                    if (items.isNullOrEmpty()) return@collect
-                    // 添加列表数据
-                    // 添加 adapter
-                    if (loadMoreBefore) {
-                        if (hasMore) {
-                            adapter.addIfAbsent(loadStateAdapter)
-                        }
-                        adapter.addIfAbsent(listAdapter)
-                    } else {
-                        adapter.addIfAbsent(listAdapter)
-                        if (hasMore) {
-                            adapter.addIfAbsent(loadStateAdapter)
-                        }
-                    }
-                    listAdapter.submitList(items) {
-                        // RecyclerView 界面位置处理
+                    if (!items.isNullOrEmpty()) {
+                        // 添加列表数据
+                        // 添加 adapter
                         if (loadMoreBefore) {
-                            recyclerView.scrollToBottom()
+                            if (hasMore) {
+                                adapter.addIfAbsent(loadStateAdapter)
+                            }
+                            adapter.addIfAbsent(listAdapter)
                         } else {
-                            recyclerView.scrollToTop()
+                            adapter.addIfAbsent(listAdapter)
+                            if (hasMore) {
+                                adapter.addIfAbsent(loadStateAdapter)
+                            }
                         }
-                        // 更新 loadStateAdapter 的状态
-                        if (hasMore) {
-                            // 此处必须放在 submitList 的回调里面，并且使用 postDelayed 来提交，达到双重保障。当然也可以监听数据的插入来处理，但是比较麻烦。
-                            // 否则会由于调用本方法时界面还没有真正收到新的数据，
-                            // 导致 loadStateAdapter 还显示于界面中（实际上插入新的数据后，它有可能会处于界面外了，此时不应该触发加载更多），
-                            // 导致错误的调用加载更多。
-                            recyclerView.postDelayed({ loadStateAdapter?.hasMore(true) }, 100)
+                        listAdapter.submitList(items) {
+                            // RecyclerView 界面位置处理
+                            if (loadMoreBefore) {
+                                recyclerView.scrollToBottom()
+                            } else {
+                                recyclerView.scrollToTop()
+                            }
+                            // 更新 loadStateAdapter 的状态
+                            if (hasMore) {
+                                // 此处必须放在 submitList 的回调里面，并且使用 postDelayed 来提交，达到双重保障。当然也可以监听数据的插入来处理，但是比较麻烦。
+                                // 否则会由于调用本方法时界面还没有真正收到新的数据，
+                                // 导致 loadStateAdapter 还显示于界面中（实际上插入新的数据后，它有可能会处于界面外了，此时不应该触发加载更多），
+                                // 导致错误的调用加载更多。
+                                recyclerView.postDelayed({ loadStateAdapter?.hasMore(true) }, 100)
+                            }
                         }
                     }
                 } else {// 加载更多
-                    if (items.isNullOrEmpty()) {
-                        loadStateAdapter?.end()
-                        return@collect
-                    }
-                    // 添加列表数据
-                    val newItems = listAdapter.currentList.toMutableList()
-                    if (loadMoreBefore) {
-                        newItems.addAll(0, items)
-                    } else {
-                        newItems.addAll(items)
-                    }
-                    listAdapter.submitList(newItems) {
-                        // RecyclerView 界面位置处理
+                    if (!items.isNullOrEmpty()) {
+                        // 添加列表数据
+                        val newItems = listAdapter.currentList.toMutableList()
                         if (loadMoreBefore) {
-                            recyclerView.keepPosition(items.size, 1)
+                            newItems.addAll(0, items)
+                        } else {
+                            newItems.addAll(items)
                         }
-                        // 更新 loadStateAdapter 的状态
-                        if (hasMore) {
-                            recyclerView.postDelayed({ loadStateAdapter?.hasMore(false) }, 100)
+                        listAdapter.submitList(newItems) {
+                            // RecyclerView 界面位置处理
+                            if (loadMoreBefore) {
+                                recyclerView.keepPosition(items.size, 1)
+                            }
+                            // 更新 loadStateAdapter 的状态
+                            if (hasMore) {
+                                recyclerView.postDelayed({ loadStateAdapter?.hasMore(false) }, 100)
+                            }
                         }
+                    } else {
+                        loadStateAdapter?.end()
                     }
                 }
                 onSuccess?.invoke(requestType, items)

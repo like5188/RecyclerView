@@ -1,17 +1,17 @@
 package com.like.recyclerview.sample.concat
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.hjq.toast.ToastUtils
-import com.like.common.util.*
-import com.like.paging.RequestType
-import com.like.recyclerview.adapter.CombineAdapter
+import com.like.common.util.Logger
+import com.like.common.util.UiStatus
+import com.like.common.util.gone
 import com.like.recyclerview.decoration.ColorLineItemDecoration
 import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.model.IRecyclerViewItem
@@ -22,22 +22,19 @@ import com.like.recyclerview.sample.concat.vo.Item2
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
 import com.like.recyclerview.ui.util.AdapterFactory
+import com.like.recyclerview.ui.util.BaseUiStatusController
+import com.like.recyclerview.ui.util.UiStatusControllerCombineAdapter
 import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class ConcatActivity : AppCompatActivity() {
     companion object {
-        private const val TAG = "ConcatActivity"
         const val TAG_UI_STATUS_EMPTY = "tag_ui_status_empty"
         const val TAG_UI_STATUS_ERROR = "tag_ui_status_error"
-        const val TAG_UI_STATUS_NETWORK_ERROR = "tag_ui_status_network_error"
         const val TAG_UI_STATUS_LOADING = "tag_ui_status_loading"
-        const val TAG_UI_STATUS_NOT_FOUND_ERROR = "tag_ui_status_not_found_error"
     }
 
     private val mBinding by lazy {
@@ -55,11 +52,67 @@ class ConcatActivity : AppCompatActivity() {
     private val loadMoreAdapter by lazy {
         AdapterFactory.createLoadMoreAdapter()
     }
+
+    private val uiStatusController by lazy {
+        object : BaseUiStatusController(mBinding.rv) {
+            override fun addUiStatus(context: Context, refresh: suspend () -> Unit) {
+                addUiStatus(TAG_UI_STATUS_EMPTY, UiStatus<ViewUiStatusBinding>(context, R.layout.view_ui_status).apply {
+                    dataBinding.iv.setImageResource(R.drawable.common_back)
+                    dataBinding.tvDes.text = "暂无数据~"
+                    dataBinding.tvFun.gone()
+                    dataBinding.tvTitle.gone()
+                })
+                addUiStatus(TAG_UI_STATUS_ERROR, UiStatus<ViewUiStatusBinding>(context, R.layout.view_ui_status).apply {
+                    dataBinding.iv.setImageResource(R.drawable.common_back)
+                    dataBinding.tvDes.text = "加载失败"
+                    dataBinding.tvFun.text = "刷新试试"
+                    dataBinding.tvFun.setOnClickListener {
+                        if (context is LifecycleOwner) {
+                            (context as LifecycleOwner).lifecycleScope.launch {
+                                refresh()
+                            }
+                        }
+                    }
+                    dataBinding.tvTitle.gone()
+                })
+                addUiStatus(TAG_UI_STATUS_LOADING, UiStatus<ViewUiStatusBinding>(context, R.layout.view_ui_status).apply {
+                    dataBinding.iv.setImageResource(R.drawable.common_back)
+                    dataBinding.tvDes.text = "正在奋力加载中..."
+                    dataBinding.tvFun.gone()
+                    dataBinding.tvTitle.gone()
+                })
+            }
+
+            override fun getEmptyStatusTag(): String {
+                return TAG_UI_STATUS_EMPTY
+            }
+
+            override fun getLoadingStatusTag(): String {
+                return TAG_UI_STATUS_LOADING
+            }
+
+            override fun getErrorStatusTag(throwable: Throwable): String {
+                return TAG_UI_STATUS_ERROR
+            }
+        }
+    }
     private val adapter by lazy {
-        object : CombineAdapter<IRecyclerViewItem>() {
+//        object : CombineAdapter<IRecyclerViewItem>() {
+//            override fun hasMore(data: List<IRecyclerViewItem>?): Boolean {
+//                val items = data?.filter { it is Item1 || it is Item2 }
+//                return !items.isNullOrEmpty()
+//            }
+//        }
+        object : UiStatusControllerCombineAdapter<IRecyclerViewItem>(uiStatusController) {
             override fun hasMore(data: List<IRecyclerViewItem>?): Boolean {
                 val items = data?.filter { it is Item1 || it is Item2 }
                 return !items.isNullOrEmpty()
+            }
+
+            override fun onErrorStatusShown(throwable: Throwable) {
+                uiStatusController.getDataBinding<ViewUiStatusBinding>(TAG_UI_STATUS_ERROR)?.apply {
+                    tvDes.text = throwable.message
+                }
             }
         }
     }
@@ -69,40 +122,10 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
         mBinding.rv.setAdapter(adapter)
-
-//        lifecycleScope.launchWhenResumed {
-//            (0..3).asFlow()
-//                .map {
-//                    delay(1000)
-//                    if (it == 2) {
-//                        throw RuntimeException("test error")
-//                    }
-//                    it
-//                }.retryWhen { cause, attempt ->
-//                    Logger.v("retryWhen cause=$cause attempt=$attempt")
-//                    cause.message == "test error" && attempt == 0L
-//                }.onStart {
-//                    Logger.w("onStart")
-//                }.onCompletion {
-//                    Logger.w("onCompletion $it")
-//                }.catch {
-//                    Logger.e("catch $it")
-//                    throw it
-//                }.onStart {
-//                    Logger.w("1 onStart")
-//                }.onCompletion {
-//                    Logger.w("1 onCompletion $it")
-//                }.catch {
-//                    Logger.e("1 catch $it")
-//                }.collect {
-//                    Logger.e("collect $it")
-//                }
-//        }
-
 //        initItems()
 //        initHeadersAndItems()
-//        initLoadAfter()
-        initLoadAfterWithHeaders()
+        initLoadAfter()
+//        initLoadAfterWithHeaders()
 //        initLoadBefore()
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
@@ -112,12 +135,48 @@ class ConcatActivity : AppCompatActivity() {
         lifecycleScope.launch {
             adapter.initial()
         }
+
+//        testFlow()
+    }
+
+    private fun testFlow() {
+        lifecycleScope.launchWhenResumed {
+            (0..3).asFlow()
+                .map {
+                    delay(1000)
+                    if (it == 2) {
+                        throw RuntimeException("test error")
+                    }
+                    it
+                }.retryWhen { cause, attempt ->
+                    Logger.v("retryWhen cause=$cause attempt=$attempt")
+                    cause.message == "test error" && attempt == 0L
+                }.onStart {
+                    Logger.w("onStart")
+                }.onCompletion {
+                    Logger.w("onCompletion $it")
+                }.catch {
+                    Logger.e("catch $it")
+                    throw it
+                }.onStart {
+                    Logger.w("1 onStart")
+                }.onCompletion {
+                    Logger.w("1 onCompletion $it")
+                }.catch {
+                    Logger.e("1 catch $it")
+                }.collect {
+                    Logger.e("collect $it")
+                }
+        }
     }
 
     private fun initItems() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
+            }
             withListAdapter(
                 itemAdapter,
                 mViewModel::getItems.asFlow().map {
@@ -134,6 +193,9 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
+            }
             withListAdapter(
                 itemAdapter,
                 mViewModel::getHeadersAndItems.asFlow()
@@ -142,48 +204,11 @@ class ConcatActivity : AppCompatActivity() {
     }
 
     private fun initLoadAfter() {
-        val uiStatusController: DefaultUiStatusController? by lazy {
-            DefaultUiStatusController(mBinding.rv)
-        }
         adapter.apply {
-            show = {
-                if (uiStatusController == null) {
-                    mProgressDialog.show()
-                } else {
-                    uiStatusController?.show = { mProgressDialog.show() }
-                    uiStatusController?.showUiStatus(TAG_UI_STATUS_LOADING)
-                }
-            }
+            show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
-                uiStatusController?.apply {
-                    this.refresh = {
-                        refresh()
-                    }
-                    if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemAdapter.itemCount <= 0) {
-                        // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
-                        showUiStatus(TAG_UI_STATUS_ERROR)
-                        getDataBinding<ViewUiStatusBinding>(TAG_UI_STATUS_ERROR)?.apply {
-                            tvDes.text = throwable.message
-                        }
-                    } else {
-                        showContent()
-                    }
-                }
-            }
-            onSuccess = { requestType, resultType ->
-                uiStatusController?.apply {
-                    this.refresh = {
-                        refresh()
-                    }
-                    if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && resultType.isNullOrEmpty()) {
-                        // 显示空视图
-                        showUiStatus(TAG_UI_STATUS_EMPTY)
-                    } else {
-                        showContent()
-                    }
-                }
             }
             withPagingListAdapter(
                 itemAdapter,
@@ -204,6 +229,9 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
+            }
             withPagingListAdapter(
                 itemAdapter,
                 mViewModel.LoadAfterWithHeadersResult
@@ -216,6 +244,9 @@ class ConcatActivity : AppCompatActivity() {
         adapter.apply {
             show = { mProgressDialog.show() }
             hide = { mProgressDialog.hide() }
+            onError = { requestType, throwable ->
+                ToastUtils.show(throwable.message)
+            }
             withLoadStateHeader(loadMoreAdapter)
             withPagingListAdapter(
                 itemAdapter,
@@ -231,82 +262,4 @@ class ConcatActivity : AppCompatActivity() {
         }
     }
 
-    class DefaultUiStatusController(view: View) : UiStatusController(view) {
-        private var clickRefreshBtn = false
-        var show: (() -> Unit)? = null
-        var refresh: (suspend () -> Unit)? = null
-
-        override fun showUiStatus(tag: String) {// 加载中需要特殊处理
-            if (tag == TAG_UI_STATUS_LOADING && !clickRefreshBtn) {
-                show?.invoke()
-            } else {
-                super.showUiStatus(tag)
-            }
-        }
-
-        init {
-            addUiStatus(TAG_UI_STATUS_EMPTY, UiStatus<ViewUiStatusBinding>(view.context, R.layout.view_ui_status).apply {
-                dataBinding.iv.setImageResource(R.drawable.common_back)
-                dataBinding.tvDes.text = "暂无数据~"
-                dataBinding.tvFun.gone()
-                dataBinding.tvTitle.gone()
-            })
-            addUiStatus(TAG_UI_STATUS_ERROR, UiStatus<ViewUiStatusBinding>(view.context, R.layout.view_ui_status).apply {
-                dataBinding.iv.setImageResource(R.drawable.common_back)
-                dataBinding.tvDes.text = "加载失败"
-                dataBinding.tvFun.text = "刷新试试"
-                dataBinding.tvFun.setOnClickListener {
-                    if (view.context is LifecycleOwner) {
-                        (view.context as LifecycleOwner).lifecycleScope.launch {
-                            clickRefreshBtn = true
-                            refresh?.invoke()
-                            clickRefreshBtn = false
-                        }
-                    }
-                }
-                dataBinding.tvTitle.gone()
-            })
-            addUiStatus(
-                TAG_UI_STATUS_NETWORK_ERROR,
-                UiStatus<ViewUiStatusBinding>(view.context, R.layout.view_ui_status).apply {
-                    dataBinding.iv.setImageResource(R.drawable.common_back)
-                    dataBinding.tvDes.text = "你目前暂无网络"
-                    dataBinding.tvFun.text = "刷新试试"
-                    dataBinding.tvFun.visible()
-                    dataBinding.tvFun.setOnClickListener {
-                        if (view.context is LifecycleOwner) {
-                            (view.context as LifecycleOwner).lifecycleScope.launch {
-                                clickRefreshBtn = true
-                                refresh?.invoke()
-                                clickRefreshBtn = false
-                            }
-                        }
-                    }
-                    dataBinding.tvTitle.gone()
-                })
-            addUiStatus(TAG_UI_STATUS_LOADING, UiStatus<ViewUiStatusBinding>(view.context, R.layout.view_ui_status).apply {
-                dataBinding.iv.setImageResource(R.drawable.common_back)
-                dataBinding.tvDes.text = "正在奋力加载中..."
-                dataBinding.tvFun.gone()
-                dataBinding.tvTitle.gone()
-            })
-            addUiStatus(
-                TAG_UI_STATUS_NOT_FOUND_ERROR,
-                UiStatus<ViewUiStatusBinding>(view.context, R.layout.view_ui_status).apply {
-                    dataBinding.iv.setImageResource(R.drawable.common_back)
-                    dataBinding.tvTitle.text = "404错误页面"
-                    dataBinding.tvDes.text = "Sorry您访问的页面不见了~"
-                    dataBinding.tvFun.text = "刷新试试"
-                    dataBinding.tvFun.setOnClickListener {
-                        if (view.context is LifecycleOwner) {
-                            (view.context as LifecycleOwner).lifecycleScope.launch {
-                                clickRefreshBtn = true
-                                refresh?.invoke()
-                                clickRefreshBtn = false
-                            }
-                        }
-                    }
-                })
-        }
-    }
 }

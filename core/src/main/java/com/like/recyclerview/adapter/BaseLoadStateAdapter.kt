@@ -27,9 +27,14 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
     internal var isAfter: Boolean = true
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            // onScrolled 在添加 item 时也会触发，但是刷新后，如果添加的 item 和上一次的一样多，则不会触发。
+            // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
+        }
+
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                // 此回调在添加 item 时也会触发，但是刷新后，如果添加的 item 和上一次的一样多，则不会触发。
+                // onScrollStateChanged 在添加 item 时不会触发，所以刷新时不会触发。
                 // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
                 // 滚动界面触发
                 loadMore()
