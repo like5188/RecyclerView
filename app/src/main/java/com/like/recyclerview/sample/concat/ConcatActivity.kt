@@ -22,7 +22,7 @@ import com.like.recyclerview.sample.concat.vo.Item2
 import com.like.recyclerview.sample.databinding.ActivityConcatBinding
 import com.like.recyclerview.sample.databinding.ViewUiStatusBinding
 import com.like.recyclerview.ui.adapter.BaseUiStatusController
-import com.like.recyclerview.ui.adapter.UiStatusControllerCombineAdapter
+import com.like.recyclerview.ui.adapter.UiStatusCombineAdapter
 import com.like.recyclerview.ui.util.AdapterFactory
 import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.Dispatchers
@@ -95,7 +95,7 @@ class ConcatActivity : AppCompatActivity() {
                 return TAG_UI_STATUS_ERROR
             }
         }
-        object : UiStatusControllerCombineAdapter<IRecyclerViewItem>(uiStatusController) {
+        object : UiStatusCombineAdapter<IRecyclerViewItem>(uiStatusController) {
             override fun hasMore(list: List<IRecyclerViewItem>?): Boolean {
                 val items = list?.filter { it is Item1 || it is Item2 }
                 return !items.isNullOrEmpty()

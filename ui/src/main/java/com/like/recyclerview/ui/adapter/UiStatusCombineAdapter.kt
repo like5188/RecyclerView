@@ -7,7 +7,7 @@ import com.like.recyclerview.adapter.CombineAdapter
  * 封装了3种状态视图：加载中、加载失败、空
  * 如果不需要状态视图，可以直接使用[CombineAdapter]，或者设置[uiStatusController] 参数为 null
  */
-open class UiStatusControllerCombineAdapter<ValueInList>(private val uiStatusController: BaseUiStatusController?) :
+open class UiStatusCombineAdapter<ValueInList>(private val uiStatusController: BaseUiStatusController?) :
     CombineAdapter<ValueInList>() {
 
     override var show: (() -> Unit)? = null
