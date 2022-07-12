@@ -51,7 +51,7 @@ open class CombineAdapter<ValueInList>(
      */
     open var onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null
 
-    internal fun attachedToRecyclerView(recyclerView: RecyclerView) {
+    fun attachedToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
     }
 
