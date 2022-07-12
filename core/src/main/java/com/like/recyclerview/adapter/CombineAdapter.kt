@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.*
  */
 open class CombineAdapter<ValueInList> {
     private lateinit var recyclerView: RecyclerView
-    internal val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
+    val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
     private lateinit var listAdapter: BaseListAdapter<*, ValueInList>
     private var loadStateAdapter: BaseLoadStateAdapter<*>? = null
     private lateinit var pagingResult: PagingResult<List<ValueInList>?>
