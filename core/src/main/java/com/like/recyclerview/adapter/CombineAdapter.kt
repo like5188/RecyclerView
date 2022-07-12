@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.*
 
 /**
  * 组合[BaseListAdapter]和[BaseLoadStateAdapter]。并绑定[PagingResult]或者[Flow]类型的数据。
+ * 如果不需要加载状态视图，可以直接使用[BaseListAdapter]
  * 功能：
  * 1、支持添加 Header 加载状态、Footer 加载状态。
  * 2、支持初始化、刷新时进度条的显示隐藏。
@@ -19,9 +20,12 @@ import kotlinx.coroutines.flow.*
  * ①、初始化、刷新：如果有操作正在执行，则取消正在执行的操作，执行新操作。
  * ②、往后加载更多、往前加载更多：如果有操作正在执行，则放弃新操作，否则执行新操作。
  */
-open class CombineAdapter<ValueInList> {
+open class CombineAdapter<ValueInList>(
+    val concatAdapter: ConcatAdapter = ConcatAdapter(
+        ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build()
+    )
+) {
     private lateinit var recyclerView: RecyclerView
-    val adapter = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build())
     private lateinit var listAdapter: BaseListAdapter<*, ValueInList>
     private var loadStateAdapter: BaseLoadStateAdapter<*>? = null
     private lateinit var pagingResult: PagingResult<List<ValueInList>?>
@@ -162,13 +166,13 @@ open class CombineAdapter<ValueInList> {
                         // 添加 adapter
                         if (loadMoreBefore) {
                             if (hasMore) {
-                                adapter.addIfAbsent(loadStateAdapter)
+                                concatAdapter.addIfAbsent(loadStateAdapter)
                             }
-                            adapter.addIfAbsent(listAdapter)
+                            concatAdapter.addIfAbsent(listAdapter)
                         } else {
-                            adapter.addIfAbsent(listAdapter)
+                            concatAdapter.addIfAbsent(listAdapter)
                             if (hasMore) {
-                                adapter.addIfAbsent(loadStateAdapter)
+                                concatAdapter.addIfAbsent(loadStateAdapter)
                             }
                         }
                         listAdapter.submitList(items) {

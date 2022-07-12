@@ -1,5 +1,6 @@
 package com.like.recyclerview.ui.adapter
 
+import androidx.recyclerview.widget.ConcatAdapter
 import com.like.paging.RequestType
 import com.like.recyclerview.adapter.CombineAdapter
 
@@ -7,8 +8,12 @@ import com.like.recyclerview.adapter.CombineAdapter
  * 封装了3种状态视图：加载中、加载失败、空
  * 如果不需要状态视图，可以直接使用[CombineAdapter]，或者设置[uiStatusController] 参数为 null
  */
-open class UiStatusCombineAdapter<ValueInList>(private val uiStatusController: BaseUiStatusController?) :
-    CombineAdapter<ValueInList>() {
+open class UiStatusCombineAdapter<ValueInList>(
+    private val uiStatusController: BaseUiStatusController?,
+    concatAdapter: ConcatAdapter = ConcatAdapter(
+        ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build()
+    )
+) : CombineAdapter<ValueInList>(concatAdapter) {
 
     override var show: (() -> Unit)? = null
         get() = if (uiStatusController == null) {

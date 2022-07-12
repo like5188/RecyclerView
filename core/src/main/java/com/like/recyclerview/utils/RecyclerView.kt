@@ -62,5 +62,5 @@ fun RecyclerView.findLastVisibleItemPosition(): Int {
 
 fun RecyclerView.setAdapter(adapter: CombineAdapter<*>) {
     adapter.attachedToRecyclerView(this)
-    this.adapter = adapter.adapter
+    this.adapter = adapter.concatAdapter
 }
