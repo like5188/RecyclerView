@@ -25,7 +25,6 @@ import com.like.recyclerview.ui.adapter.BaseUiStatusController
 import com.like.recyclerview.ui.adapter.UiStatusCombineAdapter
 import com.like.recyclerview.ui.loadstate.LoadStateAdapter
 import com.like.recyclerview.ui.loadstate.LoadStateItem
-import com.like.recyclerview.utils.setAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -107,6 +106,8 @@ class ConcatActivity : AppCompatActivity() {
                     tvDes.text = throwable.message
                 }
             }
+        }.apply {
+            attachedToRecyclerView(mBinding.rv)
         }
     }
 
@@ -114,7 +115,7 @@ class ConcatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding.rv.layoutManager = WrapLinearLayoutManager(this)
         mBinding.rv.addItemDecoration(ColorLineItemDecoration(0, 1, Color.BLACK))//添加分割线
-        mBinding.rv.setAdapter(adapter)
+        mBinding.rv.adapter = adapter.concatAdapter
 //        initItems()
 //        initHeadersAndItems()
         initLoadAfter()
