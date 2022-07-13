@@ -10,8 +10,8 @@ import com.like.common.util.UiStatusController
 abstract class BaseUiStatusController(contentView: View) : UiStatusController(contentView) {
     // 是否点击刷新按钮
     private var clickRefreshBtn = false
-    internal var show: (() -> Unit)? = null
-    internal var refresh: (suspend () -> Unit)? = null
+    var show: (() -> Unit)? = null
+    var refresh: (suspend () -> Unit)? = null
 
     final override fun showUiStatus(tag: String) {// 加载中需要特殊处理
         if (tag == getLoadingStatusTag() && !clickRefreshBtn) {
