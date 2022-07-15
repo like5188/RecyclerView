@@ -1,4 +1,4 @@
-package com.like.recyclerview.sample.concat
+package com.like.recyclerview.sample.concat.repository
 
 import com.like.common.util.Logger
 import com.like.common.util.successIfAllSuccess

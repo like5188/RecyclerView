@@ -3,10 +3,7 @@ package com.like.recyclerview.sample.concat
 import androidx.lifecycle.ViewModel
 import com.like.common.util.successIfOneSuccess
 import com.like.recyclerview.model.IRecyclerViewItem
-import com.like.recyclerview.sample.concat.repository.HeaderDataSource
-import com.like.recyclerview.sample.concat.repository.ItemDataSource
-import com.like.recyclerview.sample.concat.repository.LoadAfterDataSource
-import com.like.recyclerview.sample.concat.repository.LoadBeforeDataSource
+import com.like.recyclerview.sample.concat.repository.*
 
 class ConcatViewModel : ViewModel() {
     companion object {
