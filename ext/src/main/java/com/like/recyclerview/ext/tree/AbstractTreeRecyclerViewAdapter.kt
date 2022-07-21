@@ -27,9 +27,10 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding>(diffCallbac
         item ?: return
         if (item.isExpanded) {
             val newList = currentList.filter { !it.isChild(item) }
-            submitList(newList)
-            onContract(item, position, binding)
-            item.isExpanded = !item.isExpanded
+            submitList(newList) {
+                onContract(item, position, binding)
+                item.isExpanded = !item.isExpanded
+            }
         } else {
             val children = onExpand(item, position, binding)
             if (children.isNotEmpty()) {
@@ -39,8 +40,9 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding>(diffCallbac
                 }
                 val newList = currentList.toMutableList()
                 newList.addAll(position + 1, children)
-                submitList(newList)
-                item.isExpanded = !item.isExpanded
+                submitList(newList) {
+                    item.isExpanded = !item.isExpanded
+                }
             }
         }
     }
