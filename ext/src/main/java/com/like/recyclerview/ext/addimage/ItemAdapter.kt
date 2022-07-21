@@ -48,15 +48,17 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
             curCount + items.size < maxSelectNum -> {
                 val newItems = currentList.toMutableList()
                 newItems.addAll(items)
-                submitList(newItems)
-                onAdded()
+                submitList(newItems) {
+                    onAdded()
+                }
             }
             curCount + items.size == maxSelectNum -> {// 移除+号
                 notifyRemovePlus()
                 val newItems = currentList.toMutableList()
                 newItems.addAll(items)
-                submitList(newItems)
-                onAdded()
+                submitList(newItems) {
+                    onAdded()
+                }
             }
             else -> {// 不能添加
                 Toast.makeText(activity, "只能添加 $maxSelectNum 张图片", Toast.LENGTH_SHORT).show()
@@ -70,25 +72,25 @@ open class ItemAdapter<VB : ViewDataBinding, ValueInList>(
             curCount < maxSelectNum -> {
                 val newItems = currentList.toMutableList()
                 newItems.removeAt(position)
-                submitList(newItems)
-                onRemoved()
+                submitList(newItems) {
+                    onRemoved()
+                }
             }
             curCount == maxSelectNum -> {// 添加+号
                 val newItems = currentList.toMutableList()
                 newItems.removeAt(position)
-                submitList(newItems)
+                submitList(newItems) {
+                    onRemoved()
+                }
                 notifyAddPlus()
-                onRemoved()
             }
         }
     }
 
     open fun onAdded() {
-
     }
 
     open fun onRemoved() {
-
     }
 
 }
