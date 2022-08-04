@@ -75,12 +75,15 @@ open class CombineAdapter<ValueInList>(
         this.loadStateAdapter = adapter
     }
 
+    /**
+     * 设置列表 adapter
+     */
     fun withListAdapter(adapter: BaseListAdapter<*, ValueInList>) {
         this.listAdapter = adapter
     }
 
     /**
-     * 提交（不分页）列表数据。最后必须调用一个[submitData]方法去能触发初始化操作。
+     * 提交列表数据（不分页）。最后必须调用一个[submitData]方法去能触发初始化操作。
      */
     open suspend fun submitData(flow: Flow<List<ValueInList>?>) {
         this.pagingResult = PagingResult(flow) {}
@@ -88,7 +91,7 @@ open class CombineAdapter<ValueInList>(
     }
 
     /**
-     * 提交（分页）列表数据。最后必须调用一个[submitData]方法去能触发初始化操作。
+     * 提交列表数据（分页）。最后必须调用一个[submitData]方法去能触发初始化操作。
      * @param pagingResult  列表需要的数据。使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
      */
     open suspend fun submitData(pagingResult: PagingResult<List<ValueInList>?>) {
