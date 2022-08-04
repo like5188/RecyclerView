@@ -7,6 +7,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.like.common.util.Logger
 import com.like.recyclerview.utils.findFirstVisibleItemPosition
 import com.like.recyclerview.utils.findLastVisibleItemPosition
 import com.like.recyclerview.viewholder.BindingViewHolder
@@ -28,11 +29,13 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            Logger.e("onScrolled")
             // onScrolled 在添加 item 时也会触发，但是刷新后，如果添加的 item 和上一次的一样多，则不会触发。
             // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
         }
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            Logger.w("onScrollStateChanged")
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 // onScrollStateChanged 在添加 item 时不会触发，所以刷新时不会触发。
                 // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
@@ -69,11 +72,9 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
     /**
      * 如果还有更多数据时调用此方法进行标记。
      */
-    internal fun hasMore(isRefresh: Boolean) {
-        hasMore.compareAndSet(false, true)
-        if (isRefresh) {// 只针对 onScrolled 无法处理的那种刷新情况
-            loadMore()
-        }
+    internal fun hasMore() {
+        hasMore.set(true)
+        loadMore()
     }
 
     /**
@@ -106,6 +107,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
             if (context is LifecycleOwner) {
                 context.lifecycleScope.launch(Dispatchers.Main) {
                     onLoading()
+                    Logger.d("loadMore")
                     onLoadMore()
                 }
             }
