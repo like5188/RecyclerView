@@ -167,7 +167,6 @@ open class CombineAdapter<ValueInList>(
                 val hasMore = hasMore(items)
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
                     if (!items.isNullOrEmpty()) {
-                        // 添加列表数据
                         // 添加 adapter
                         if (loadMoreBefore) {
                             if (hasMore) {
@@ -180,6 +179,7 @@ open class CombineAdapter<ValueInList>(
                                 concatAdapter.addIfAbsent(loadStateAdapter)
                             }
                         }
+                        // 添加列表数据
                         listAdapter.submitList(items) {
                             // RecyclerView 界面位置处理
                             if (loadMoreBefore) {
