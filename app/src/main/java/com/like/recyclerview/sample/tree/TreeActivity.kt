@@ -15,7 +15,6 @@ import com.like.recyclerview.layoutmanager.WrapLinearLayoutManager
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ActivityTreeBinding
 import com.like.recyclerview.sample.databinding.TreeItem0Binding
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 
 class TreeActivity : AppCompatActivity() {
@@ -36,7 +35,7 @@ class TreeActivity : AppCompatActivity() {
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
             }
-            withListAdapter(itemAdapter, mViewModel::getItems.asFlow())
+            withListAdapter(itemAdapter)
         }
     }
 
@@ -78,8 +77,8 @@ class TreeActivity : AppCompatActivity() {
                 mAdapter.refresh()
             }
         }
-        lifecycleScope.launch {
-            mAdapter.initial()
+        lifecycleScope.launchWhenResumed {
+            mAdapter.submitData(mViewModel.getItemsFlow())
         }
     }
 }

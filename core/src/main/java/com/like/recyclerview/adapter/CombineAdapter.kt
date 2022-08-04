@@ -51,11 +51,11 @@ open class CombineAdapter<ValueInList>(
      */
     open var onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null
 
+    fun itemCount() = listAdapter.itemCount
+
     fun attachedToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
     }
-
-    fun itemCount() = listAdapter.itemCount
 
     /**
      * 设置加载状态视图到 Header，固定于 [RecyclerView] 顶部，用于往前加载更多
@@ -75,29 +75,31 @@ open class CombineAdapter<ValueInList>(
         this.loadStateAdapter = adapter
     }
 
-    /**
-     * 设置（不分页）列表数据，固定于 [RecyclerView] 中部。
-     * 注意：[withListAdapter]、[withPagingListAdapter]这两个方法必须调用一个
-     */
-    fun withListAdapter(adapter: BaseListAdapter<*, ValueInList>, flow: Flow<List<ValueInList>?>) {
+    fun withListAdapter(adapter: BaseListAdapter<*, ValueInList>) {
         this.listAdapter = adapter
-        this.pagingResult = PagingResult(flow) {}
     }
 
     /**
-     * 设置（分页）列表数据，固定于 [RecyclerView] 中部，并且加载更多的数据是添加到其中。
-     * 注意：[withListAdapter]、[withPagingListAdapter]这两个方法必须调用一个
+     * 提交（不分页）列表数据。最后必须调用一个[submitData]方法去能触发初始化操作。
+     */
+    open suspend fun submitData(flow: Flow<List<ValueInList>?>) {
+        this.pagingResult = PagingResult(flow) {}
+        initial()
+    }
+
+    /**
+     * 提交（分页）列表数据。最后必须调用一个[submitData]方法去能触发初始化操作。
      * @param pagingResult  列表需要的数据。使用了 [com.github.like5188:Paging:x.x.x] 库，得到的返回结果。
      */
-    fun withPagingListAdapter(adapter: BaseListAdapter<*, ValueInList>, pagingResult: PagingResult<List<ValueInList>?>) {
-        this.listAdapter = adapter
+    open suspend fun submitData(pagingResult: PagingResult<List<ValueInList>?>) {
         this.pagingResult = pagingResult
+        initial()
     }
 
     /**
      * 初始化操作（线程安全）
      */
-    suspend fun initial() {
+    private suspend fun initial() {
         val requestType = RequestType.Initial
         concurrencyHelper.cancelPreviousThenRun {
             pagingResult.setRequestType.invoke(requestType)

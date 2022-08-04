@@ -108,6 +108,7 @@ class ConcatActivity : AppCompatActivity() {
             }
         }.apply {
             attachedToRecyclerView(mBinding.rv)
+            withListAdapter(listAdapter)
         }
     }
 
@@ -126,10 +127,6 @@ class ConcatActivity : AppCompatActivity() {
                 adapter.refresh()
             }
         }
-        lifecycleScope.launch {
-            adapter.initial()
-        }
-
 //        testFlow()
     }
 
@@ -171,15 +168,15 @@ class ConcatActivity : AppCompatActivity() {
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
             }
-            withListAdapter(
-                listAdapter,
-                mViewModel::getItems.asFlow().map {
-                    it?.take(3)
-                }.retryWhen { cause, attempt ->
-                    Logger.e("retryWhen")
-                    cause.message == "load error 0" && attempt == 0L
-                }.flowOn(Dispatchers.IO)
-            )
+
+        }
+        lifecycleScope.launchWhenResumed {
+            adapter.submitData(mViewModel::getItems.asFlow().map {
+                it?.take(3)
+            }.retryWhen { cause, attempt ->
+                Logger.e("retryWhen")
+                cause.message == "load error 0" && attempt == 0L
+            }.flowOn(Dispatchers.IO))
         }
     }
 
@@ -190,10 +187,9 @@ class ConcatActivity : AppCompatActivity() {
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
             }
-            withListAdapter(
-                listAdapter,
-                mViewModel::getHeadersAndItems.asFlow()
-            )
+        }
+        lifecycleScope.launchWhenResumed {
+            adapter.submitData(mViewModel::getHeadersAndItems.asFlow())
         }
     }
 
@@ -204,18 +200,17 @@ class ConcatActivity : AppCompatActivity() {
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
             }
-            withPagingListAdapter(
-                listAdapter,
-                mViewModel.loadAfterResult.apply {
-                    flow = flow.map {
-                        it?.take(5)
-                    }.retryWhen { cause, attempt ->
-                        Logger.e("retryWhen")
-                        cause.message == "load error 0" && attempt == 0L
-                    }.flowOn(Dispatchers.IO)
-                }
-            )
             withLoadStateFooter(loadStateAdapter)
+        }
+        lifecycleScope.launchWhenResumed {
+            adapter.submitData(mViewModel.loadAfterResult.apply {
+                flow = flow.map {
+                    it?.take(5)
+                }.retryWhen { cause, attempt ->
+                    Logger.e("retryWhen")
+                    cause.message == "load error 0" && attempt == 0L
+                }.flowOn(Dispatchers.IO)
+            })
         }
     }
 
@@ -226,11 +221,10 @@ class ConcatActivity : AppCompatActivity() {
             onError = { requestType, throwable ->
                 ToastUtils.show(throwable.message)
             }
-            withPagingListAdapter(
-                listAdapter,
-                mViewModel.LoadAfterWithHeadersResult
-            )
             withLoadStateFooter(loadStateAdapter)
+        }
+        lifecycleScope.launchWhenResumed {
+            adapter.submitData(mViewModel.LoadAfterWithHeadersResult)
         }
     }
 
@@ -242,17 +236,16 @@ class ConcatActivity : AppCompatActivity() {
                 ToastUtils.show(throwable.message)
             }
             withLoadStateHeader(loadStateAdapter)
-            withPagingListAdapter(
-                listAdapter,
-                mViewModel.loadBeforeResult.apply {
-                    flow = flow.map {
-                        it?.take(20)
-                    }.retryWhen { cause, attempt ->
-                        Logger.e("retryWhen")
-                        cause.message == "load error 0" && attempt == 0L
-                    }.flowOn(Dispatchers.IO)
-                }
-            )
+        }
+        lifecycleScope.launchWhenResumed {
+            adapter.submitData(mViewModel.loadBeforeResult.apply {
+                flow = flow.map {
+                    it?.take(20)
+                }.retryWhen { cause, attempt ->
+                    Logger.e("retryWhen")
+                    cause.message == "load error 0" && attempt == 0L
+                }.flowOn(Dispatchers.IO)
+            })
         }
     }
 
