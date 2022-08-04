@@ -2,7 +2,6 @@ package com.like.recyclerview.adapter
 
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.like.common.util.Logger
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
 import com.like.recyclerview.utils.*
@@ -160,28 +159,23 @@ open class CombineAdapter<ValueInList>(
                 }
                 onError?.invoke(requestType, it)
             }.flowOn(Dispatchers.Main)
-            .collect { items ->
-                Logger.e(items)
+            .collect { list ->
                 // 是否往前加载更多。处理逻辑分为两种：1、往前加载更多；2、往后加载更多或者不分页；
                 val loadMoreBefore = loadStateAdapter?.isAfter == false
-                val hasMore = hasMore(items)
+                val items = getItems(list)// list 中可能包含 header（比如 banner） 和 items。
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
-                    // items 中可能包含 header（比如 banner） 和 item。我们一般需要根据 item 来判断。如果全部是 header 数据的话，就不应该有更多数据。
-                    if (!items.isNullOrEmpty()) {
-                        // 添加 adapter
-                        if (loadMoreBefore) {
-                            if (hasMore) {
-                                concatAdapter.addIfAbsent(loadStateAdapter)
-                            }
-                            concatAdapter.addIfAbsent(listAdapter)
-                        } else {
-                            concatAdapter.addIfAbsent(listAdapter)
-                            if (hasMore) {
-                                concatAdapter.addIfAbsent(loadStateAdapter)
-                            }
-                        }
+                    if (!list.isNullOrEmpty()) {
+                        // 添加列表 adapter
+                        concatAdapter.addIfAbsent(listAdapter)
                         // 添加列表数据
-                        listAdapter.submitList(items) {
+                        listAdapter.submitList(list) {
+                            if (!items.isNullOrEmpty() && loadStateAdapter != null) {// 如果全部是 header 数据的话，就不应该有更多数据。也就是说，只要有列表数据，就显示加载状态视图。
+                                if (loadMoreBefore) {
+                                    concatAdapter.addIfAbsent(0, loadStateAdapter)
+                                } else {
+                                    concatAdapter.addIfAbsent(loadStateAdapter)
+                                }
+                            }
                             // RecyclerView 界面位置处理
                             if (loadMoreBefore) {
                                 recyclerView.scrollToBottom()
@@ -189,7 +183,7 @@ open class CombineAdapter<ValueInList>(
                                 recyclerView.scrollToTop()
                             }
                             // 更新 loadStateAdapter 的状态
-                            if (hasMore) {
+                            if (!items.isNullOrEmpty() && loadStateAdapter != null) {
                                 // 此处必须放在 submitList 的回调里面，并且使用 postDelayed 来提交，达到双重保障。当然也可以监听数据的插入来处理，但是比较麻烦。
                                 // 否则会由于调用本方法时界面还没有真正收到新的数据，
                                 // 导致 loadStateAdapter 还显示于界面中（实际上插入新的数据后，它有可能会处于界面外了，此时不应该触发加载更多），
@@ -213,7 +207,7 @@ open class CombineAdapter<ValueInList>(
                                 recyclerView.keepPosition(items.size, 1)
                             }
                             // 更新 loadStateAdapter 的状态
-                            if (hasMore) {
+                            if (loadStateAdapter != null) {
                                 recyclerView.postDelayed({ loadStateAdapter?.hasMore(false) }, 100)
                             }
                         }
@@ -221,17 +215,16 @@ open class CombineAdapter<ValueInList>(
                         loadStateAdapter?.end()
                     }
                 }
-                onSuccess?.invoke(requestType, items)
+                onSuccess?.invoke(requestType, list)
             }
     }
 
     /**
-     * 是否有更多数据
-     * 判断由使用者提供。因为 listAdapter 中有可能包含 header（比如 banner） 和 item。
-     * 我们一般需要根据 item 来判断。如果全部是 header 数据的话，就不应该有更多数据。
+     * 从[list]中获取列表数据 items，需要根据 items 来判断是否还有更多，以及加载更多时需要添加 items 到列表中。
+     * 因为[list]中可能包含 header（比如 banner） 和 items。
      */
-    open fun hasMore(list: List<ValueInList>?): Boolean {
-        return !list.isNullOrEmpty()
+    open fun getItems(list: List<ValueInList>?): List<ValueInList>? {
+        return list
     }
 
 }

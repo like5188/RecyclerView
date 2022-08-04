@@ -53,12 +53,12 @@ open class UiStatusCombineAdapter<ValueInList>(
         get() = if (uiStatusController == null) {
             field
         } else {
-            { requestType, items ->
+            { requestType, list ->
                 with(uiStatusController) {
                     refresh = {
                         refresh()
                     }
-                    if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && items.isNullOrEmpty()) {
+                    if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && list.isNullOrEmpty()) {
                         // 显示空视图
                         showUiStatus(getEmptyStatusTag())
                         onEmptyStatusShown()
@@ -66,7 +66,7 @@ open class UiStatusCombineAdapter<ValueInList>(
                         showContent()
                     }
                 }
-                field?.invoke(requestType, items)
+                field?.invoke(requestType, list)
             }
         }
 

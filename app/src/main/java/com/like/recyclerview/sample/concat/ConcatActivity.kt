@@ -96,9 +96,8 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
         object : UiStatusCombineAdapter<IRecyclerViewItem>(uiStatusController) {
-            override fun hasMore(list: List<IRecyclerViewItem>?): Boolean {
-                val items = list?.filter { it is Item1 || it is Item2 }
-                return !items.isNullOrEmpty()
+            override fun getItems(list: List<IRecyclerViewItem>?): List<IRecyclerViewItem>? {
+                return list?.filter { it is Item1 || it is Item2 }
             }
 
             override fun onErrorStatusShown(throwable: Throwable) {
