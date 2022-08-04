@@ -166,6 +166,7 @@ open class CombineAdapter<ValueInList>(
                 val loadMoreBefore = loadStateAdapter?.isAfter == false
                 val hasMore = hasMore(items)
                 if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
+                    // items 中可能包含 header（比如 banner） 和 item。我们一般需要根据 item 来判断。如果全部是 header 数据的话，就不应该有更多数据。
                     if (!items.isNullOrEmpty()) {
                         // 添加 adapter
                         if (loadMoreBefore) {
