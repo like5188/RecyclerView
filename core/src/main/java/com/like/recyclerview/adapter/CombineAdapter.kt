@@ -157,7 +157,6 @@ open class CombineAdapter<ValueInList>(
                     // 加载更多失败时，直接更新[loadMoreAdapter]
                     loadStateAdapter?.error(it)
                 }
-                // todo 正在加载更多时刷新出错怎么处理
                 onError?.invoke(requestType, it)
             }.flowOn(Dispatchers.Main)
             .collect { list ->

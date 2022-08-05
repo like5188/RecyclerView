@@ -32,10 +32,10 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
         }
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            // 滚动界面触发
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 // onScrollStateChanged 在添加 item 时不会触发，所以刷新时不会触发。
                 // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
-                // 滚动界面触发
                 loadMore()
             }
         }
