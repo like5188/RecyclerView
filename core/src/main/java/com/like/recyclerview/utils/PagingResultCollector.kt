@@ -1,8 +1,7 @@
-package com.like.recyclerview.adapter
+package com.like.recyclerview.utils
 
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
-import com.like.recyclerview.utils.ConcurrencyHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
