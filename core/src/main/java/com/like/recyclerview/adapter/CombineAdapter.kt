@@ -221,8 +221,8 @@ open class CombineAdapter<ValueInList>(
     }
 
     /**
-     * 从[list]中获取列表数据 items，需要根据 items 来判断是否还有更多，以及加载更多时需要添加 items 到列表中。
-     * 因为[list]中可能包含 header（比如 banner） 和 items。
+     * 从[list]中获取列表数据 items（列表数据可能包含 header（比如 banner） 和 items）。
+     * 需要根据 items 来判断是否还有更多，以及加载更多时需要添加 items 到列表中。
      */
     open fun getItems(list: List<ValueInList>?): List<ValueInList>? {
         return list
