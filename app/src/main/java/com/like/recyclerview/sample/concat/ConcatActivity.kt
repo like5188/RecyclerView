@@ -170,7 +170,7 @@ class ConcatActivity : AppCompatActivity() {
 
         }
         lifecycleScope.launchWhenResumed {
-            adapter.submitData(mViewModel::getItems.asFlow().map {
+            adapter.collectFrom(mViewModel::getItems.asFlow().map {
                 it?.take(3)
             }.retryWhen { cause, attempt ->
                 Logger.e("retryWhen")
@@ -188,7 +188,7 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
         lifecycleScope.launchWhenResumed {
-            adapter.submitData(mViewModel::getHeadersAndItems.asFlow())
+            adapter.collectFrom(mViewModel::getHeadersAndItems.asFlow())
         }
     }
 
@@ -202,7 +202,7 @@ class ConcatActivity : AppCompatActivity() {
             withLoadStateFooter(loadStateAdapter)
         }
         lifecycleScope.launchWhenResumed {
-            adapter.submitData(mViewModel.loadAfterResult.apply {
+            adapter.collectFrom(mViewModel.loadAfterResult.apply {
                 flow = flow.map {
                     it?.take(5)
                 }.retryWhen { cause, attempt ->
@@ -223,7 +223,7 @@ class ConcatActivity : AppCompatActivity() {
             withLoadStateFooter(loadStateAdapter)
         }
         lifecycleScope.launchWhenResumed {
-            adapter.submitData(mViewModel.LoadAfterWithHeadersResult)
+            adapter.collectFrom(mViewModel.LoadAfterWithHeadersResult)
         }
     }
 
@@ -237,7 +237,7 @@ class ConcatActivity : AppCompatActivity() {
             withLoadStateHeader(loadStateAdapter)
         }
         lifecycleScope.launchWhenResumed {
-            adapter.submitData(mViewModel.loadBeforeResult.apply {
+            adapter.collectFrom(mViewModel.loadBeforeResult.apply {
                 flow = flow.map {
                     it?.take(20)
                 }.retryWhen { cause, attempt ->

@@ -78,7 +78,7 @@ class TreeActivity : AppCompatActivity() {
             }
         }
         lifecycleScope.launchWhenResumed {
-            mAdapter.submitData(mViewModel.getItemsFlow())
+            mAdapter.collectFrom(mViewModel.getItemsFlow())
         }
     }
 }
