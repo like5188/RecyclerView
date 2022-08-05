@@ -153,6 +153,7 @@ open class CombineAdapter<ValueInList>(
                     hide?.invoke()
                 }
             }.catch {
+                // 初始化或者刷新失败时保持界面原样，就算加载状态视图显示加载中也不管。
                 if (requestType is RequestType.After || requestType is RequestType.Before) {
                     // 加载更多失败时，直接更新[loadMoreAdapter]
                     loadStateAdapter?.error(it)
