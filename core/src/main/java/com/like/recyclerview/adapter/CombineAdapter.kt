@@ -94,7 +94,7 @@ open class CombineAdapter<ValueInList>(
                             // 否则会由于调用本方法时界面还没有真正收到新的数据，
                             // 导致 loadStateAdapter 还显示于界面中（实际上插入新的数据后，它有可能会处于界面外了，此时不应该触发加载更多），
                             // 导致错误的调用加载更多。
-                            recyclerView.postDelayed({ loadStateAdapter?.loadMore() }, 100)
+                            recyclerView.postDelayed({ loadStateAdapter?.hasMore() }, 100)
                         }
                     }
                 }
@@ -114,7 +114,7 @@ open class CombineAdapter<ValueInList>(
                         }
                         // 更新 loadStateAdapter 的状态
                         if (loadStateAdapter != null) {
-                            recyclerView.postDelayed({ loadStateAdapter?.loadMore() }, 100)
+                            recyclerView.postDelayed({ loadStateAdapter?.hasMore() }, 100)
                         }
                     }
                 } else {

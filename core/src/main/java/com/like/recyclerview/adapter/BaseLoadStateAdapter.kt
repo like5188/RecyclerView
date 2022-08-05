@@ -13,6 +13,7 @@ import com.like.recyclerview.utils.findLastVisibleItemPosition
 import com.like.recyclerview.viewholder.BindingViewHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 加载状态 Adapter
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
  * 处理了3种触发加载更多的情况：1、数据插入时触发；2、滚动界面触发；3、加载失败后由点击事件触发；
  */
 abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter<BindingViewHolder<VB>>() {
+    private val hasMore = AtomicBoolean(false)
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
     private lateinit var recyclerView: RecyclerView
@@ -82,20 +84,30 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
     }
 
     /**
+     * 如果还有更多数据时调用此方法进行标记。
+     */
+    internal fun hasMore() {
+        hasMore.set(true)
+        loadMore()
+    }
+
+    /**
      * 加载更多数据
      */
-    internal fun loadMore() {
+    private fun loadMore() {
         if (!::mHolder.isInitialized) return
         if (!isVisible()) {
             return
         }
-        mHolder.itemView.setOnClickListener(null)
-        val context = mHolder.itemView.context
-        if (context is LifecycleOwner) {
-            context.lifecycleScope.launch(Dispatchers.Main) {
-                onLoading()
-                Logger.w("loadMore")
-                onLoadMore()
+        if (hasMore.compareAndSet(true, false)) {
+            mHolder.itemView.setOnClickListener(null)
+            val context = mHolder.itemView.context
+            if (context is LifecycleOwner) {
+                context.lifecycleScope.launch(Dispatchers.Main) {
+                    onLoading()
+                    Logger.w("loadMore")
+                    onLoadMore()
+                }
             }
         }
     }
@@ -117,7 +129,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
         if (!::mHolder.isInitialized) return
         mHolder.itemView.setOnClickListener {
             // 加载失败后由点击事件触发
-            loadMore()
+            hasMore()
         }
         onError(throwable)
     }
