@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * 加载状态 Adapter
  *
- * 处理了3种触发加载更多的情况：1、数据插入时触发；2、滚动界面触发；3、加载失败后由点击事件触发；
+ * 处理了2种触发加载更多的情况：1、[getItemViewType]触发；2、加载失败后由点击事件触发；
  */
 abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter<BindingViewHolder<VB>>() {
     private val hasMore = AtomicBoolean(false)
