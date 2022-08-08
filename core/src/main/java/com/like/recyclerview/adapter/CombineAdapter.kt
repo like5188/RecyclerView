@@ -4,7 +4,11 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
-import com.like.recyclerview.utils.*
+import com.like.paging.util.PagingResultCollector
+import com.like.recyclerview.utils.addIfAbsent
+import com.like.recyclerview.utils.keepPosition
+import com.like.recyclerview.utils.scrollToBottom
+import com.like.recyclerview.utils.scrollToTop
 import kotlinx.coroutines.flow.Flow
 
 /**
