@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
 import com.like.recyclerview.utils.*
-import com.like.recyclerview.utils.PagingResultCollector
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -88,11 +87,7 @@ open class CombineAdapter<ValueInList>(
                         }
                         // 更新 loadStateAdapter 的状态
                         if (!items.isNullOrEmpty() && loadStateAdapter != null) {
-                            // 此处必须放在 submitList 的回调里面，并且使用 postDelayed 来提交，达到双重保障。当然也可以监听数据的插入来处理，但是比较麻烦。
-                            // 否则会由于调用本方法时界面还没有真正收到新的数据，
-                            // 导致 loadStateAdapter 还显示于界面中（实际上插入新的数据后，它有可能会处于界面外了，此时不应该触发加载更多），
-                            // 导致错误的调用加载更多。
-                            recyclerView.postDelayed({ loadStateAdapter?.hasMore() }, 100)
+                            loadStateAdapter?.hasMore()
                         }
                     }
                 }
@@ -111,9 +106,7 @@ open class CombineAdapter<ValueInList>(
                             recyclerView.keepPosition(items.size, 1)
                         }
                         // 更新 loadStateAdapter 的状态
-                        if (loadStateAdapter != null) {
-                            recyclerView.postDelayed({ loadStateAdapter?.hasMore() }, 100)
-                        }
+                        loadStateAdapter?.hasMore()
                     }
                 } else {
                     loadStateAdapter?.end()

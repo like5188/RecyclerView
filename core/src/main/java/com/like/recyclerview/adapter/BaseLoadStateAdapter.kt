@@ -8,8 +8,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.like.common.util.Logger
-import com.like.recyclerview.utils.findFirstVisibleItemPosition
-import com.like.recyclerview.utils.findLastVisibleItemPosition
 import com.like.recyclerview.viewholder.BindingViewHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,35 +22,7 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
     private val hasMore = AtomicBoolean(false)
     internal var onLoadMore: suspend () -> Unit = {}
     private lateinit var mHolder: BindingViewHolder<VB>
-    private lateinit var recyclerView: RecyclerView
     internal var isAfter: Boolean = true
-
-    private val onScrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            // onScrolled 在添加 item 时也会触发，但是刷新后，如果添加的 item 和上一次的一样多，则不会触发。
-            // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
-        }
-
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            // 滚动界面触发
-            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                // onScrollStateChanged 在添加 item 时不会触发，所以刷新时不会触发。
-                // 所以只靠此方法触发加载更多不行，需要在 hasMore 方法中也触发以处理上述情况。
-                loadMore()
-            }
-        }
-    }
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        this.recyclerView = recyclerView
-        recyclerView.addOnScrollListener(onScrollListener)
-    }
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
-        recyclerView.removeOnScrollListener(onScrollListener)
-    }
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<VB> {
         return BindingViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context), getLayoutId(), parent, false))
@@ -63,24 +33,13 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
         onBindViewHolder(holder)
     }
 
-    final override fun getItemCount(): Int {
-        return 1
+    override fun getItemViewType(position: Int): Int {
+        loadMore()
+        return super.getItemViewType(position)
     }
 
-    /**
-     * 判断 BaseLoadMoreAdapter 是否可见
-     */
-    private fun isVisible(): Boolean {
-        if (isAfter) {
-            if (recyclerView.findLastVisibleItemPosition() != (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
-                return false
-            }
-        } else {
-            if (recyclerView.findFirstVisibleItemPosition() != 0) {
-                return false
-            }
-        }
-        return true
+    final override fun getItemCount(): Int {
+        return 1
     }
 
     /**
@@ -88,7 +47,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
      */
     internal fun hasMore() {
         hasMore.set(true)
-        loadMore()
     }
 
     /**
@@ -96,9 +54,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
      */
     private fun loadMore() {
         if (!::mHolder.isInitialized) return
-        if (!isVisible()) {
-            return
-        }
         if (hasMore.compareAndSet(true, false)) {
             mHolder.itemView.setOnClickListener(null)
             val context = mHolder.itemView.context
@@ -129,7 +84,8 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
         if (!::mHolder.isInitialized) return
         mHolder.itemView.setOnClickListener {
             // 加载失败后由点击事件触发
-            hasMore()
+            hasMore.set(true)
+            loadMore()
         }
         onError(throwable)
     }
