@@ -7,7 +7,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import com.like.common.util.Logger
 import com.like.recyclerview.viewholder.BindingViewHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,7 +59,6 @@ abstract class BaseLoadStateAdapter<VB : ViewDataBinding> : RecyclerView.Adapter
             if (context is LifecycleOwner) {
                 context.lifecycleScope.launch(Dispatchers.Main) {
                     onLoading()
-                    Logger.w("loadMore")
                     onLoadMore()
                 }
             }
