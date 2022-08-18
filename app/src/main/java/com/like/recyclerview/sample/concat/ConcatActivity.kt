@@ -96,7 +96,7 @@ class ConcatActivity : AppCompatActivity() {
             }
         }
         object : UiStatusCombineAdapter<IRecyclerViewItem>(uiStatusController) {
-            override fun getItems(list: List<IRecyclerViewItem>?): List<IRecyclerViewItem>? {
+            override fun getItemsFrom(list: List<IRecyclerViewItem>?): List<IRecyclerViewItem>? {
                 return list?.filter { it is Item1 || it is Item2 }
             }
 
@@ -124,6 +124,14 @@ class ConcatActivity : AppCompatActivity() {
         mBinding.btnRefresh.setOnClickListener {
             lifecycleScope.launch {
                 adapter.refresh()
+            }
+        }
+        mBinding.btnAdd.setOnClickListener {
+            lifecycleScope.launch {
+                listAdapter.currentList.toMutableList().apply {
+                    add(Item1(10000, "addName", "addDes"))
+                    adapter.submitList(this)
+                }
             }
         }
 //        testFlow()

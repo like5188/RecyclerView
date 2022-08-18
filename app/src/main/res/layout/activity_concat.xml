@@ -12,6 +12,12 @@
             android:layout_height="wrap_content"
             android:text="刷新" />
 
+        <Button
+            android:id="@+id/btnAdd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="直接添加数据" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv"
             android:layout_width="match_parent"
