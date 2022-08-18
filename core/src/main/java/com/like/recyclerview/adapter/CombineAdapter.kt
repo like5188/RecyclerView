@@ -5,10 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.like.paging.PagingResult
 import com.like.paging.RequestType
 import com.like.paging.util.PagingResultCollector
-import com.like.recyclerview.utils.addIfAbsent
-import com.like.recyclerview.utils.keepPosition
-import com.like.recyclerview.utils.scrollToBottom
-import com.like.recyclerview.utils.scrollToTop
+import com.like.recyclerview.utils.*
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -67,58 +64,66 @@ open class CombineAdapter<ValueInList>(
         }
 
         override suspend fun onSuccess(requestType: RequestType, list: List<ValueInList>?) {
-            // 是否往前加载更多。处理逻辑分为两种：1、往前加载更多；2、往后加载更多或者不分页；
-            val loadMoreBefore = loadStateAdapter?.isAfter == false
-            val items = getItems(list)// list 中可能包含 header（比如 banner） 和 items。
-            if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
-                if (!list.isNullOrEmpty()) {
-                    // 添加列表 adapter
-                    concatAdapter.addIfAbsent(listAdapter)
-                    // 添加列表数据
-                    listAdapter.submitList(list) {
-                        if (!items.isNullOrEmpty() && loadStateAdapter != null) {// 如果全部是 header 数据的话，就不应该有更多数据。也就是说，只要有列表数据，就显示加载状态视图。
-                            if (loadMoreBefore) {
-                                concatAdapter.addIfAbsent(0, loadStateAdapter)
-                            } else {
-                                concatAdapter.addIfAbsent(loadStateAdapter)
-                            }
-                        }
-                        // RecyclerView 界面位置处理
-                        if (loadMoreBefore) {
-                            recyclerView.scrollToBottom()
-                        } else {
-                            recyclerView.scrollToTop()
-                        }
-                        // 更新 loadStateAdapter 的状态
-                        if (!items.isNullOrEmpty() && loadStateAdapter != null) {
-                            loadStateAdapter?.hasMore()
-                        }
-                    }
-                }
-            } else {// 加载更多
-                if (!items.isNullOrEmpty()) {
-                    // 添加列表数据
-                    val newItems = listAdapter.currentList.toMutableList()
-                    if (loadMoreBefore) {
-                        newItems.addAll(0, items)
-                    } else {
-                        newItems.addAll(items)
-                    }
-                    listAdapter.submitList(newItems) {
-                        // RecyclerView 界面位置处理
-                        if (loadMoreBefore) {
-                            recyclerView.keepPosition(items.size, 1)
-                        }
-                        // 更新 loadStateAdapter 的状态
-                        loadStateAdapter?.hasMore()
-                    }
-                } else {
-                    loadStateAdapter?.end()
-                }
-            }
-            this@CombineAdapter.onSuccess?.invoke(requestType, list)
+            handleSuccess(requestType, list)
         }
 
+    }
+
+    open suspend fun handleSuccess(requestType: RequestType, list: List<ValueInList>?) {
+        // 是否往前加载更多。处理逻辑分为两种：1、往前加载更多；2、往后加载更多或者不分页；
+        val loadMoreBefore = loadStateAdapter?.isAfter == false
+        val items = getItems(list)// list 中可能包含 header（比如 banner） 和 items。
+        if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
+            if (!list.isNullOrEmpty()) {
+                // 添加列表 adapter
+                concatAdapter.addIfAbsent(listAdapter)
+            } else {
+                concatAdapter.clear()
+            }
+            // 添加列表数据
+            listAdapter.submitList(list) {
+                if (!items.isNullOrEmpty() && loadStateAdapter != null) {// 如果全部是 header 数据的话，就不应该有更多数据。也就是说，只要有列表数据，就显示加载状态视图。
+                    if (loadMoreBefore) {
+                        concatAdapter.addIfAbsent(0, loadStateAdapter)
+                    } else {
+                        concatAdapter.addIfAbsent(loadStateAdapter)
+                    }
+                }
+                // RecyclerView 界面位置处理
+                if (!list.isNullOrEmpty()) {
+                    if (loadMoreBefore) {
+                        recyclerView.scrollToBottom()
+                    } else {
+                        recyclerView.scrollToTop()
+                    }
+                }
+                // 更新 loadStateAdapter 的状态
+                if (!items.isNullOrEmpty() && loadStateAdapter != null) {
+                    loadStateAdapter?.hasMore()
+                }
+            }
+        } else {// 加载更多
+            if (!items.isNullOrEmpty()) {
+                // 添加列表数据
+                val newItems = listAdapter.currentList.toMutableList()
+                if (loadMoreBefore) {
+                    newItems.addAll(0, items)
+                } else {
+                    newItems.addAll(items)
+                }
+                listAdapter.submitList(newItems) {
+                    // RecyclerView 界面位置处理
+                    if (loadMoreBefore) {
+                        recyclerView.keepPosition(items.size, 1)
+                    }
+                    // 更新 loadStateAdapter 的状态
+                    loadStateAdapter?.hasMore()
+                }
+            } else {
+                loadStateAdapter?.end()
+            }
+        }
+        this@CombineAdapter.onSuccess?.invoke(requestType, list)
     }
 
     protected fun itemCount() = listAdapter.itemCount
