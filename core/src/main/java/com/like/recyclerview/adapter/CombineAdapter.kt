@@ -7,6 +7,8 @@ import com.like.paging.RequestType
 import com.like.paging.util.PagingResultCollector
 import com.like.recyclerview.utils.*
 import kotlinx.coroutines.flow.Flow
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * 组合[BaseListAdapter]和[BaseLoadStateAdapter]。并绑定[PagingResult]或者[Flow]类型的数据。
@@ -45,6 +47,9 @@ open class CombineAdapter<ValueInList>(
      */
     open var onSuccess: (suspend (RequestType, List<ValueInList>?) -> Unit)? = null
 
+    /**
+     * 本库内部调用回调
+     */
     private val callback = object : PagingResultCollector.Callback<ValueInList> {
         override fun onShow() {
             this@CombineAdapter.show?.invoke()
@@ -55,16 +60,13 @@ open class CombineAdapter<ValueInList>(
         }
 
         override suspend fun onError(requestType: RequestType, throwable: Throwable) {
-            // 初始化或者刷新失败时保持界面原样，就算加载状态视图显示加载中也不管。
-            if (requestType is RequestType.After || requestType is RequestType.Before) {
-                // 加载更多失败时，直接更新[loadMoreAdapter]
-                loadStateAdapter?.error(throwable)
-            }
+            handleError(requestType, throwable)
             this@CombineAdapter.onError?.invoke(requestType, throwable)
         }
 
         override suspend fun onSuccess(requestType: RequestType, list: List<ValueInList>?) {
-            submitList(list, requestType)
+            handleSuccess(requestType, list)
+            this@CombineAdapter.onSuccess?.invoke(requestType, list)
         }
 
     }
@@ -75,7 +77,24 @@ open class CombineAdapter<ValueInList>(
     val itemCount: Int
         get() = listAdapter.itemCount
 
-    suspend fun submitList(list: List<ValueInList>?, requestType: RequestType = RequestType.Initial) {
+    /**
+     * 用于直接添加数据时调用（非本库内部调用）
+     */
+    suspend fun submitList(list: List<ValueInList>?) {
+        val requestType = RequestType.Initial
+        handleSuccess(requestType, list)
+        this@CombineAdapter.onSuccess?.invoke(requestType, list)
+    }
+
+    private suspend fun handleError(requestType: RequestType, throwable: Throwable) {
+        // 初始化或者刷新失败时保持界面原样，就算加载状态视图显示加载中也不管。
+        if (requestType is RequestType.After || requestType is RequestType.Before) {
+            // 加载更多失败时，直接更新[loadMoreAdapter]
+            loadStateAdapter?.error(throwable)
+        }
+    }
+
+    private suspend fun handleSuccess(requestType: RequestType, list: List<ValueInList>?) = suspendCoroutine<Unit> {
         // 是否往前加载更多。处理逻辑分为两种：1、往前加载更多；2、往后加载更多或者不分页；
         val loadMoreBefore = loadStateAdapter?.isAfter == false
         val items = getItemsFrom(list)// list 中可能包含 header（比如 banner） 和 items。
@@ -107,6 +126,7 @@ open class CombineAdapter<ValueInList>(
                 if (!items.isNullOrEmpty() && loadStateAdapter != null) {
                     loadStateAdapter?.hasMore()
                 }
+                it.resume(Unit)
             }
         } else {// 加载更多
             if (!items.isNullOrEmpty()) {
@@ -124,12 +144,13 @@ open class CombineAdapter<ValueInList>(
                     }
                     // 更新 loadStateAdapter 的状态
                     loadStateAdapter?.hasMore()
+                    it.resume(Unit)
                 }
             } else {
                 loadStateAdapter?.end()
+                it.resume(Unit)
             }
         }
-        this@CombineAdapter.onSuccess?.invoke(requestType, list)
     }
 
     fun attachedToRecyclerView(recyclerView: RecyclerView) {
