@@ -64,15 +64,21 @@ open class CombineAdapter<ValueInList>(
         }
 
         override suspend fun onSuccess(requestType: RequestType, list: List<ValueInList>?) {
-            handleSuccess(requestType, list)
+            submitList(list, requestType)
         }
 
     }
 
-    open suspend fun handleSuccess(requestType: RequestType, list: List<ValueInList>?) {
+    val currentList: List<ValueInList>
+        get() = listAdapter.currentList
+
+    val itemCount: Int
+        get() = listAdapter.itemCount
+
+    suspend fun submitList(list: List<ValueInList>?, requestType: RequestType = RequestType.Initial) {
         // 是否往前加载更多。处理逻辑分为两种：1、往前加载更多；2、往后加载更多或者不分页；
         val loadMoreBefore = loadStateAdapter?.isAfter == false
-        val items = getItems(list)// list 中可能包含 header（比如 banner） 和 items。
+        val items = getItemsFrom(list)// list 中可能包含 header（比如 banner） 和 items。
         if (requestType is RequestType.Initial || requestType is RequestType.Refresh) {
             if (!list.isNullOrEmpty()) {
                 // 添加列表 adapter
@@ -125,8 +131,6 @@ open class CombineAdapter<ValueInList>(
         }
         this@CombineAdapter.onSuccess?.invoke(requestType, list)
     }
-
-    protected fun itemCount() = listAdapter.itemCount
 
     fun attachedToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
@@ -183,7 +187,7 @@ open class CombineAdapter<ValueInList>(
      * 从[list]中获取列表数据 items（列表数据可能包含 header（比如 banner） 和 items）。
      * 需要根据 items 来判断是否还有更多，以及加载更多时需要添加 items 到列表中。
      */
-    open fun getItems(list: List<ValueInList>?): List<ValueInList>? {
+    open fun getItemsFrom(list: List<ValueInList>?): List<ValueInList>? {
         return list
     }
 

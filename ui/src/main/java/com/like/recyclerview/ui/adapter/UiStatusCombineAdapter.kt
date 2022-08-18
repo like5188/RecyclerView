@@ -37,7 +37,7 @@ open class UiStatusCombineAdapter<ValueInList>(
                     refresh = {
                         refresh()
                     }
-                    if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemCount() <= 0) {
+                    if ((requestType is RequestType.Initial || requestType is RequestType.Refresh) && itemCount <= 0) {
                         // 初始化或者刷新失败时，如果当前显示的是列表，则不处理，否则显示[errorAdapter]
                         showUiStatus(getErrorStatusTag(throwable))
                         onErrorStatusShown(throwable)
