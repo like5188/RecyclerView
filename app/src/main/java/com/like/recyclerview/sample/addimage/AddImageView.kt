@@ -82,6 +82,7 @@ class AddImageViewInfo(val localMedia: LocalMedia) : IRecyclerViewItem {
 
 /**
  * +号视图需要的数据
+ * @param addImageResId +号图片资源 id
  */
 data class AddInfo(@DrawableRes val addImageResId: Int) : IRecyclerViewItem {
     override var layoutId: Int = R.layout.view_add_image
@@ -90,11 +91,11 @@ data class AddInfo(@DrawableRes val addImageResId: Int) : IRecyclerViewItem {
 class MyItemAdapter(maxSelectNum: Int = Int.MAX_VALUE) :
     ItemAdapter<ViewImageBinding, AddImageViewInfo>(object : DiffUtil.ItemCallback<AddImageViewInfo>() {
         override fun areItemsTheSame(oldItem: AddImageViewInfo, newItem: AddImageViewInfo): Boolean {
-            return oldItem == newItem
+            return oldItem.localMedia.id == newItem.localMedia.id
         }
 
         override fun areContentsTheSame(oldItem: AddImageViewInfo, newItem: AddImageViewInfo): Boolean {
-            return oldItem.localMedia.id == newItem.localMedia.id
+            return oldItem.localMedia.compressPath == newItem.localMedia.compressPath
         }
     }, maxSelectNum) {
     val showDeleteButton: ObservableBoolean = ObservableBoolean()
