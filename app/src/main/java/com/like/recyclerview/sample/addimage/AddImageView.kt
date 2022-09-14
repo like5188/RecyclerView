@@ -37,16 +37,12 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
      */
     fun init(maxSelectNum: Int = Int.MAX_VALUE, onItemChanged: (() -> Unit)? = null) {
         myItemAdapter = MyItemAdapter(maxSelectNum).also { it.onItemChanged = onItemChanged }
-        myPlusAdapter = MyPlusAdapter(AddInfo(R.drawable.icon_add), maxSelectNum)
+        myPlusAdapter = MyPlusAdapter(maxSelectNum, R.drawable.icon_add)
         adapter = AddImageAdapterManager(
             activity = context as AppCompatActivity,
             itemAdapter = myItemAdapter,
             plusAdapter = myPlusAdapter,
-            getSelectedLocalMedias = {
-                myItemAdapter.currentList.map {
-                    it.localMedia
-                }
-            },
+            getSelectedLocalMedias = ::getSelectedLocalMedias,
             itemCreator = {
                 AddImageViewInfo(it)
             },
@@ -56,39 +52,17 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
         ).getConcatAdapter()
     }
 
-    fun getSelectedImages() = myItemAdapter.currentList
+    fun getSelectedLocalMedias() = myItemAdapter.currentList.map {
+        it.localMedia
+    }
 
 }
 
 class AddImageViewInfo(val localMedia: LocalMedia) : IRecyclerViewItem {
     override var layoutId: Int = R.layout.view_image
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as AddImageViewInfo
-
-        if (localMedia != other.localMedia) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return localMedia.hashCode()
-    }
-
 }
 
-/**
- * +号视图需要的数据
- * @param addImageResId +号图片资源 id
- */
-data class AddInfo(@DrawableRes val addImageResId: Int) : IRecyclerViewItem {
-    override var layoutId: Int = R.layout.view_add_image
-}
-
-class MyItemAdapter(maxSelectNum: Int = Int.MAX_VALUE) :
+class MyItemAdapter(maxSelectNum: Int) :
     ItemAdapter<ViewImageBinding, AddImageViewInfo>(object : DiffUtil.ItemCallback<AddImageViewInfo>() {
         override fun areItemsTheSame(oldItem: AddImageViewInfo, newItem: AddImageViewInfo): Boolean {
             return oldItem.localMedia.id == newItem.localMedia.id
@@ -127,16 +101,16 @@ class MyItemAdapter(maxSelectNum: Int = Int.MAX_VALUE) :
 }
 
 class MyPlusAdapter(
-    private val addInfo: AddInfo,
-    maxSelectNum: Int = Int.MAX_VALUE
-) : PlusAdapter<ViewAddImageBinding, AddInfo>(maxSelectNum) {
+    maxSelectNum: Int,
+    @DrawableRes private val addImageResId: Int
+) : PlusAdapter<ViewAddImageBinding>(maxSelectNum) {
 
     override fun onBindViewHolder(holder: BindingViewHolder<ViewAddImageBinding>) {
-        holder.binding.iv.setImageResource(addInfo.addImageResId)
+        holder.binding.iv.setImageResource(addImageResId)
     }
 
     override fun getLayoutId(): Int {
-        return addInfo.layoutId
+        return R.layout.view_add_image
     }
 
 }

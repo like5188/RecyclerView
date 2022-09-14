@@ -13,7 +13,7 @@ import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.entity.LocalMedia
 import kotlinx.coroutines.launch
 
-abstract class PlusAdapter<VB : ViewDataBinding, ValueInList>(
+abstract class PlusAdapter<VB : ViewDataBinding>(
     private val maxSelectNum: Int = Int.MAX_VALUE
 ) : RecyclerView.Adapter<BindingViewHolder<VB>>() {
     lateinit var activity: AppCompatActivity

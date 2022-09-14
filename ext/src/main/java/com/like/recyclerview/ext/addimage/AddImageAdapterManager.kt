@@ -10,13 +10,13 @@ import com.luck.picture.lib.entity.LocalMedia
  * [ItemAdapter]、[PlusAdapter]交互逻辑封装
  *
  * @param getSelectedLocalMedias    获取当前已经添加了的所有 [LocalMedia]
- * @param itemCreator       根据 [LocalMedia] 创建 item
- * @param onPlusClicked +号被点击回调
+ * @param itemCreator               根据 [LocalMedia] 创建 item
+ * @param onPlusClicked             +号被点击回调
  */
 class AddImageAdapterManager<ValueInList>(
     activity: AppCompatActivity,
     itemAdapter: ItemAdapter<*, ValueInList>,
-    plusAdapter: PlusAdapter<*, *>,
+    plusAdapter: PlusAdapter<*>,
     getSelectedLocalMedias: () -> List<LocalMedia>,
     itemCreator: (LocalMedia) -> ValueInList,
     onPlusClicked: () -> Unit
