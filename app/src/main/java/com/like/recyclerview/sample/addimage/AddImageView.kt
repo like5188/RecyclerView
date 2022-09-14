@@ -135,7 +135,7 @@ class MyPlusAdapter(
     }
 
     override fun getLayoutId(): Int {
-        return R.layout.view_add_image
+        return addInfo.layoutId
     }
 
 }
