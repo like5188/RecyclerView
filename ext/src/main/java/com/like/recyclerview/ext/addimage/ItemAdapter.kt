@@ -8,6 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.like.recyclerview.adapter.BaseListAdapter
 import com.luck.picture.lib.entity.LocalMedia
 
+/**
+ * 带一个"+"号的选择器，用于选择图片、视频等。
+ * 功能：在添加、删除 item 时，控制"+"号 item 的显示隐藏。
+ */
 abstract class ItemAdapter<VB : ViewDataBinding>(
     diffCallback: DiffUtil.ItemCallback<LocalMedia>
 ) : BaseListAdapter<VB, LocalMedia>(diffCallback) {
