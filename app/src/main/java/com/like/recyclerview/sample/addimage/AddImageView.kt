@@ -58,14 +58,15 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
         }
         with(myPlusAdapter) {
             addOnItemClickListener {
+                myItemAdapter.maxSelectNum = maxSelectNum
                 activity.lifecycleScope.launch {
                     if (maxSelectNum == 1) {
                         activity.selectSinglePhoto()?.apply {
-                            myItemAdapter.addLocalMedias(listOf(this), maxSelectNum)
+                            myItemAdapter.addLocalMedias(listOf(this))
                         }
                     } else {
                         activity.selectMultiplePhoto(myItemAdapter.currentList, maxSelectNum)?.apply {
-                            myItemAdapter.addLocalMedias(this, maxSelectNum)
+                            myItemAdapter.addLocalMedias(this)
                         }
                     }
                 }

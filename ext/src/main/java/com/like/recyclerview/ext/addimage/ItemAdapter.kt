@@ -12,18 +12,16 @@ abstract class ItemAdapter<VB : ViewDataBinding>(
     diffCallback: DiffUtil.ItemCallback<LocalMedia>
 ) : BaseListAdapter<VB, LocalMedia>(diffCallback) {
     private lateinit var context: Context
-    private var maxSelectNum: Int = Int.MAX_VALUE
+    var maxSelectNum: Int = Int.MAX_VALUE
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         this.context = recyclerView.context
     }
 
-    fun addLocalMedias(list: List<LocalMedia>, maxSelectNum: Int) {
-        this.maxSelectNum = maxSelectNum
-        val localMedias = currentList
+    fun addLocalMedias(list: List<LocalMedia>) {
         // 去掉已经添加过的
-        val needAddItems = list.filter { !localMedias.contains(it) }
+        val needAddItems = list.filter { !currentList.contains(it) }
         val curCount = itemCount
         when {
             curCount + needAddItems.size < maxSelectNum -> {
