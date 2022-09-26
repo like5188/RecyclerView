@@ -44,7 +44,7 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
      */
     fun init(maxSelectNum: Int = Int.MAX_VALUE, onItemChanged: (() -> Unit)? = null) {
         val activity = context as AppCompatActivity
-        myItemAdapter = MyItemAdapter()
+        myItemAdapter = MyItemAdapter(maxSelectNum)
         myPlusAdapter = MyPlusAdapter(R.drawable.icon_add)
         val addImageAdapter = ConcatAdapter(myItemAdapter, myPlusAdapter)
         with(myItemAdapter) {
@@ -58,7 +58,6 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
         }
         with(myPlusAdapter) {
             addOnItemClickListener {
-                myItemAdapter.maxSelectNum = maxSelectNum
                 activity.lifecycleScope.launch {
                     if (maxSelectNum == 1) {
                         activity.selectSinglePhoto()?.apply {
@@ -78,7 +77,7 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
 
 }
 
-class MyItemAdapter : ItemAdapter<ViewImageBinding>(object : DiffUtil.ItemCallback<LocalMedia>() {
+class MyItemAdapter(maxSelectNum: Int) : ItemAdapter<ViewImageBinding>(maxSelectNum, object : DiffUtil.ItemCallback<LocalMedia>() {
     override fun areItemsTheSame(oldItem: LocalMedia, newItem: LocalMedia): Boolean {
         return oldItem.id == newItem.id
     }
