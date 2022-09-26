@@ -5,19 +5,26 @@ import android.util.AttributeSet
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ObservableBoolean
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import com.like.recyclerview.ext.addimage.AddImageAdapterManager
+import com.like.common.util.selectMultiplePhoto
+import com.like.common.util.selectSinglePhoto
+import com.like.recyclerview.adapter.BaseListAdapter
 import com.like.recyclerview.ext.addimage.ItemAdapter
-import com.like.recyclerview.ext.addimage.PlusAdapter
 import com.like.recyclerview.layoutmanager.WrapGridLayoutManager
-import com.like.recyclerview.model.IRecyclerViewItem
 import com.like.recyclerview.sample.R
 import com.like.recyclerview.sample.databinding.ViewAddImageBinding
 import com.like.recyclerview.sample.databinding.ViewImageBinding
+import com.like.recyclerview.utils.ItemTouchHelperCallback
+import com.like.recyclerview.utils.add
+import com.like.recyclerview.utils.remove
 import com.like.recyclerview.viewholder.BindingViewHolder
 import com.luck.picture.lib.entity.LocalMedia
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -36,48 +43,65 @@ class AddImageView(context: Context, attrs: AttributeSet) : RecyclerView(context
      * @param onItemChanged 添加删除图片监听
      */
     fun init(maxSelectNum: Int = Int.MAX_VALUE, onItemChanged: (() -> Unit)? = null) {
-        myItemAdapter = MyItemAdapter(maxSelectNum).also { it.onItemChanged = onItemChanged }
-        myPlusAdapter = MyPlusAdapter(maxSelectNum, R.drawable.icon_add)
-        adapter = AddImageAdapterManager(
-            activity = context as AppCompatActivity,
-            itemAdapter = myItemAdapter,
-            plusAdapter = myPlusAdapter,
-            getSelectedLocalMedias = ::getSelectedLocalMedias,
-            itemCreator = {
-                AddImageViewInfo(it)
-            },
-            onPlusClicked = {
+        val activity = context as AppCompatActivity
+        myItemAdapter = MyItemAdapter()
+        myPlusAdapter = MyPlusAdapter(R.drawable.icon_add)
+        val addImageAdapter = ConcatAdapter(myItemAdapter, myPlusAdapter)
+        with(myItemAdapter) {
+            this.onItemChanged = onItemChanged
+            this.onRemovePlus = {
+                addImageAdapter.remove(myPlusAdapter)
+            }
+            this.onAddPlus = {
+                addImageAdapter.add(myPlusAdapter)
+            }
+        }
+        with(myPlusAdapter) {
+            addOnItemClickListener {
+                activity.lifecycleScope.launch {
+                    if (maxSelectNum == 1) {
+                        activity.selectSinglePhoto()?.apply {
+                            myItemAdapter.addLocalMedias(listOf(this), maxSelectNum)
+                        }
+                    } else {
+                        activity.selectMultiplePhoto(myItemAdapter.currentList, maxSelectNum)?.apply {
+                            myItemAdapter.addLocalMedias(this, maxSelectNum)
+                        }
+                    }
+                }
                 myItemAdapter.showDeleteButton.set(false)
             }
-        ).getConcatAdapter()
-    }
-
-    fun getSelectedLocalMedias() = myItemAdapter.currentList.map {
-        it.localMedia
+        }
+        adapter = addImageAdapter
     }
 
 }
 
-class AddImageViewInfo(val localMedia: LocalMedia) : IRecyclerViewItem {
-    override var layoutId: Int = R.layout.view_image
-}
+class MyItemAdapter : ItemAdapter<ViewImageBinding>(object : DiffUtil.ItemCallback<LocalMedia>() {
+    override fun areItemsTheSame(oldItem: LocalMedia, newItem: LocalMedia): Boolean {
+        return oldItem.id == newItem.id
+    }
 
-class MyItemAdapter(maxSelectNum: Int) :
-    ItemAdapter<ViewImageBinding, AddImageViewInfo>(object : DiffUtil.ItemCallback<AddImageViewInfo>() {
-        override fun areItemsTheSame(oldItem: AddImageViewInfo, newItem: AddImageViewInfo): Boolean {
-            return oldItem.localMedia.id == newItem.localMedia.id
-        }
-
-        override fun areContentsTheSame(oldItem: AddImageViewInfo, newItem: AddImageViewInfo): Boolean {
-            return oldItem.localMedia.compressPath == newItem.localMedia.compressPath
-        }
-    }, maxSelectNum) {
+    override fun areContentsTheSame(oldItem: LocalMedia, newItem: LocalMedia): Boolean {
+        return oldItem.compressPath == newItem.compressPath
+    }
+}) {
+    private val mItemTouchHelper by lazy {
+        ItemTouchHelper(ItemTouchHelperCallback(this))
+    }
     val showDeleteButton: ObservableBoolean = ObservableBoolean()
     var onItemChanged: (() -> Unit)? = null
+    var onRemovePlus: (() -> Unit)? = null
+    var onAddPlus: (() -> Unit)? = null
 
-    override fun onBindViewHolder(holder: BindingViewHolder<ViewImageBinding>, item: AddImageViewInfo) {
-        super.onBindViewHolder(holder, item)
-        holder.binding.iv.load(File(item.localMedia.compressPath))
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        mItemTouchHelper.attachToRecyclerView(recyclerView)
+    }
+
+    override fun onBindViewHolder(holder: BindingViewHolder<ViewImageBinding>, item: LocalMedia?) {
+        item ?: return
+        holder.binding.iv.load(File(item.compressPath))
         holder.binding.root.setOnLongClickListener {
             // 显示删除按钮
             if (!showDeleteButton.get()) {
@@ -91,6 +115,10 @@ class MyItemAdapter(maxSelectNum: Int) :
         holder.binding.showDeleteButton = showDeleteButton
     }
 
+    override fun getItemViewType(position: Int, item: LocalMedia?): Int {
+        return R.layout.view_image
+    }
+
     override fun onAdded() {
         onItemChanged?.invoke()
     }
@@ -98,19 +126,39 @@ class MyItemAdapter(maxSelectNum: Int) :
     override fun onRemoved() {
         onItemChanged?.invoke()
     }
+
+    override fun onRemovePlus() {
+        onRemovePlus?.invoke()
+    }
+
+    override fun onAddPlus() {
+        onAddPlus?.invoke()
+    }
+
 }
 
 class MyPlusAdapter(
-    maxSelectNum: Int,
     @DrawableRes private val addImageResId: Int
-) : PlusAdapter<ViewAddImageBinding>(maxSelectNum) {
+) : BaseListAdapter<ViewAddImageBinding, Any>(object : DiffUtil.ItemCallback<Any>() {
+    override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
+        return true
+    }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<ViewAddImageBinding>) {
+    override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
+        return true
+    }
+}) {
+
+    override fun onBindViewHolder(holder: BindingViewHolder<ViewAddImageBinding>, item: Any?) {
         holder.binding.iv.setImageResource(addImageResId)
     }
 
-    override fun getLayoutId(): Int {
+    override fun getItemViewType(position: Int, item: Any?): Int {
         return R.layout.view_add_image
+    }
+
+    override fun getItemCount(): Int {
+        return 1
     }
 
 }

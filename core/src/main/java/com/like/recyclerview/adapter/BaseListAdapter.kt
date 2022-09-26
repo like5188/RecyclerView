@@ -35,16 +35,16 @@ open class BaseListAdapter<VB : ViewDataBinding, ValueInList>(diffCallback: Diff
     }
 
     final override fun getItemViewType(position: Int): Int {
-        val item = getItem(position) ?: return -1
-        if (item is IRecyclerViewItem) {
+        val item = getItemOrNull(position)
+        if (item != null && item is IRecyclerViewItem) {
             return item.layoutId
         }
         return getItemViewType(position, item)
     }
 
     final override fun onBindViewHolder(holder: BindingViewHolder<VB>, position: Int) {
-        val item = getItem(holder.bindingAdapterPosition) ?: return
-        if (item is IRecyclerViewItem) {
+        val item = getItemOrNull(holder.bindingAdapterPosition)
+        if (item != null && item is IRecyclerViewItem) {
             val variableId = item.variableId
             if (variableId >= 0) {
                 try {
@@ -59,11 +59,19 @@ open class BaseListAdapter<VB : ViewDataBinding, ValueInList>(diffCallback: Diff
         onBindViewHolder(holder, item)
     }
 
+    fun getItemOrNull(position: Int): ValueInList? {
+        return try {
+            getItem(position)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     /**
      * 如果没有使用 [IRecyclerViewItem] 类型的数据类，则必须重写此方法
      */
-    open fun getItemViewType(position: Int, item: ValueInList): Int = -1
+    open fun getItemViewType(position: Int, item: ValueInList?): Int = -1
 
-    open fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList) {}
+    open fun onBindViewHolder(holder: BindingViewHolder<VB>, item: ValueInList?) {}
 
 }

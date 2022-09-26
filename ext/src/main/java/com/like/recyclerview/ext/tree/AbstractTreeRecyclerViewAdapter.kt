@@ -47,9 +47,10 @@ abstract class AbstractTreeRecyclerViewAdapter<VB : ViewDataBinding>(diffCallbac
         }
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: BaseTreeNode) {
+    override fun onBindViewHolder(holder: BindingViewHolder<VB>, item: BaseTreeNode?) {
         super.onBindViewHolder(holder, item)
         val checkBox = getCheckBox(holder.binding) ?: return
+        item ?: return
         // 这里不能用setOnCheckedChangeListener监听，会循环触发
         checkBox.setOnClickListener {
             clickCheckBox(checkBox, item)
