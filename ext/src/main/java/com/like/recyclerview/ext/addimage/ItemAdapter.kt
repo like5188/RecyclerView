@@ -13,10 +13,10 @@ import com.luck.picture.lib.entity.LocalMedia
  * 功能：在添加、删除 item 时，通过是否达到[maxSelectNum]来控制"+"号 item 的显示隐藏。
  */
 abstract class ItemAdapter<VB : ViewDataBinding>(
-    private val maxSelectNum: Int = Int.MAX_VALUE,
     diffCallback: DiffUtil.ItemCallback<LocalMedia>
 ) : BaseListAdapter<VB, LocalMedia>(diffCallback) {
     private lateinit var context: Context
+    var maxSelectNum: Int = Int.MAX_VALUE
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
